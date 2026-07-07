@@ -1,6 +1,6 @@
-"""心颜 v0.1 原型 — 主入口 app.py
+"""心颜 v0.6 原型 — 主入口 app.py
 
-3 个 page: 每日一经 / 每日一汤 / 共修堂
+6 个 page: 主页 / 每日一经 / 每日一汤 / 共修堂 / 镜中 / 我的
 严守 6 条意见: 滋养而非治疗, 照镜子, 共修, 经文, 汤品, 不挂祺臻
 """
 import streamlit as st
@@ -32,8 +32,9 @@ with st.sidebar:
     st.page_link("pages/2_每日一汤.py", label="🍵 每日一汤")
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
+    st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
-    st.caption("v0.5 · 2026-07-06")
+    st.caption("v0.6 · 2026-07-07")
     st.caption("滋养 · 涵养 · 共修")
 
 # ══════════════════════════════════════════════════════════
@@ -128,6 +129,22 @@ st.markdown(f"""
 
 if st.button("🪞 进入镜中", use_container_width=True):
     st.switch_page("pages/4_镜中.py")
+
+# ══════════════════════════════════════════════════════════
+#  🌿 区块 5.6: 我的入口 (v0.6 新增)
+# ══════════════════════════════════════════════════════════
+fl_on = st.session_state.get("fl_enabled", False)
+fl_badge = " · 🌐 FL 开启" if fl_on else ""
+st.markdown(f"""
+<div class="card" style="text-align: center;">
+    <h3 style="color: #4a7c59 !important; margin: 0 0 0.5rem 0;">🌿 我的</h3>
+    <p style="color: #2d3a2e; margin: 0.3rem 0;">共修统计 · 收藏 · 海报历史 · 设置</p>
+    <p style="color: #6b6b6b; font-size: 0.88rem; margin: 0.3rem 0;">✦ 数据只存本地, 关浏览器即清空{fl_badge}</p>
+</div>
+""", unsafe_allow_html=True)
+
+if st.button("🌿 进入我的", use_container_width=True):
+    st.switch_page("pages/5_我的.py")
 
 # ══════════════════════════════════════════════════════════
 #  📌 区块 6: 严守声明
