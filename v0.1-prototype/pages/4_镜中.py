@@ -50,15 +50,11 @@ checkin_init()
 
 # ── sidebar ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜 · 照镜子")
-    st.page_link("app.py", label="🏠 主页")
-    st.page_link("pages/1_每日一经.py", label="📜 每日一经")
-    st.page_link("pages/2_每日一汤.py", label="🍵 每日一汤")
-    st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
-    st.page_link("pages/4_镜中.py", label="🪞 镜中")
+    st.markdown("### ✨ 心颜")
     st.markdown("---")
-    st.caption("v0.5 · 2026-07-06")
-
+    st.caption("v0.6.2 · 2026-07-07")
+    st.caption("滋养 · 涵养 · 共修")
+    st.caption("✦ 导航在浏览器顶部")
 # ── brand header ──
 get_brand_header()
 
