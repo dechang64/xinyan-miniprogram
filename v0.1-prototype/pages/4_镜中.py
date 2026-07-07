@@ -1,6 +1,6 @@
-"""心颜 v0.5 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
+"""心颜 v0.5.2 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
 
-7 个区块:
+9 个区块:
 1. 4 滑块自评 (心情/精力/睡眠/肌肤) + 保存
 2. 30 天心情曲线 (st.line_chart, session_state 累积)
 3. PHQ-9 量表 (9 题, 弹出式)
@@ -8,9 +8,12 @@
 5. DLQI 量表 (10 题, 弹出式)
 6. 今日自我对话 (6 类标签筛选)
 7. 「给 3 个月后的自己」彩蛋 (本地 session_state)
+8. 我的镜中签 (海报生成, 6 主题 x 6 风格, 下载到本地)
+9. FL 联邦聚合 (v0.5.2 mock, 同城同龄人心情/汤品/共修排行)
 
 严守 6 条意见: 滋养而非治疗, 照镜子, 不诊断
 v0.5.1: 干掉 altair, 用 st.line_chart (避免 Cloud Python 3.14 上 altair 5.5 schema 炸)
+v0.5.2: 加 镜中签海报 (C 方案) + FL 联邦聚合 (灵感 reading-fl Apache 2.0)
 """
 import streamlit as st
 from datetime import date, datetime, timedelta
@@ -26,6 +29,16 @@ from data.scales import (
     SCALE_DISCLAIMER, all_scales_meta,
 )
 from data.self_dialogue import get_today_dialogue, SELF_DIALOGUE_30
+from data.jingwen_30 import get_today_jingwen
+from data.soups_30 import get_today_soup
+from data.posters import (
+    POSTER_THEMES, POSTER_STYLES, draw_poster, preview_poster,
+    img_to_bytes, POSTER_DISCLAIMER, WATERMARK,
+)
+from data.fl_mock import (
+    FL_DISCLAIMER, FL_PRIVACY, mock_fl_query_mood, mock_fl_query_soup,
+    mock_fl_query_checkin, hash_user_tag, encrypt_mood, mood_to_bucket,
+)
 
 st.set_page_config(page_title="镜中 · 心颜", page_icon="🪞", layout="centered")
 inject_css()
@@ -339,12 +352,213 @@ if len(st.session_state.mirror_history) >= 5:
             ✦ 共修 <strong style="color: #4a7c59;">{len(df)}</strong> 天<br>
             ✦ 心情均值 <strong style="color: #4a7c59;">{avg_mood:.1f}</strong> / 10<br>
             ✦ 滋养日 (≥7) <strong style="color: #4a7c59;">{high_days}</strong> 天<br>
-            ✦ 低谷日 (<5) <strong style="color: #a94442;">{low_days}</strong> 天
+             ✦ 低谷日 (<5) <strong style="color: #a94442;">{low_days}</strong> 天
         </div>
     </div>
     """, unsafe_allow_html=True)
 else:
     st.caption("需要至少 5 天自评才能生成报告. 继续每日打卡 🌿")
+
+# ══════════════════════════════════════════════════════════
+#  区块 8: 我的镜中签 (C 方案 — 选主题 + 选风格 + 选背景色, 一键下载)
+# ══════════════════════════════════════════════════════════
+st.markdown("---")
+st.markdown("### 🪞 我的镜中签")
+st.caption("✦ 选 1 个主题 + 1 个风格, 一键下载到本地 (1080×1920 朋友圈尺寸)")
+
+# 主题 + 风格选择
+c1, c2 = st.columns(2)
+with c1:
+    theme_options = {t["name"]: t["key"] for t in POSTER_THEMES}
+    theme_label = st.selectbox(
+        "主题",
+        list(theme_options.keys()),
+        index=0,
+        key="poster_theme",
+    )
+    theme_key = theme_options[theme_label]
+with c2:
+    style_label = st.selectbox(
+        "风格",
+        list(POSTER_STYLES.keys()),
+        index=1,  # 默认 节气
+        key="poster_style",
+    )
+
+# 上传背景图 (可选, 不上传用纯色)
+bg_upload = st.file_uploader(
+    "✦ 可选: 上传 1 张背景图 (jpg/png, 不上传到云, 仅本次会话使用)",
+    type=["jpg", "jpeg", "png"],
+    key="poster_bg",
+    help="严守: 心颜不保存你的图片, 关浏览器即清空",
+)
+
+st.markdown(f"""
+<div class="compliance-note">
+    <strong>✦ 严守</strong>: {POSTER_DISCLAIMER}<br>
+    <strong>✦ 永久水印</strong>: 海报右下角永久印「{WATERMARK}」
+</div>
+""", unsafe_allow_html=True)
+
+# 生成按钮
+if st.button("🎨 生成我的镜中签", use_container_width=True, type="primary", key="btn_make_poster"):
+    # 取今日经文 + 汤品
+    jw = get_today_jingwen()
+    sp = get_today_soup()
+    # 画
+    img = draw_poster(
+        theme_key, style_label,
+        st.session_state.mirror_history,
+        jw, sp,
+    )
+    # 存 session 给 download
+    st.session_state["_poster_img"] = img
+    st.success("✦ 镜中签已生成, 下方下载或长按图片保存到手机")
+
+# 显示预览 + 下载
+if "_poster_img" in st.session_state:
+    img = st.session_state["_poster_img"]
+    preview = preview_poster(img)
+    st.image(preview, caption="预览 (1080×1920 全尺寸点击下载)", use_container_width=False)
+
+    # 下载按钮
+    img_bytes = img_to_bytes(img, format="PNG")
+    filename = f"xinyan_mirror_{date.today().isoformat()}.png"
+    st.download_button(
+        label="📥 下载心颜签 (PNG, 1080×1920)",
+        data=img_bytes,
+        file_name=filename,
+        mime="image/png",
+        use_container_width=True,
+    )
+    st.caption("✦ 下载后: 微信扫码 → 选图片 → 朋友圈发布. 心颜不存图, 不传图, 不分析图.")
+
+# ══════════════════════════════════════════════════════════
+#  区块 9: FL 联邦聚合 (v0.5.2 mock, 灵感 reading-fl Apache 2.0)
+# ══════════════════════════════════════════════════════════
+st.markdown("---")
+st.markdown("### 🌐 FL 联邦聚合 (v0.5.2 mock)")
+st.caption("✦ 灵感 reading-fl (Apache 2.0) — 数据只在本地, server 看不到你")
+
+# FL 开关
+fl_enabled = st.checkbox(
+    "✦ 开启 FL 联邦聚合 (默认关闭, 严守 ❶ 数据只在本地 ❷ 上传加密标签 ❸ server 看不到单个 user)",
+    value=st.session_state.get("fl_enabled", False),
+    key="fl_toggle",
+    help="关闭时所有 FL 接口都不调用",
+)
+st.session_state["fl_enabled"] = fl_enabled
+
+if not fl_enabled:
+    st.markdown(f"""
+    <div class="compliance-note">
+        <strong>✦ FL 关闭</strong>: {FL_PRIVACY}<br>
+        <strong>✦ 严守</strong>: 心颜镜中不构成任何医学建议, 仅供日常滋养陪伴. 严重时务必就医.
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown(f"""
+    <div class="compliance-note">
+        <strong>✦ FL 开启 (mock 模式)</strong>: {FL_DISCLAIMER}<br>
+        <strong>✦ 严守</strong>: 心颜镜中不构成任何医学建议, 仅供日常滋养陪伴. 严重时务必就医.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 3 个 FL 查询
+    fl_tab1, fl_tab2, fl_tab3 = st.tabs(["同龄人心情", "FL 推荐汤品", "FL 共修排行"])
+
+    with fl_tab1:
+        st.markdown("**FL 联邦聚合: 同城同年龄段心情分布**")
+        age = st.selectbox(
+            "年龄段",
+            ["20-25", "25-30", "30-40", "40-50"],
+            index=1,
+            key="fl_age",
+        )
+        if st.button("🔍 FL 查询 (mock)", key="fl_btn_mood", type="primary"):
+            result = mock_fl_query_mood(age)
+            st.markdown(f"""
+            <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 1.2rem;">
+                <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.4rem;">
+                    FL 聚合结果 · 样本 {result['sample_size']} 人
+                </div>
+                <div style="color: #2d3a2e; font-size: 1rem; line-height: 1.8; margin: 0.3rem 0;">
+                    {result['interpretation']}
+                </div>
+                <div style="color: #6b6b6b; font-size: 0.85rem; line-height: 1.6; margin-top: 0.5rem;">
+                    {result['privacy']}<br>
+                    ✦ 心情分布:<br>
+                    <span class="tag">高位 {result['distribution']['high']*100:.0f}%</span>
+                    <span class="tag">中高 {result['distribution']['mid_high']*100:.0f}%</span>
+                    <span class="tag">中低 {result['distribution']['mid_low']*100:.0f}%</span>
+                    <span class="tag tag-red">低位 {result['distribution']['low']*100:.0f}%</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with fl_tab2:
+        st.markdown("**FL 联邦推荐: 同体质同季, 哪些汤被 FL 聚合后选最多**")
+        c1, c2 = st.columns(2)
+        with c1:
+            tizhi = st.selectbox(
+                "体质",
+                ["yinxu (阴虚)", "tanshi (痰湿)", "yangxu (阳虚)", "pinghe (平和)"],
+                index=0,
+                key="fl_tizhi",
+            )
+        with c2:
+            season = st.selectbox(
+                "季节",
+                ["夏", "秋", "春", "冬"],
+                index=0,
+                key="fl_season",
+            )
+
+        if st.button("🔍 FL 查询 (mock)", key="fl_btn_soup", type="primary"):
+            tizhi_key = tizhi.split(" ")[0]  # "yinxu (阴虚)" -> "yinxu"
+            results = mock_fl_query_soup(tizhi_key, season)
+            if results:
+                for r in results:
+                    st.markdown(f"""
+                    <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 0.8rem; margin: 0.3rem 0;">
+                        <div style="color: #2d3a2e; font-size: 1.05rem; font-weight: 500;">🍵 {r['name']}</div>
+                        <div style="color: #6b6b6b; font-size: 0.85rem; margin-top: 0.3rem;">
+                            ✦ FL 聚合票数: <strong style="color: #4a7c59;">{r['votes']}</strong> 票<br>
+                            ✦ FL 评分: <strong style="color: #4a7c59;">{r['fl_score']:.2f}</strong>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                st.caption("✦ 这是 FL 聚合结果, 不是你一个人的选择. server 看不到你的具体选项.")
+            else:
+                st.info("该组合暂无 FL 聚合数据")
+
+    with fl_tab3:
+        st.markdown("**FL 联邦排行: 同年龄段连续共修天数排行 (FL 隐藏真名)**")
+        age = st.selectbox(
+            "年龄段",
+            ["20-25", "25-30", "30-40", "40-50"],
+            index=2,
+            key="fl_rank_age",
+        )
+        if st.button("🔍 FL 查询 (mock)", key="fl_btn_rank", type="primary"):
+            results = mock_fl_query_checkin(age)
+            for r in results:
+                medal = ["🥇", "🥈", "🥉"][r['rank']-1]
+                st.markdown(f"""
+                <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 0.8rem; margin: 0.3rem 0;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="font-size: 1.5rem; margin-right: 1rem;">{medal}</div>
+                        <div style="flex: 1;">
+                            <div style="color: #2d3a2e; font-size: 1.05rem; font-weight: 500;">{r['note']}</div>
+                            <div style="color: #6b6b6b; font-size: 0.85rem; margin-top: 0.2rem;">
+                                ✦ 连续共修 <strong style="color: #4a7c59;">{r['days']}</strong> 天 ·
+                                E-Tag: <code style="color: #a94442;">{r['e_tag']}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            st.caption("✦ FL 隐藏真名, 排行只显示 E-Tag + 共修天数, 你不会暴露身份")
 
 # ══════════════════════════════════════════════════════════
 #  Footer
