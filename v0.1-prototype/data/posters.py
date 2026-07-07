@@ -372,3 +372,111 @@ def img_to_bytes(img: Image.Image, format: str = "PNG") -> bytes:
     buf = io.BytesIO()
     img.save(buf, format=format, quality=95)
     return buf.getvalue()
+
+
+# ════════════════════════════════════════════════════════════════
+#  v0.6.1: 温润滤镜 (5 预设 + 自定义)
+#  严守: 不用「美颜/美白/瘦脸/医美」营销词, 叫「温润」
+#  Pillow 内置滤镜, 纯本地, 不上传, 不 AI 测肤
+# ════════════════════════════════════════════════════════════════
+
+# 5 预设 (每预设 = (磨皮, 亮肤, 通透, 暖色))
+# 数值: 0.0-1.0, 1.0 = 最大, 0.0 = 不动
+WARM_FILTER_PRESETS = {
+    "原图":       {"smooth": 0.0, "bright": 0.0, "color": 0.0, "warm": 0.0, "contrast": 0.0},
+    "清润":       {"smooth": 0.30, "bright": 0.10, "color": 0.05, "warm": 0.15, "contrast": 0.05},
+    "温润":       {"smooth": 0.50, "bright": 0.15, "color": 0.10, "warm": 0.30, "contrast": 0.08},
+    "通透":       {"smooth": 0.20, "bright": 0.20, "color": 0.15, "warm": 0.05, "contrast": 0.20},
+    "晨光":       {"smooth": 0.40, "bright": 0.25, "color": 0.10, "warm": 0.45, "contrast": 0.10},
+    "黄昏":       {"smooth": 0.45, "bright": 0.05, "color": 0.20, "warm": 0.60, "contrast": 0.15},
+}
+
+
+def apply_warm_filter(
+    img: Image.Image,
+    preset: str = "原图",
+    smooth: float = None,
+    bright: float = None,
+    color: float = None,
+    warm: float = None,
+    contrast: float = None,
+) -> Image.Image:
+    """温润滤镜 — 5 预设 或 自定义滑块
+
+    Args:
+        img: PIL Image (RGB/RGBA)
+        preset: 预设名 (WARM_FILTER_PRESETS key), 用 "原图" 不处理
+        smooth/bright/color/warm/contrast: 自定义滑块, 0.0-1.0
+            - smooth:  磨皮 (GaussianBlur + MedianFilter)
+            - bright:  亮肤 (Brightness)
+            - color:   通透 (Color 饱和度)
+            - warm:    暖色 (R 通道微增)
+            - contrast:对比度微调
+    Returns:
+        处理后的 PIL Image (RGB)
+
+    严守:
+    - 不用「美颜/美白/瘦脸」营销词, 用「清润/温润/通透/晨光/黄昏」
+    - 纯本地 Pillow, 不上传, 不 AI 测肤
+    - 严守「滋养而非治疗」基调
+    """
+    if img is None:
+        return None
+
+    # 取预设值 (自定义滑块覆盖预设)
+    params = dict(WARM_FILTER_PRESETS.get(preset, WARM_FILTER_PRESETS["原图"]))
+    if smooth is not None: params["smooth"] = max(0.0, min(1.0, smooth))
+    if bright is not None: params["bright"] = max(0.0, min(1.0, bright))
+    if color is not None: params["color"] = max(0.0, min(1.0, color))
+    if warm is not None: params["warm"] = max(0.0, min(1.0, warm))
+    if contrast is not None: params["contrast"] = max(0.0, min(1.0, contrast))
+
+    # 如果 5 个参数全 0, 直接返回原图
+    if all(v == 0.0 for v in params.values()):
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        return img
+
+    # 统一转 RGB
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+
+    # ── 1. 磨皮: 高斯模糊 + 中值滤波, 取柔和 (Pillow 内置) ──
+    if params["smooth"] > 0:
+        from PIL import ImageFilter
+        # 高斯模糊 radius = 1-5 (smooth 0-1 映射)
+        gauss_radius = int(params["smooth"] * 4) + 1  # 1~5
+        img = img.filter(ImageFilter.GaussianBlur(radius=gauss_radius))
+        # 中值滤波去斑点 (size 3 或 5)
+        median_size = 3 if params["smooth"] < 0.6 else 5
+        img = img.filter(ImageFilter.MedianFilter(size=median_size))
+
+    # ── 2. 亮肤 (Brightness): 1.0 = 原图, >1 变亮 ──
+    if params["bright"] > 0:
+        from PIL import ImageEnhance
+        factor = 1.0 + params["bright"] * 0.35  # 最多 +35% 亮
+        img = ImageEnhance.Brightness(img).enhance(factor)
+
+    # ── 3. 通透 (Color 饱和度): >1 增色 ──
+    if params["color"] > 0:
+        from PIL import ImageEnhance
+        factor = 1.0 + params["color"] * 0.30  # 最多 +30% 饱和
+        img = ImageEnhance.Color(img).enhance(factor)
+
+    # ── 4. 暖色 (R 通道微增 + G 微减): 自然暖色 ──
+    if params["warm"] > 0:
+        from PIL import ImageEnhance
+        # 暖色: 先增亮度再微调色调, 用 R 通道 point 函数
+        r, g, b = img.split()
+        # R 通道 +warm*15 (最多 +15), B 通道 -warm*10
+        r = r.point(lambda p: min(255, int(p + params["warm"] * 15)))
+        b = b.point(lambda p: max(0, int(p - params["warm"] * 10)))
+        img = Image.merge("RGB", (r, g, b))
+
+    # ── 5. 对比度微调 (Contrast): 1.0 原图, >1 更通透 ──
+    if params["contrast"] > 0:
+        from PIL import ImageEnhance
+        factor = 1.0 + params["contrast"] * 0.20  # 最多 +20% 对比
+        img = ImageEnhance.Contrast(img).enhance(factor)
+
+    return img

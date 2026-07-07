@@ -1,4 +1,4 @@
-"""心颜 v0.5.2 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
+"""心颜 v0.6.1 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
 
 9 个区块:
 1. 4 滑块自评 (心情/精力/睡眠/肌肤) + 保存
@@ -8,12 +8,15 @@
 5. DLQI 量表 (10 题, 弹出式)
 6. 今日自我对话 (6 类标签筛选)
 7. 「给 3 个月后的自己」彩蛋 (本地 session_state)
-8. 我的镜中签 (海报生成, 6 主题 x 6 风格, 下载到本地)
+8. 我的镜中签 (海报生成, 9 主题 x 6 风格, 下载到本地)
+   v0.5.3: 加自拍背景 (本地 Pillow)
+   v0.6.1: 加温润滤镜 (5 预设 + 自定义 5 滑块)
 9. FL 联邦聚合 (v0.5.2 mock, 同城同龄人心情/汤品/共修排行)
 
 严守 6 条意见: 滋养而非治疗, 照镜子, 不诊断
 v0.5.1: 干掉 altair, 用 st.line_chart (避免 Cloud Python 3.14 上 altair 5.5 schema 炸)
 v0.5.2: 加 镜中签海报 (C 方案) + FL 联邦聚合 (灵感 reading-fl Apache 2.0)
+v0.6.1: 加温润滤镜 (5 预设: 原图/清润/温润/通透/晨光/黄昏, 自定义 5 滑块)
 """
 import streamlit as st
 from datetime import date, datetime, timedelta
@@ -34,6 +37,7 @@ from data.soups_30 import get_today_soup
 from data.posters import (
     POSTER_THEMES, POSTER_STYLES, draw_poster, preview_poster,
     img_to_bytes, POSTER_DISCLAIMER, WATERMARK,
+    apply_warm_filter, WARM_FILTER_PRESETS,
 )
 from data.fl_mock import (
     FL_DISCLAIMER, FL_PRIVACY, mock_fl_query_mood, mock_fl_query_soup,
@@ -430,6 +434,49 @@ if theme_needs_bg and bg_pil_image is None:
 elif bg_pil_image is not None:
     st.success(f"✦ 已选背景图 ({bg_source}), 仅本次会话使用, 不上传")
 
+# v0.6.1: 温润滤镜 (5 预设 + 自定义滑块) — 只在有背景图时显示
+if bg_pil_image is not None:
+    st.markdown("##### 🎨 温润滤镜 (本地处理, 不上传)")
+    st.caption("✦ 5 预设 / 自定义滑块 — 严守: 不用「美颜/美白/瘦脸」营销词, 用「清润/温润/通透/晨光/黄昏」, 纯本地 Pillow, 不 AI 测肤")
+
+    preset_label = st.selectbox(
+        "选择温润滤镜预设",
+        list(WARM_FILTER_PRESETS.keys()),
+        index=0,
+        key="warm_preset",
+        label_visibility="collapsed",
+    )
+
+    # 自定义滑块 (advanced expander)
+    with st.expander("🔧 自定义滑块 (高级)", expanded=False):
+        st.caption("✦ 5 滑块 0.0-1.0, 覆盖预设. 默认值跟预设走, 拖动则自定义.")
+        c1, c2 = st.columns(2)
+        with c1:
+            custom_smooth = st.slider("磨皮 (高斯 + 中值)", 0.0, 1.0, WARM_FILTER_PRESETS[preset_label]["smooth"], 0.05, key="warm_smooth")
+            custom_bright = st.slider("亮肤 (Brightness)", 0.0, 1.0, WARM_FILTER_PRESETS[preset_label]["bright"], 0.05, key="warm_bright")
+            custom_color = st.slider("通透 (Color 饱和度)", 0.0, 1.0, WARM_FILTER_PRESETS[preset_label]["color"], 0.05, key="warm_color")
+        with c2:
+            custom_warm = st.slider("暖色 (R+ / B-)", 0.0, 1.0, WARM_FILTER_PRESETS[preset_label]["warm"], 0.05, key="warm_warm")
+            custom_contrast = st.slider("对比度 (Contrast)", 0.0, 1.0, WARM_FILTER_PRESETS[preset_label]["contrast"], 0.05, key="warm_contrast")
+
+    # 实时预览: 先用温润滤镜处理
+    if st.button("👀 预览温润效果", key="btn_warm_preview"):
+        try:
+            preview_processed = apply_warm_filter(
+                bg_pil_image.copy(),
+                preset=preset_label,
+                smooth=st.session_state.get("warm_smooth"),
+                bright=st.session_state.get("warm_bright"),
+                color=st.session_state.get("warm_color"),
+                warm=st.session_state.get("warm_warm"),
+                contrast=st.session_state.get("warm_contrast"),
+            )
+            # 缩放到合适尺寸
+            preview_processed.thumbnail((400, 700), Image.LANCZOS)
+            st.image(preview_processed, caption=f"温润滤镜预览 ({preset_label})", use_container_width=False)
+        except Exception as e:
+            st.warning(f"预览失败: {e}")
+
 st.markdown(f"""
 <div class="compliance-note">
     <strong>✦ 严守</strong>: {POSTER_DISCLAIMER}<br>
@@ -442,12 +489,36 @@ if st.button("🎨 生成我的镜中签", use_container_width=True, type="prima
     # 取今日经文 + 汤品
     jw = get_today_jingwen()
     sp = get_today_soup()
-    # 画 (v0.5.3: 传 bg_pil_image, 自拍当背景)
+    # v0.6.1: 先过温润滤镜 (如果用户选了非"原图"预设 或 动了滑块)
+    processed_bg = bg_pil_image
+    if bg_pil_image is not None:
+        preset_label = st.session_state.get("warm_preset", "原图")
+        # 检查是否动了滑块 (跟预设默认对比)
+        is_custom = any(
+            st.session_state.get(f"warm_{k}", WARM_FILTER_PRESETS[preset_label][k])
+            != WARM_FILTER_PRESETS[preset_label][k]
+            for k in ["smooth", "bright", "color", "warm", "contrast"]
+        )
+        if preset_label != "原图" or is_custom:
+            try:
+                processed_bg = apply_warm_filter(
+                    bg_pil_image.copy(),
+                    preset=preset_label,
+                    smooth=st.session_state.get("warm_smooth"),
+                    bright=st.session_state.get("warm_bright"),
+                    color=st.session_state.get("warm_color"),
+                    warm=st.session_state.get("warm_warm"),
+                    contrast=st.session_state.get("warm_contrast"),
+                )
+            except Exception as e:
+                st.warning(f"温润滤镜失败, 用原图: {e}")
+                processed_bg = bg_pil_image
+    # 画 (v0.5.3: 传 bg_pil_image, 自拍当背景 / v0.6.1: 传 processed_bg, 过温润滤镜)
     img = draw_poster(
         theme_key, style_label,
         st.session_state.mirror_history,
         jw, sp,
-        bg_image=bg_pil_image,
+        bg_image=processed_bg,
     )
     # 存 session 给 download
     st.session_state["_poster_img"] = img
