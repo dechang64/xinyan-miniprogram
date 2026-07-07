@@ -2,7 +2,7 @@
 
 7 个区块:
 1. 4 滑块自评 (心情/精力/睡眠/肌肤) + 保存
-2. 30 天心情曲线 (altair, session_state 累积)
+2. 30 天心情曲线 (st.line_chart, session_state 累积)
 3. PHQ-9 量表 (9 题, 弹出式)
 4. GAD-7 量表 (7 题, 弹出式)
 5. DLQI 量表 (10 题, 弹出式)
@@ -10,10 +10,9 @@
 7. 「给 3 个月后的自己」彩蛋 (本地 session_state)
 
 严守 6 条意见: 滋养而非治疗, 照镜子, 不诊断
+v0.5.1: 干掉 altair, 用 st.line_chart (避免 Cloud Python 3.14 上 altair 5.5 schema 炸)
 """
 import streamlit as st
-import pandas as pd
-import altair as alt
 from datetime import date, datetime, timedelta
 from core.styles import inject_css
 from core.config import (
@@ -128,48 +127,33 @@ st.markdown("### 📈 30 天心情曲线")
 st.caption("✦ 数据仅存你浏览器, 不上传, 关闭页面即清空")
 
 if len(st.session_state.mirror_history) >= 1:
-    df = pd.DataFrame(st.session_state.mirror_history)
-    df["date"] = pd.to_datetime(df["date"])
-    df = df.sort_values("date")
+    # 按日期排序
+    history_sorted = sorted(st.session_state.mirror_history, key=lambda x: x["date"])
 
-    # 多线图
-    base = alt.Chart(df).encode(
-        x=alt.X("date:T", title="日期", axis=alt.Axis(format="%m/%d")),
-        tooltip=["date:T", "mood", "energy", "sleep", "skin", "avg"],
-    )
-
-    # 心情线 (主)
-    mood_line = base.mark_line(color="#4a7c59", strokeWidth=2.5).encode(
-        y=alt.Y("mood:Q", title="分数 (1-10)", scale=alt.Scale(domain=[0, 10])),
-    )
-    mood_pts = base.mark_circle(color="#4a7c59", size=80).encode(y="mood:Q")
-
-    chart = (mood_line + mood_pts).properties(
-        height=280,
-        background="transparent",
-    ).configure_axis(
-        labelColor="#2d3a2e",
-        titleColor="#2d3a2e",
-        gridColor="#e8dfc8",
-    ).configure_view(
-        strokeWidth=0,
-    )
-
-    st.altair_chart(chart, use_container_width=True)
+    # 用原生 Python dict 喂 st.line_chart (不用 pandas, 避免依赖)
+    chart_data = {
+        "🌿 心情": [h["mood"] for h in history_sorted],
+        "⚡ 精力": [h["energy"] for h in history_sorted],
+        "🌙 睡眠": [h["sleep"] for h in history_sorted],
+        "🌸 肌肤": [h["skin"] for h in history_sorted],
+    }
+    st.line_chart(chart_data, height=280, x_label="日期", y_label="分数 (1-10)")
 
     # 统计
-    if len(df) >= 3:
+    if len(history_sorted) >= 3:
         st.markdown("#### 📊 这段时间的小观察")
+        mood_list = [h["mood"] for h in history_sorted]
+        avg_list = [h["avg"] for h in history_sorted]
         cols = st.columns(4)
-        cols[0].metric("共修天数", f"{len(df)} 天")
-        cols[1].metric("心情均值", f"{df['mood'].mean():.1f}")
-        cols[2].metric("最高分", f"{df['avg'].max():.1f}")
-        cols[3].metric("最低分", f"{df['avg'].min():.1f}")
+        cols[0].metric("共修天数", f"{len(history_sorted)} 天")
+        cols[1].metric("心情均值", f"{sum(mood_list)/len(mood_list):.1f}")
+        cols[2].metric("最高分", f"{max(avg_list):.1f}")
+        cols[3].metric("最低分", f"{min(avg_list):.1f}")
 
         # 简单洞察
-        if df['mood'].iloc[-1] > df['mood'].iloc[0]:
+        if mood_list[-1] > mood_list[0]:
             st.success("✦ 心情在向上, 继续涵养")
-        elif df['mood'].iloc[-1] < df['mood'].iloc[0]:
+        elif mood_list[-1] < mood_list[0]:
             st.info("✦ 心情在波动, 这是正常的, 给自己多一份耐心")
         else:
             st.info("✦ 心情平稳, 这也是一种稳定")
@@ -333,11 +317,12 @@ st.markdown("### 📜 每月滋养报告")
 st.caption("✦ 月底自动生成, 当前为 v0.5 mock")
 
 if len(st.session_state.mirror_history) >= 5:
-    df = pd.DataFrame(st.session_state.mirror_history)
-    avg_mood = df['mood'].mean()
-    avg_avg = df['avg'].mean()
-    high_days = len(df[df['avg'] >= 7])
-    low_days = len(df[df['avg'] < 5])
+    mood_list = [h["mood"] for h in st.session_state.mirror_history]
+    avg_list = [h["avg"] for h in st.session_state.mirror_history]
+    avg_mood = sum(mood_list) / len(mood_list)
+    avg_avg = sum(avg_list) / len(avg_list)
+    high_days = sum(1 for a in avg_list if a >= 7)
+    low_days = sum(1 for a in avg_list if a < 5)
 
     if avg_mood >= 7:
         summary = "✦ 这段时间, 你整体在滋养状态. 继续保持."

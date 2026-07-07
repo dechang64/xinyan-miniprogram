@@ -1,4 +1,4 @@
 streamlit==1.45.0
-# 心颜 v0.1 Streamlit 原型
-# 必须锁 1.45.0: 1.58.0 + starlette 0.38.6 不兼容 (DEFAULT_EXCLUDED_CONTENT_TYPES 找不到)
-# 已知 1.45.0 + starlette 0.38.6 工作正常 (本地 _verify.py 实测)
+# 心颜 v0.5.1 Streamlit 原型
+# 锁 1.45.0: 1.58.0 + starlette 0.38.6 不兼容 (DEFAULT_EXCLUDED_CONTENT_TYPES 找不到)
+# 不依赖 altair / pandas: 用 streamlit 内置 st.line_chart, 避免 Python 3.14 上 altair 5.5 schema 炸
