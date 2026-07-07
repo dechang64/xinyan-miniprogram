@@ -17,21 +17,26 @@ st.set_page_config(
     page_title="心颜 · 照镜子, 也是为了更好的自己",
     page_icon="✨",
     layout="centered",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",  # v0.6.3: sidebar 默认收起, 避免重复菜单困扰
 )
 
 # ── 注入 CSS + 初始化 ──
 inject_css()
 checkin_init()
 
-# ── sidebar: 只显示品牌 + 严守 caption (导航用 streamlit 自动顶部 nav, 不重复) ──
+# ── sidebar: 自定义中文菜单 (默认收起, 用户主动展开才显示) ──
 with st.sidebar:
-    st.markdown(f"### ✨ 心颜 · {BRAND_TAGLINE[:6]}")
+    st.markdown("### ✨ 心颜")
     st.markdown("---")
-    st.caption(f"v0.6.1 · 2026-07-07")
+    st.page_link("app.py", label="🏠 主页")
+    st.page_link("pages/1_每日一经.py", label="📜 每日一经")
+    st.page_link("pages/2_每日一汤.py", label="🍵 每日一汤")
+    st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
+    st.page_link("pages/4_镜中.py", label="🪞 镜中")
+    st.page_link("pages/5_我的.py", label="🌿 我的")
+    st.markdown("---")
+    st.caption("v0.6.3 · 2026-07-07")
     st.caption("滋养 · 涵养 · 共修")
-    st.markdown("---")
-    st.caption("✦ 导航在浏览器顶部")
 
 # ══════════════════════════════════════════════════════════
 #  🎬 区块 1: Hero (启动)

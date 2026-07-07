@@ -7,6 +7,8 @@
 CSS = """<style>
 /* 隐藏 Streamlit 默认元素 */
 #MainMenu, footer, header {visibility: hidden}
+/* v0.6.3: 隐藏 streamlit 自动顶部 nav (用 sidebar 自建中文菜单) */
+div[data-testid="stSidebarNav"] {display: none !important; visibility: hidden !important; height: 0 !important;}
 .block-container {padding-top: 0.5rem; padding-bottom: 2rem; max-width: 520px}
 
 /* 全局字体 — 优先思源宋体, 然后衬线, 营造古朴涵养感 */
