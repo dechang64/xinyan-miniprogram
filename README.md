@@ -9,9 +9,18 @@
 
 | 版本 | 状态 | 路径 |
 |---|---|---|
-| **v0.1 原型** (Streamlit) | ✅ ready, 已跑通 | `v0.1-prototype/` |
-| v0.5 增强版 | ⏳ 待 user 拍板 12 项决策 | — |
+| **v0.5 镜中完整版** (Streamlit) | ✅ ready, 已部署 xinyan.streamlit.app | `v0.1-prototype/` |
+| v0.5 = v0.1 + page 4 镜中 | 4 page: 每日一经 / 每日一汤 / 共修堂 / **镜中** | `v0.1-prototype/pages/` |
 | v1.0 微信小程序 | ⏳ 6 周 MVP 待启动 | `miniprogram/` (未来) |
+
+## v0.5 新增 (镜中 page)
+
+- **4 滑块自评** (心情/精力/睡眠/肌肤) + session_state 累积
+- **30 天心情曲线** (altair 折线图)
+- **3 个量表** (PHQ-9 / GAD-7 / DLQI) + 评分解读 + 严守声明
+- **6 类自我对话** (早安/晚安/疲惫/焦虑/自卑/孤独, 30 句)
+- **「给 3 个月后的自己」** 彩蛋 (本地 session_state)
+- **每月滋养报告** (≥5 天自评生成, v0.5 mock)
 
 ## v0.1 原型 — 跑起来
 

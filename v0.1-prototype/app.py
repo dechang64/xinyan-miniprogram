@@ -31,8 +31,9 @@ with st.sidebar:
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
     st.page_link("pages/2_每日一汤.py", label="🍵 每日一汤")
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
+    st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.markdown("---")
-    st.caption("v0.1 原型 · 2026-07-06")
+    st.caption("v0.5 · 2026-07-06")
     st.caption("滋养 · 涵养 · 共修")
 
 # ══════════════════════════════════════════════════════════
@@ -113,6 +114,20 @@ st.markdown(f"""
 
 if st.button("🌸 进入共修堂", use_container_width=True):
     st.switch_page("pages/3_共修堂.py")
+
+# ══════════════════════════════════════════════════════════
+#  🪞 区块 5.5: 镜中入口 (v0.5 新增)
+# ══════════════════════════════════════════════════════════
+st.markdown(f"""
+<div class="card" style="text-align: center; background: linear-gradient(135deg, #faf6f0, #f0e9dc);">
+    <h3 style="color: #4a7c59 !important; margin: 0 0 0.5rem 0;">🪞 镜中</h3>
+    <p style="color: #2d3a2e; margin: 0.3rem 0; font-style: italic;">镜中, 是正在成为自己的你</p>
+    <p style="color: #6b6b6b; font-size: 0.88rem; margin: 0.3rem 0;">4 滑块自评 · 30 天心情曲线 · 3 个量表 · 6 类自我对话 · 给 3 个月后的信</p>
+</div>
+""", unsafe_allow_html=True)
+
+if st.button("🪞 进入镜中", use_container_width=True):
+    st.switch_page("pages/4_镜中.py")
 
 # ══════════════════════════════════════════════════════════
 #  📌 区块 6: 严守声明
