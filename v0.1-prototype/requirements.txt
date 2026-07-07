@@ -1,4 +1,9 @@
 streamlit==1.45.0
+sxtwl==2.0.7
+Pillow>=10.0.0
 # 心颜 v0.5.1 Streamlit 原型
 # 锁 1.45.0: 1.58.0 + starlette 0.38.6 不兼容 (DEFAULT_EXCLUDED_CONTENT_TYPES 找不到)
 # 不依赖 altair / pandas: 用 streamlit 内置 st.line_chart, 避免 Python 3.14 上 altair 5.5 schema 炸
+# v0.7 加 sxtwl: 寿星天文历 (BSD, PyPI 公版), 八字四柱 + 月亮星座算法
+# v0.6.1 加 Pillow: 温润滤镜 (v0.6.1 5 预设 smooth/bright/color/warm/contrast)
+# v0.7.1 漏掉 sxtwl + Pillow 依赖, Streamlit Cloud 缺模块报错 (本地 dev 环境已装所以漏检)
