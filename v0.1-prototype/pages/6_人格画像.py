@@ -1,13 +1,22 @@
-"""心颜 v0.7 — page 6: 人格画像 (MBTI 8 题 + 八字四柱 + 星盘 3 星座)
+"""心颜 v0.7.1 — page 6: 人格画像
+
+6 tab 自评工具 (全部严守「非诊断 / 参考」):
+- 🧠 MBTI: 8 题 4 维度 → 16 型
+- ☯️ 八字: sxtwl 2.x 算年/月/日/时柱 + 元素分布
+- ✨ 星盘: 太阳 + 月亮 + 上升 3 星座 + 元素
+- 🌧️ 心情: PHQ-9 (9 题) — 心情低落自评 (Kroenke 2001, 公版)
+- ⚡ 焦虑: GAD-7 (7 题) — 焦虑自评 (Spitzer 2006, 公版)
+- 🧬 体质: 9 题 × 3 选 1 投票 (王琦 9 体质 2009 简化版)
 
 严守 (核心):
-- MBTI / 八字 / 星盘 只做「性格倾向 / 参考」, 不做「命理预测 / 运势预测」
-- 不用「决定命运」/「命中注定」/「今日吉凶」/「治疗/改善」 等营销/医疗词
-- 月亮 + 上升星座用简化估算, 不是精确天文计算 (用户能看清)
-- 数据只存 session_state, 关浏览器即清
-- 8 禁用词 0 出现 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美)
-
-3 tab 模式: 每个 tab 是独立的自评工具, 互不强制, 用户随便测
+- 8 禁用词 0 出现 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美/美颜/美白/瘦脸)
+- 严守声明顶部, 量表/八字/星盘都标「仅供参考 / 不构成医学建议」
+- PHQ-9 Q9 自伤念头 ≥ 1 → 强制红色 banner + 12356 + 北京心理危机中心
+- 月亮 + 上升星座用简化估算
+- 八字只算 4 柱 + 元素, 不算大运流年
+- 体质只推荐票数最多的 (允许并列), 不评分判定
+- 数据 100% 本地, 关浏览器即清
+- 8 禁用词 0 出现
 """
 
 import streamlit as st
@@ -20,6 +29,13 @@ from core.config import (
 from data.mbti import MBTI_8_QUESTIONS, MBTI_16_TYPES, score_mbti
 from data.bazi import calc_bazi, TIANGAN, DIZHI, WUXING
 from data.zodiac import calc_zodiac, SIGN_DESC, ELEMENTS
+from data.scales import (
+    PHQ9_QUESTIONS, PHQ9_OPTIONS, PHQ9_KEY_ITEM_9, phq9_score,
+    GAD7_QUESTIONS, GAD7_OPTIONS, gad7_score,
+    DLQI_QUESTIONS, DLQI_OPTIONS, dlqi_score,
+    SCALE_DISCLAIMER, scale_disclaimer_html, phq9_q9_alert_html,
+)
+from data.tizhi import TIZHI_9, TIZHI_9_QUESTIONS, score_tizhi
 
 st.set_page_config(
     page_title="人格画像 · 心颜",
@@ -29,7 +45,7 @@ st.set_page_config(
 )
 inject_css()
 
-# ── sidebar: 自定义中文菜单 (默认收起, 跟 5 个 page 一致) ──
+# ── sidebar: 自定义中文菜单 ──
 with st.sidebar:
     st.markdown("### ✨ 心颜")
     st.markdown("---")
@@ -42,25 +58,27 @@ with st.sidebar:
     st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
-    st.caption("v0.7 · 2026-07-07")
+    st.caption("v0.7.1 · 2026-07-07")
     st.caption("滋养 · 涵养 · 共修")
 
 get_brand_header()
 
-# ── 顶部严守声明 ──
-st.markdown("""
+# ── 顶部统一严守声明 ──
+st.markdown(f"""
 <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 1rem; margin-bottom: 1rem;">
     <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 严守</div>
     <div style="color: #2d3a2e; font-size: 0.92rem; line-height: 1.6;">
-        MBTI / 八字 / 星盘 <b>只做性格倾向参考</b>, 不做命理预测 / 运势预测 / 医疗诊断。<br>
-        月亮 + 上升星座用简化估算 (非精确天文计算), 八字仅显示四柱 + 元素平衡, 不算大运流年。<br>
+        6 个自评工具 <b>只做倾向参考</b>, 不做命理预测 / 医疗诊断 / 体质判定。<br>
+        MBTI / 八字 / 星盘 / 心情 / 焦虑 / 体质 <b>全部仅供参考</b>, 个体差异请咨询专业人士。<br>
         ✦ 数据仅存你浏览器, 关浏览器即清
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── 3 tab ──
-tab_mbti, tab_bazi, tab_zodiac = st.tabs(["🧠 MBTI", "☯️ 八字", "✨ 星盘"])
+# ── 6 tab ──
+tab_mbti, tab_bazi, tab_zodiac, tab_phq, tab_gad, tab_tizhi = st.tabs([
+    "🧠 MBTI", "☯️ 八字", "✨ 星盘", "🌧️ 心情", "⚡ 焦虑", "🧬 体质"
+])
 
 # ═══════════════════════════════════════════════════════════
 # Tab 1: MBTI (8 题简化版)
@@ -72,7 +90,6 @@ with tab_mbti:
     if "mbti_answers" not in st.session_state:
         st.session_state.mbti_answers = [None] * 8
 
-    # 4 维度 × 2 题, 每题 E/I 倾向
     dim_labels = [
         ("能量方向", "E 外向 ↔ I 内向"),
         ("信息获取", "S 实感 ↔ N 直觉"),
@@ -116,7 +133,6 @@ with tab_mbti:
 
         st.markdown("---")
 
-    # 算 MBTI
     all_answered = all(a is not None for a in st.session_state.mbti_answers)
     if all_answered:
         result = score_mbti(st.session_state.mbti_answers)
@@ -132,13 +148,11 @@ with tab_mbti:
         </div>
         """, unsafe_allow_html=True)
 
-        # 4 维度比例条
         st.markdown("#### 📊 4 维度倾向")
         for dim_key, dim_label in [("EI", "E ↔ I 能量方向"), ("SN", "S ↔ N 信息获取"), ("TF", "T ↔ F 决策方式"), ("JP", "J ↔ P 生活态度")]:
             d = result["dimensions"][dim_key]
             ratio_left = d.get("ratio_E", d.get("ratio_S", d.get("ratio_T", d.get("ratio_J", 0.5))))
             ratio_right = 1 - ratio_left
-            st.markdown(f"**{dim_label}**")
             st.progress(ratio_left, text=f"{int(ratio_left * 100)}% / {int(ratio_right * 100)}%")
 
         st.markdown("---")
@@ -167,7 +181,7 @@ with tab_bazi:
         b_hour = st.selectbox(
             "出生时辰",
             options=list(range(0, 24)),
-            index=14,  # 默认 14:00
+            index=14,
             format_func=lambda h: f"{h:02d}:00",
             key="bazi_hour",
         )
@@ -177,7 +191,6 @@ with tab_bazi:
             r = calc_bazi(b_year, b_month, b_day, b_hour)
             yp, mp, dp, hp = r["year_pillar"], r["month_pillar"], r["day_pillar"], r["hour_pillar"]
 
-            # 4 柱大字
             st.markdown(f"""
             <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); text-align: center; padding: 1.5rem; margin-top: 1rem;">
                 <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 1rem;">✦ 你的四柱</div>
@@ -191,13 +204,12 @@ with tab_bazi:
             </div>
             """, unsafe_allow_html=True)
 
-            # 元素分布
             st.markdown("#### 🌿 元素分布")
             wx = r["wuxing_count"]
             c1, c2, c3, c4, c5 = st.columns(5)
             colors = {"木": "#90c290", "火": "#e6a89c", "土": "#d4b48c", "金": "#d4d4d4", "水": "#a8c5d8"}
             icons = {"木": "🌳", "火": "🔥", "土": "🏔️", "金": "⚙️", "水": "💧"}
-            for i, el in enumerate(ELEMENTS if False else ["木", "火", "土", "金", "水"]):
+            for i, el in enumerate(["木", "火", "土", "金", "水"]):
                 with [c1, c2, c3, c4, c5][i]:
                     st.markdown(f"""
                     <div style="background: {colors[el]}20; border: 1px solid {colors[el]}; border-radius: 8px; padding: 0.8rem; text-align: center;">
@@ -207,7 +219,6 @@ with tab_bazi:
                     </div>
                     """, unsafe_allow_html=True)
 
-            # 严守提示
             st.markdown("---")
             st.markdown("""
             <div style="text-align: center; color: #8a8a8a; font-size: 0.85rem; padding: 1rem;">
@@ -256,7 +267,6 @@ with tab_zodiac:
             </div>
             """, unsafe_allow_html=True)
 
-            # 太阳星座解读
             st.markdown(f"#### ☀️ {sun} 关键词")
             sun_d = r["sun_desc"]
             st.markdown(f"""
@@ -266,7 +276,6 @@ with tab_zodiac:
             </div>
             """, unsafe_allow_html=True)
 
-            # 元素分布
             st.markdown("#### 🌿 元素分布 (3 星座各占 1)")
             el = r["elements"]
             c1, c2, c3, c4 = st.columns(4)
@@ -280,7 +289,6 @@ with tab_zodiac:
                     </div>
                     """, unsafe_allow_html=True)
 
-            # 元素平衡提示
             el_max = max(el.values())
             el_dominant = [k for k, v in el.items() if v == el_max]
             if len(el_dominant) == 1 and el_max >= 2:
@@ -301,6 +309,178 @@ with tab_zodiac:
             """, unsafe_allow_html=True)
         except Exception as e:
             st.error(f"计算失败: {e}")
+
+# ═══════════════════════════════════════════════════════════
+# Tab 4: 心情低落自评 (PHQ-9) — v0.7.1 加回来
+# ═══════════════════════════════════════════════════════════
+with tab_phq:
+    st.markdown("### 🌧️ 心情低落自评 (PHQ-9)")
+    st.caption("✦ 国际通用 9 题量表 (Kroenke 2001, 公版), 严守: 不构成医学诊断")
+
+    st.markdown(scale_disclaimer_html(), unsafe_allow_html=True)
+
+    if "phq9_answers" not in st.session_state:
+        st.session_state.phq9_answers = [None] * 9
+
+    st.markdown("#### 📝 过去 2 周, 你多久遇到以下情况?")
+    for i, q in enumerate(PHQ9_QUESTIONS):
+        choice = st.radio(
+            q,
+            PHQ9_OPTIONS,
+            key=f"phq9_q{i}",
+            index=PHQ9_OPTIONS.index(st.session_state.phq9_answers[i]) if st.session_state.phq9_answers[i] in PHQ9_OPTIONS else 0,
+            horizontal=True,
+        )
+        st.session_state.phq9_answers[i] = choice
+
+    all_answered = all(c is not None for c in st.session_state.phq9_answers)
+    if all_answered:
+        scores = [PHQ9_OPTIONS.index(c) for c in st.session_state.phq9_answers]
+        result = phq9_score(scores)
+
+        # Q9 自伤念头 → 强制红色 banner
+        q9_alert = phq9_q9_alert_html(scores)
+        if q9_alert:
+            st.markdown(q9_alert, unsafe_allow_html=True)
+
+        st.markdown(f"""
+        <div class="card" style="background: linear-gradient(135deg, #e8f0e8, #d8e6d8); text-align: center; padding: 1.5rem;">
+            <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.5rem;">✦ PHQ-9 结果</div>
+            <div style="color: #2d3a2e; font-size: 2.5rem; font-weight: 300;">{result['total']}</div>
+            <div style="color: #6b6b6b; font-size: 0.95rem;">满分 27, 参考区间</div>
+            <div style="color: #2d3a2e; font-size: 1.2rem; margin-top: 0.8rem; font-weight: 500;">{result['level']}</div>
+            <div style="color: #4a5a4a; font-size: 0.95rem; margin-top: 0.6rem; line-height: 1.7;">{result['advice']}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("---")
+        st.markdown("""
+        <div style="text-align: center; color: #8a8a8a; font-size: 0.85rem; padding: 1rem;">
+            ✦ PHQ-9 只是参考工具, 不替代专业诊断<br>
+            ✦ 数据仅存浏览器, 关浏览器即清<br>
+            <span style="color: #a94442;">危机时刻: 全国心理援助热线 <b>12356</b> · 北京心理危机研究与干预中心 010-82951332</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════
+# Tab 5: 焦虑自评 (GAD-7) — v0.7.1 加回来
+# ═══════════════════════════════════════════════════════════
+with tab_gad:
+    st.markdown("### ⚡ 焦虑自评 (GAD-7)")
+    st.caption("✦ 国际通用 7 题量表 (Spitzer 2006, 公版), 严守: 不构成医学诊断")
+
+    st.markdown(scale_disclaimer_html(), unsafe_allow_html=True)
+
+    if "gad7_answers" not in st.session_state:
+        st.session_state.gad7_answers = [None] * 7
+
+    st.markdown("#### 📝 过去 2 周, 你多久遇到以下情况?")
+    for i, q in enumerate(GAD7_QUESTIONS):
+        choice = st.radio(
+            q,
+            GAD7_OPTIONS,
+            key=f"gad7_q{i}",
+            index=GAD7_OPTIONS.index(st.session_state.gad7_answers[i]) if st.session_state.gad7_answers[i] in GAD7_OPTIONS else 0,
+            horizontal=True,
+        )
+        st.session_state.gad7_answers[i] = choice
+
+    all_answered = all(c is not None for c in st.session_state.gad7_answers)
+    if all_answered:
+        scores = [GAD7_OPTIONS.index(c) for c in st.session_state.gad7_answers]
+        result = gad7_score(scores)
+
+        st.markdown(f"""
+        <div class="card" style="background: linear-gradient(135deg, #e8f0e8, #d8e6d8); text-align: center; padding: 1.5rem;">
+            <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.5rem;">✦ GAD-7 结果</div>
+            <div style="color: #2d3a2e; font-size: 2.5rem; font-weight: 300;">{result['total']}</div>
+            <div style="color: #6b6b6b; font-size: 0.95rem;">满分 21, 参考区间</div>
+            <div style="color: #2d3a2e; font-size: 1.2rem; margin-top: 0.8rem; font-weight: 500;">{result['level']}</div>
+            <div style="color: #4a5a4a; font-size: 0.95rem; margin-top: 0.6rem; line-height: 1.7;">{result['advice']}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("---")
+        st.markdown("""
+        <div style="text-align: center; color: #8a8a8a; font-size: 0.85rem; padding: 1rem;">
+            ✦ GAD-7 只是参考工具, 不替代专业诊断<br>
+            ✦ 数据仅存浏览器, 关浏览器即清<br>
+            <span style="color: #a94442;">危机时刻: 全国心理援助热线 <b>12356</b> · 北京心理危机研究与干预中心 010-82951332</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════
+# Tab 6: 9 体质自评 (王琦 2009 简化版) — v0.7.1 新增
+# ═══════════════════════════════════════════════════════════
+with tab_tizhi:
+    st.markdown("### 🧬 9 体质自评 (王琦 2009 简化版)")
+    st.caption("✦ 9 题 × 3 选 1 投票, 推荐票数最多的体质, 不评分判定")
+
+    st.markdown("""
+    <div class="compliance-note">
+        <strong>✦ 严守声明</strong>: 9 体质是中医专业分类, 心颜只做「倾向参考」, 不构成医学判定。
+        本问卷不替代专业中医体质辨识, 个体差异请咨询专业人士。
+        数据仅存浏览器, 关浏览器即清。
+    </div>
+    """, unsafe_allow_html=True)
+
+    if "tizhi_answers" not in st.session_state:
+        # 每个 question 默认选第一个 (平和倾向), 但 votes 会平
+        st.session_state.tizhi_answers = [0] * 9
+
+    st.markdown("#### 📝 9 题 × 3 选 1")
+    for i, q_data in enumerate(TIZHI_9_QUESTIONS):
+        st.markdown(f"**{q_data['question']}**")
+        option_labels = [opt[0] for opt in q_data["options"]]
+        choice_idx = st.radio(
+            q_data["question"],
+            option_labels,
+            key=f"tizhi_q{i}",
+            index=st.session_state.tizhi_answers[i] if st.session_state.tizhi_answers[i] < len(option_labels) else 0,
+            label_visibility="collapsed",
+        )
+        # 转成 tizhi key 存
+        st.session_state.tizhi_answers[i] = option_labels.index(choice_idx)
+
+    if st.button("✦ 看推荐体质", key="tizhi_calc"):
+        # 取所有 9 题答案的体质 key
+        choices = []
+        for i, q_data in enumerate(TIZHI_9_QUESTIONS):
+            opt_idx = st.session_state.tizhi_answers[i]
+            choices.append(q_data["options"][opt_idx][1])
+        result = score_tizhi(choices)
+
+        if result["winner"]:
+            tie_text = ""
+            if result["is_tie"]:
+                tie_names = [TIZHI_9[k][0] for k in result["tied"]]
+                tie_text = f"<br><span style='color: #a94442; font-size: 0.85rem;'>（并列: {' / '.join(tie_names)}）</span>"
+
+            st.markdown(f"""
+            <div class="card" style="background: linear-gradient(135deg, #e8f0e8, #d8e6d8); text-align: center; padding: 1.5rem; margin-top: 1rem;">
+                <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.5rem;">✦ 推荐体质</div>
+                <div style="color: #2d3a2e; font-size: 2.2rem; font-weight: 300; letter-spacing: 0.1em;">{result['winner_name']}</div>
+                <div style="color: #6b6b6b; font-size: 0.95rem; margin-top: 0.5rem;">{result['winner_desc']}{tie_text}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # 票数详情
+            st.markdown("#### 📊 投票详情")
+            sorted_votes = sorted(result["votes"].items(), key=lambda x: -x[1])
+            for tizhi_key, cnt in sorted_votes:
+                name, _ = TIZHI_9[tizhi_key]
+                st.progress(cnt / 9.0, text=f"{name}: {cnt} 票")
+
+            st.markdown("---")
+            st.markdown(f"""
+            <div style="text-align: center; color: #8a8a8a; font-size: 0.85rem; padding: 1rem;">
+                ✦ 9 体质仅供参考, 不构成医学判定<br>
+                ✦ 个体差异请咨询专业中医师<br>
+                ✦ 数据仅存浏览器, 关浏览器即清
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.error("计算失败, 请重新作答")
 
 st.markdown("---")
 st.markdown(get_footer_note(), unsafe_allow_html=True)

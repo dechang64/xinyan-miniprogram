@@ -28,7 +28,7 @@ with st.sidebar:
     st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
-    st.caption("v0.7 · 2026-07-07")
+    st.caption("v0.7.1 · 2026-07-07")
     st.caption("滋养 · 涵养 · 共修")
 
 # ── brand header ──

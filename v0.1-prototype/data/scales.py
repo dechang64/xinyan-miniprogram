@@ -138,6 +138,43 @@ SCALE_DISCLAIMER = (
     "自伤念头等情况, 请务必咨询专业医生或专业人士。"
 )
 
+# PHQ-9 Q9 自伤念头 严守 banner (用户选了 ≥ 1 时强制显示)
+PHQ9_Q9_CRISIS_BANNER = (
+    "✦ 你刚才选了第 9 题 — 关于自伤念头。"
+    "如果你正在经历这样的感受, 请你立即联系:\n"
+    "• 全国心理援助热线: 12356 (24 小时)\n"
+    "• 北京心理危机研究与干预中心: 010-82951332\n"
+    "• 信任的家人或朋友\n\n"
+    "你不需要一个人面对。心颜严守: 这是参考工具, 不是诊断, 但你的安全最重要。"
+)
+
+
+def phq9_q9_alert_html(scores: list) -> str:
+    """返回 PHQ-9 Q9 自伤念头红色 banner HTML (用户选了 ≥ 1 时显示)"""
+    if not scores or len(scores) <= PHQ9_KEY_ITEM_9:
+        return ""
+    q9 = scores[PHQ9_KEY_ITEM_9]
+    if q9 < 1:
+        return ""
+    return (
+        '<div style="background: #fff0f0; border-left: 4px solid #d9534f; '
+        'border-radius: 6px; padding: 1rem; margin: 1rem 0; '
+        'color: #a94442; font-size: 0.92rem; line-height: 1.7;">'
+        '<div style="font-weight: 600; margin-bottom: 0.5rem;">⚠️ 重要提醒</div>'
+        + PHQ9_Q9_CRISIS_BANNER.replace("\n", "<br>") +
+        "</div>"
+    )
+
+
+def scale_disclaimer_html() -> str:
+    """返回严守声明 HTML (放在量表顶部)"""
+    return (
+        '<div class="compliance-note">'
+        '<strong>✦ 严守声明</strong>: ' + SCALE_DISCLAIMER +
+        "<br><span style=\"color: #a94442;\">危机时刻: 全国心理援助热线 <b>12356</b> · 北京心理危机研究与干预中心 010-82951332</span>"
+        "</div>"
+    )
+
 
 def all_scales_meta() -> dict:
     return {
@@ -147,6 +184,9 @@ def all_scales_meta() -> dict:
             "options": PHQ9_OPTIONS,
             "range": "0-27",
             "duration": "过去 2 周",
+            "scorer": phq9_score,
+            "key_alert_fn": phq9_q9_alert_html,
+            "source": "Kroenke 2001 (公版)",
         },
         "GAD-7": {
             "name": "焦虑自评 (GAD-7)",
@@ -154,6 +194,9 @@ def all_scales_meta() -> dict:
             "options": GAD7_OPTIONS,
             "range": "0-21",
             "duration": "过去 2 周",
+            "scorer": gad7_score,
+            "key_alert_fn": None,
+            "source": "Spitzer 2006 (公版)",
         },
         "DLQI": {
             "name": "皮肤生活质量 (DLQI)",
@@ -161,5 +204,8 @@ def all_scales_meta() -> dict:
             "options": DLQI_OPTIONS,
             "range": "0-30",
             "duration": "过去 1 周",
+            "scorer": dlqi_score,
+            "key_alert_fn": None,
+            "source": "Finlay 1994 (公版)",
         },
     }
