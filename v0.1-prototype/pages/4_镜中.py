@@ -1,22 +1,21 @@
-"""心颜 v0.6.1 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
+"""心颜 v0.6.4 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
 
-9 个区块:
+6 个区块 (v0.6.4 大幅精简):
 1. 4 滑块自评 (心情/精力/睡眠/肌肤) + 保存
 2. 30 天心情曲线 (st.line_chart, session_state 累积)
-3. PHQ-9 量表 (9 题, 弹出式)
-4. GAD-7 量表 (7 题, 弹出式)
-5. DLQI 量表 (10 题, 弹出式)
-6. 今日自我对话 (6 类标签筛选)
-7. 「给 3 个月后的自己」彩蛋 (本地 session_state)
-8. 我的镜中签 (海报生成, 9 主题 x 6 风格, 下载到本地)
-   v0.5.3: 加自拍背景 (本地 Pillow)
-   v0.6.1: 加温润滤镜 (5 预设 + 自定义 5 滑块)
-9. FL 联邦聚合 (v0.5.2 mock, 同城同龄人心情/汤品/共修排行)
+3. 今日自我对话 (6 类标签筛选)
+4. 「给 3 个月后的自己」彩蛋 (本地 session_state)
+5. 我的镜中签 (海报生成, 9 主题 x 6 风格 + 温润滤镜, 下载到本地)
+6. FL 联邦聚合 (v0.5.2 mock, 同城同龄人心情/汤品/共修排行)
+
+v0.6.4 删除: PHQ-9 / GAD-7 / DLQI 3 个量表 (与心颜「滋养而非治疗」基调冲突, 量表细节冗长)
+- 用户需要专业测评请去咨询专业人士 (12356 危机热线保留)
 
 严守 6 条意见: 滋养而非治疗, 照镜子, 不诊断
 v0.5.1: 干掉 altair, 用 st.line_chart (避免 Cloud Python 3.14 上 altair 5.5 schema 炸)
 v0.5.2: 加 镜中签海报 (C 方案) + FL 联邦聚合 (灵感 reading-fl Apache 2.0)
 v0.6.1: 加温润滤镜 (5 预设: 原图/清润/温润/通透/晨光/黄昏, 自定义 5 滑块)
+v0.6.4: 删 3 量表, 严守「滋养」基调, 镜中 page 精简到 6 区块
 """
 import streamlit as st
 from datetime import date, datetime, timedelta
@@ -25,12 +24,8 @@ from core.config import (
     get_brand_header, get_footer_note, get_solar_term_strip,
     checkin_init, COMPLIANCE_DISCLAIMER,
 )
-from data.scales import (
-    PHQ9_QUESTIONS, PHQ9_OPTIONS, PHQ9_LEVELS, phq9_score,
-    GAD7_QUESTIONS, GAD7_OPTIONS, GAD7_LEVELS, gad7_score,
-    DLQI_QUESTIONS, DLQI_OPTIONS, DLQI_LEVELS, dlqi_score,
-    SCALE_DISCLAIMER, all_scales_meta,
-)
+# v0.6.4: 删除 3 个量表, 心颜严守「滋养」基调, 不放医疗量表
+# (scales.py 保留, 备未来需要时复用, 但镜中 page 不再调用)
 from data.self_dialogue import get_today_dialogue, SELF_DIALOGUE_30
 from data.jingwen_30 import get_today_jingwen
 from data.soups_30 import get_today_soup
@@ -185,102 +180,22 @@ else:
     """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════
-#  区块 3-5: 3 个量表 (tab 切换)
+#  区块 3-5 整段删除 (v0.6.4 — 严守「滋养」基调)
 # ══════════════════════════════════════════════════════════
 st.markdown("---")
-st.markdown("### 📋 轻量量表 (仅参考)")
-st.caption("严守: 心颜不是诊断工具, 量表只供日常觉察. 严守红线后接 12356 危机热线")
 
-tab_phq, tab_gad, tab_dlqi = st.tabs(["PHQ-9 心情低落", "GAD-7 焦虑", "DLQI 皮肤生活质量"])
-
-with tab_phq:
-    st.markdown("**过去 2 周, 您是否被以下问题困扰?**")
-    phq_scores = []
-    for i, q in enumerate(PHQ9_QUESTIONS):
-        ans = st.radio(
-            q,
-            PHQ9_OPTIONS,
-            index=0,
-            key=f"phq_{i}",
-            horizontal=True,
-            label_visibility="visible",
-        )
-        phq_scores.append(PHQ9_OPTIONS.index(ans))
-    if st.button("📊 解读 PHQ-9", key="btn_phq", type="primary"):
-        r = phq9_score(phq_scores)
-        st.markdown(f"""
-        <div class="card" style="text-align: center; background: linear-gradient(135deg, #faf6f0, #f0e9dc);">
-            <div style="color: #a94442; font-size: 0.85rem; letter-spacing: 0.2em;">PHQ-9 总分</div>
-            <div style="color: #2d3a2e; font-size: 2rem; font-weight: 600; margin: 0.5rem 0;">{r['total']} / 27</div>
-            <div style="color: #4a7c59; font-size: 1.1rem; margin: 0.3rem 0;">{r['level']}</div>
-            <div style="color: #6b6b6b; font-size: 0.9rem; margin-top: 0.3rem;">{r['advice']}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        if r['q9_alert']:
-            st.error("⚠️ 第 9 题 (自伤念头) 有分, 请务必联系专业人士或拨打 12356 心理援助热线")
-        st.markdown(f"""
-        <div class="compliance-note">
-            <strong>✦ 严守声明</strong>: {SCALE_DISCLAIMER}
-        </div>
-        """, unsafe_allow_html=True)
-
-with tab_gad:
-    st.markdown("**过去 2 周, 您是否被以下问题困扰?**")
-    gad_scores = []
-    for i, q in enumerate(GAD7_QUESTIONS):
-        ans = st.radio(
-            q,
-            GAD7_OPTIONS,
-            index=0,
-            key=f"gad_{i}",
-            horizontal=True,
-            label_visibility="visible",
-        )
-        gad_scores.append(GAD7_OPTIONS.index(ans))
-    if st.button("📊 解读 GAD-7", key="btn_gad", type="primary"):
-        r = gad7_score(gad_scores)
-        st.markdown(f"""
-        <div class="card" style="text-align: center; background: linear-gradient(135deg, #faf6f0, #f0e9dc);">
-            <div style="color: #a94442; font-size: 0.85rem; letter-spacing: 0.2em;">GAD-7 总分</div>
-            <div style="color: #2d3a2e; font-size: 2rem; font-weight: 600; margin: 0.5rem 0;">{r['total']} / 21</div>
-            <div style="color: #4a7c59; font-size: 1.1rem; margin: 0.3rem 0;">{r['level']}</div>
-            <div style="color: #6b6b6b; font-size: 0.9rem; margin-top: 0.3rem;">{r['advice']}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="compliance-note">
-            <strong>✦ 严守声明</strong>: {SCALE_DISCLAIMER}
-        </div>
-        """, unsafe_allow_html=True)
-
-with tab_dlqi:
-    st.markdown("**过去 1 周, 您的皮肤问题对您的影响**")
-    dlqi_scores = []
-    for i, q in enumerate(DLQI_QUESTIONS):
-        ans = st.radio(
-            q,
-            DLQI_OPTIONS,
-            index=0,
-            key=f"dlqi_{i}",
-            horizontal=True,
-            label_visibility="visible",
-        )
-        dlqi_scores.append(DLQI_OPTIONS.index(ans))
-    if st.button("📊 解读 DLQI", key="btn_dlqi", type="primary"):
-        r = dlqi_score(dlqi_scores)
-        st.markdown(f"""
-        <div class="card" style="text-align: center; background: linear-gradient(135deg, #faf6f0, #f0e9dc);">
-            <div style="color: #a94442; font-size: 0.85rem; letter-spacing: 0.2em;">DLQI 总分</div>
-            <div style="color: #2d3a2e; font-size: 2rem; font-weight: 600; margin: 0.5rem 0;">{r['total']} / 30</div>
-            <div style="color: #4a7c59; font-size: 1.1rem; margin: 0.3rem 0;">{r['level']}</div>
-            <div style="color: #6b6b6b; font-size: 0.9rem; margin-top: 0.3rem;">{r['advice']}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="compliance-note">
-            <strong>✦ 严守声明</strong>: 心颜严守「滋养而非治疗」原则, DLQI 只测皮肤相关生活质量, 不诊断皮肤疾病. 严守化妆品监管条例 17/43/46/68, 不出现「治疗/治愈」用语.
-        </div>
-        """, unsafe_allow_html=True)
+# v0.6.4: 替换成「滋养自评入口」+ 严守声明 (心颜不替用户做诊断, 需要专业测评请找专业人士)
+st.markdown("### 🪞 心颜自评 (滋养维度)")
+st.markdown(f"""
+<div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc);">
+    <div style="color: #a94442; font-size: 0.85rem; letter-spacing: 0.2em; margin-bottom: 0.5rem;">✦ 滋养而非诊断</div>
+    <div style="color: #2d3a2e; line-height: 1.8;">
+        心颜是<strong>日常陪伴</strong>, 不是医疗工具.<br>
+        镜中自评只看<strong>心情 / 精力 / 睡眠 / 肌肤</strong> 4 个滋养维度, 不做抑郁 / 焦虑 / 皮肤病诊断.<br>
+        如果你最近持续心情低落、焦虑不安或皮肤问题反复, 请联系<strong>专业人士</strong>或拨打<strong>12356</strong> 心理援助热线.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════
 #  区块 6: 6 类自我对话 (按情绪筛选)
