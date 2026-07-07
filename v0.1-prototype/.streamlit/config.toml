@@ -1,0 +1,14 @@
+[theme]
+base = "light"
+primaryColor = "#4a7c59"      # 墨绿 (共修/涵养)
+backgroundColor = "#faf6f0"   # 浅米白 (温暖, 干净)
+secondaryBackgroundColor = "#f0e9dc"  # 暖米 (卡片背景)
+textColor = "#2d3a2e"         # 深绿灰 (主文字)
+font = "serif"
+
+[client]
+# 隐藏 streamlit 自动生成的 sidebar nav (英文文件名)
+showSidebarNavigation = false
+
+[browser]
+gatherUsageStats = false

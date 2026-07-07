@@ -1,0 +1,66 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ── Virtual env ──
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ── IDE / 编辑器 ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Streamlit ──
+.streamlit/secrets.toml
+*.log
+
+# ── 测试 / 调试脚本 (临时) ──
+_selfcheck.py
+_verify.py
+_*.log
+_*.err.log
+
+# ── 环境变量 / Secret ──
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.toml
+
+# ── Node / 微信开发者工具 (未来 v1.0) ──
+node_modules/
+miniprogram_npm/
+*.min.js
+project.private.config.json
+
+# ── 构建产物 ──
+dist/
+build/
+*.whl
+
+# ── 临时 / 系统 ──
+*.tmp
+*.bak
+*.orig
+nul
