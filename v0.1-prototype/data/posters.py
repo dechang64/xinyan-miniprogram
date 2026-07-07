@@ -12,7 +12,7 @@ POSTER_W, POSTER_H = 1080, 1920
 # 缩放 (Streamlit 预览)
 PREVIEW_W, PREVIEW_H = 540, 960
 
-# 6 主题 (从镜中数据来)
+# 6 主题 (从镜中数据来) + 3 镜中主题 (v0.5.3 加自拍)
 POSTER_THEMES = [
     {"key": "self_talk", "name": "今日自对话", "max_chars": 80},
     {"key": "mood_curve", "name": "30 天心情曲线", "max_chars": 0},  # 特殊: 用图表
@@ -20,6 +20,10 @@ POSTER_THEMES = [
     {"key": "soup", "name": "今日汤品", "max_chars": 150},
     {"key": "self_rating", "name": "4 滑块自评", "max_chars": 0},  # 特殊: 用分数卡
     {"key": "monthly", "name": "月底报告", "max_chars": 100},
+    # ── v0.5.3 新增 3 个镜中主题 (自拍背景图) ──
+    {"key": "mirror_today", "name": "🪞 今日镜中 (自拍)", "max_chars": 80, "needs_bg": True},
+    {"key": "mirror_30day", "name": "🪞 30 天镜中 (自拍)", "max_chars": 0, "needs_bg": True},
+    {"key": "mirror_monthly", "name": "🪞 月底镜中 (自拍)", "max_chars": 100, "needs_bg": True},
 ]
 
 # 6 风格 (跟 v0.5 每日一经/汤品海报一致)
@@ -136,6 +140,53 @@ def get_text_for_theme(theme_key: str, mirror_history: list, jingwen: dict, soup
             "subtitle": "照镜子, 也是为了更好的自己",
             "extra": None,
         }
+    # ── v0.5.3 新增 3 个镜中主题 (自拍背景图) ──
+    elif theme_key == "mirror_today":
+        from data.self_dialogue import get_today_dialogue
+        d = get_today_dialogue()
+        latest = mirror_history[-1] if mirror_history else None
+        if latest:
+            content = f"🌿 心情 {latest['mood']}/10\n⚡ 精力 {latest['energy']}/10\n🌙 睡眠 {latest['sleep']}/10\n🌸 肌肤 {latest['skin']}/10"
+        else:
+            content = "去镜中记下今天的自己\n镜中签才有数据"
+        return {
+            "title": "今日镜中",
+            "content": content,
+            "subtitle": f"「{d['text']}」",
+            "extra": None,
+        }
+    elif theme_key == "mirror_30day":
+        if len(mirror_history) < 2:
+            return {
+                "title": "30 天镜中",
+                "content": "记录 ≥ 2 天后\n解锁 30 天镜中",
+                "subtitle": "镜中共修",
+                "extra": None,
+            }
+        avg_mood = sum(h['mood'] for h in mirror_history) / len(mirror_history)
+        bar_chart = "".join(["▁▂▃▄▅▆▇█"[min(7, int(h['mood']/1.3))] for h in mirror_history[-30:]])
+        return {
+            "title": "30 天镜中",
+            "content": f"共修 {len(mirror_history)} 天\n心情均值 {avg_mood:.1f}/10\n\n{bar_chart}",
+            "subtitle": "照镜子, 也是为了更好的自己",
+            "extra": None,
+        }
+    elif theme_key == "mirror_monthly":
+        if len(mirror_history) < 5:
+            return {
+                "title": "月底镜中",
+                "content": "记录 ≥ 5 天后\n解锁月底镜中",
+                "subtitle": "继续共修",
+                "extra": None,
+            }
+        avg_mood = sum(h['mood'] for h in mirror_history) / len(mirror_history)
+        high_days = sum(1 for h in mirror_history if h['avg'] >= 7)
+        return {
+            "title": "月底镜中",
+            "content": f"共修 {len(mirror_history)} 天\n心情均值 {avg_mood:.1f}/10\n滋养日 {high_days} 天",
+            "subtitle": "照镜子, 也是为了更好的自己",
+            "extra": None,
+        }
     return {}
 
 
@@ -152,13 +203,43 @@ def get_font(size: int, family: str = "Source Han Serif SC, Songti SC") -> Image
 
 
 def draw_poster(theme_key: str, style_key: str, mirror_history: list,
-                jingwen: dict, soup: dict) -> Image.Image:
-    """画一张海报 (1080x1920), 返回 PIL Image"""
+                jingwen: dict, soup: dict,
+                bg_image: Image.Image = None) -> Image.Image:
+    """画一张海报 (1080x1920), 返回 PIL Image
+
+    v0.5.3 加 bg_image: 用户自拍/上传的背景图, 纯本地 Pillow 处理,
+    不上传到云, 不 AI 测肤, 只做 0.35 不透明叠加当背景素材
+    """
     style = POSTER_STYLES[style_key]
     text_data = get_text_for_theme(theme_key, mirror_history, jingwen, soup)
 
     # 创建画布
     img = Image.new("RGB", (POSTER_W, POSTER_H), color=style["bg"])
+
+    # ── v0.5.3: 叠加背景图 (如果用户上传/拍照) ──
+    if bg_image is not None:
+        try:
+            # 缩放到海报尺寸
+            bg_resized = bg_image.copy()
+            bg_resized.thumbnail((POSTER_W, POSTER_H), Image.LANCZOS)
+            # 居中
+            bg_w, bg_h = bg_resized.size
+            bg_x = (POSTER_W - bg_w) // 2
+            bg_y = (POSTER_H - bg_h) // 2
+            # 转换为 RGBA 以便调不透明度
+            if bg_resized.mode != "RGBA":
+                bg_resized = bg_resized.convert("RGBA")
+            # 调不透明度 (0.35) 让文字清晰
+            alpha = bg_resized.split()[3]
+            alpha = alpha.point(lambda p: int(p * 0.35))
+            bg_resized.putalpha(alpha)
+            img = img.convert("RGBA")
+            img.paste(bg_resized, (bg_x, bg_y), bg_resized)
+            img = img.convert("RGB")
+        except Exception:
+            # 背景图失败不致命, 降级用纯色背景
+            pass
+
     draw = ImageDraw.Draw(img)
 
     # 边框

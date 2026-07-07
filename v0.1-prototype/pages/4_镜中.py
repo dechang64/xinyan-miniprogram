@@ -385,13 +385,50 @@ with c2:
         key="poster_style",
     )
 
-# 上传背景图 (可选, 不上传用纯色)
-bg_upload = st.file_uploader(
-    "✦ 可选: 上传 1 张背景图 (jpg/png, 不上传到云, 仅本次会话使用)",
-    type=["jpg", "jpeg", "png"],
-    key="poster_bg",
-    help="严守: 心颜不保存你的图片, 关浏览器即清空",
-)
+# v0.5.3: 拍照 / 上传二选一 (本地处理, 不上传云)
+st.markdown("##### 📷 拍照 / 上传 (可选)")
+st.caption("✦ 自拍当背景图素材 — 严守: 不上传人脸, 不 AI 测肤, 只本地 Pillow 叠加 0.35 不透明")
+
+col_cam, col_up = st.columns(2)
+with col_cam:
+    cam_input = st.camera_input(
+        "📷 拍一张 (本地摄像头, 不上传)",
+        key="poster_cam",
+        help="拍完照片仅用于本次海报合成, 关浏览器即清空",
+    )
+with col_up:
+    bg_upload = st.file_uploader(
+        "📁 或上传 1 张图片 (jpg/png)",
+        type=["jpg", "jpeg", "png"],
+        key="poster_bg",
+        help="上传图片仅用于本次海报合成, 关浏览器即清空",
+    )
+
+# 决定用哪个 (优先拍照, 其次上传)
+from PIL import Image
+import io
+
+bg_pil_image = None
+bg_source = None  # 用于合规说明
+if cam_input is not None:
+    try:
+        bg_pil_image = Image.open(io.BytesIO(cam_input.read()))
+        bg_source = "📷 拍照"
+    except Exception as e:
+        st.warning(f"拍照读取失败: {e}")
+elif bg_upload is not None:
+    try:
+        bg_pil_image = Image.open(bg_upload)
+        bg_source = "📁 上传"
+    except Exception as e:
+        st.warning(f"上传读取失败: {e}")
+
+# v0.5.3: 镜中主题提醒
+theme_needs_bg = theme_key in ["mirror_today", "mirror_30day", "mirror_monthly"]
+if theme_needs_bg and bg_pil_image is None:
+    st.caption("⚠️ 镜中主题需要 1 张自拍/上传, 否则海报只用纯色背景")
+elif bg_pil_image is not None:
+    st.success(f"✦ 已选背景图 ({bg_source}), 仅本次会话使用, 不上传")
 
 st.markdown(f"""
 <div class="compliance-note">
@@ -405,14 +442,16 @@ if st.button("🎨 生成我的镜中签", use_container_width=True, type="prima
     # 取今日经文 + 汤品
     jw = get_today_jingwen()
     sp = get_today_soup()
-    # 画
+    # 画 (v0.5.3: 传 bg_pil_image, 自拍当背景)
     img = draw_poster(
         theme_key, style_label,
         st.session_state.mirror_history,
         jw, sp,
+        bg_image=bg_pil_image,
     )
     # 存 session 给 download
     st.session_state["_poster_img"] = img
+    st.session_state["_poster_bg_source"] = bg_source  # 用于严守说明
     st.success("✦ 镜中签已生成, 下方下载或长按图片保存到手机")
 
 # 显示预览 + 下载
@@ -432,6 +471,8 @@ if "_poster_img" in st.session_state:
         use_container_width=True,
     )
     st.caption("✦ 下载后: 微信扫码 → 选图片 → 朋友圈发布. 心颜不存图, 不传图, 不分析图.")
+    if st.session_state.get("_poster_bg_source"):
+        st.caption(f"✦ 海报背景来源: {st.session_state.get('_poster_bg_source')} (本地 Pillow 处理, 不上传到任何 server)")
 
 # ══════════════════════════════════════════════════════════
 #  区块 9: FL 联邦聚合 (v0.5.2 mock, 灵感 reading-fl Apache 2.0)
