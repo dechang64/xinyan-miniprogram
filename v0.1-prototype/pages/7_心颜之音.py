@@ -1,4 +1,10 @@
-"""心颜 v0.7 — page 7: 心颜之音 (MiniMax AI 音乐生成 5 滋养曲风)
+"""心颜 v0.7.1.1 — page 7: 心颜之音 (5 滋养曲风 + MiniMax AI 生成示例)
+
+v0.7.1.1 关键变化:
+- 之前: 用户点「生成」按钮 → 调 mavis CLI → 调 MiniMax MCP 生成新 MP3
+- 现在: 用户选曲风 → 直接展示预生成 MP3 (5 个示例 CDN URL, MiniMax hailuoai.com)
+  + 真生成按钮放折叠 (本地 dev 需 mavis daemon, Cloud 禁用)
+- 原因: Streamlit Cloud Linux 容器没装 mavis.cmd, subprocess 找不到
 
 严守 (核心):
 - 5 滋养曲风跟 v0.6.1 温润滤镜 5 预设一一对应 (清润/温润/通透/晨光/黄昏)
@@ -18,6 +24,7 @@ from core.config import (
 )
 from data.music import (
     MUSIC_STYLES, list_styles, generate_xinyan_music, get_style_prompt,
+    DEMO_URLS,
 )
 
 st.set_page_config(
@@ -41,7 +48,7 @@ with st.sidebar:
     st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
-    st.caption("v0.7.1 · 2026-07-07")
+    st.caption("v0.7.1.1 · 2026-07-07")
     st.caption("滋养 · 涵养 · 共修")
 
 get_brand_header()
@@ -52,8 +59,8 @@ st.markdown("""
     <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 心颜之音</div>
     <div style="color: #2d3a2e; font-size: 0.92rem; line-height: 1.6;">
         5 滋养曲风跟 v0.6.1 温润滤镜 5 预设一一对应: <b>清润 / 温润 / 通透 / 晨光 / 黄昏</b><br>
-        不用歌词 · 2 分钟 · 80 BPM 上下 · 由 MiniMax AI 音乐生成<br>
-        ✦ 仅生成于本地浏览器, 不上传云端, 不记录播放历史
+        不用歌词 · 2 分钟 · 80 BPM 上下 · 由 <b>MiniMax AI 音乐生成</b><br>
+        ✦ 仅在本机播放, 不上传云端, 不记录播放历史
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -86,56 +93,70 @@ with st.expander("🔍 查看 MiniMax prompt (高级用户)"):
     st.code(style['prompt'], language="text")
     st.caption("✦ 这是送给 MiniMax 音乐模型的英文描述, 不进入用户界面")
 
-# 生成按钮
+# ── 自动播放 demo MP3 (Cloud 兼容) ──
 st.markdown("---")
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    gen_btn = st.button(
-        f"✨ 生成 {style_choice} 之音",
-        use_container_width=True,
-        type="primary",
-    )
+st.markdown("### 🎧 聆听滋养曲风")
 
-if gen_btn:
-    with st.spinner(f"🎵 正在生成 {style_choice} 之音... MiniMax AI 需要 30-60 秒"):
-        result = generate_xinyan_music(style_choice)
+if style_choice in DEMO_URLS:
+    audio_url = DEMO_URLS[style_choice]
+    st.audio(audio_url, format="audio/mp3", autoplay=False)
 
-    if result.get("success"):
-        audio_url = result["audio_url"]
-        st.session_state[f"audio_url_{style_choice}"] = audio_url
+    st.markdown(f"""
+    <div style="text-align: center; color: #6b6b6b; font-size: 0.85rem; padding: 0.5rem;">
+        🎵 由 <b>MiniMax AI 生成</b> · 2 分钟 · 80 BPM 上下<br>
+        ✦ 仅供个人聆听, 不做商用 / 不宣称艺术创作
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.success(f"✦ {style_choice} 之音生成成功")
+    # CDN URL (调试用, 用户可复制, 7 天有效期)
+    with st.expander("🔗 音乐 CDN URL (7 天有效期)"):
+        st.code(audio_url, language="text")
+        st.caption("✦ MiniMax hailuoai.com CDN, 链接 7 天后失效, 失效时联系心颜重新生成")
+else:
+    st.warning(f"⚠️ {style_choice} 暂无预生成示例, 请选择其他曲风")
 
-        # 严守声明 (成功后才显示, 提醒用户这是 AI 生成)
-        st.markdown(f"""
-        <div style="text-align: center; color: #6b6b6b; font-size: 0.85rem; padding: 0.5rem;">
-            🎵 由 MiniMax AI 生成 · 2 分钟 · 80 BPM 上下<br>
-            ✦ 仅供个人聆听, 不做商用 / 不宣称艺术创作
-        </div>
-        """, unsafe_allow_html=True)
+# ── 真生成模式 (本地 dev 高级用户) ──
+with st.expander("🔧 高级: 真生成模式 (本地 dev 需 mavis daemon)"):
+    st.markdown("""
+    <div class="compliance-note" style="background: #fff8e8; border-left: 4px solid #d4a73c; padding: 0.8rem; margin-bottom: 0.8rem;">
+        ⚠️ <b>本地开发模式</b>: 调用 MiniMax MCP 真生成新音乐 (~30-60 秒).<br>
+        Streamlit Cloud 不支持 (Linux 容器无 mavis.cmd), 仅本地 dev 可用.
+    </div>
+    """, unsafe_allow_html=True)
 
-        # 播放器 (本地, 不上传)
-        st.audio(audio_url, format="audio/mp3", autoplay=False)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        real_gen_btn = st.button(
+            f"✨ 真生成 {style_choice} 之音",
+            key="real_gen_btn",
+            use_container_width=True,
+        )
 
-        # 显示 CDN URL (调试用, 用户可复制)
-        with st.expander("🔗 音乐 CDN URL"):
-            st.code(audio_url, language="text")
-            st.caption("✦ 这是 MiniMax 返回的 CDN URL, 链接有效期 7 天, 过期重新生成即可")
-    else:
-        st.error(f"生成失败: {result.get('error', '未知错误')}")
-        st.caption("✦ 可以换个曲风再试, 或检查 MiniMax MCP 是否可用")
+    if real_gen_btn:
+        with st.spinner(f"🎵 正在调 MiniMax MCP 真生成 {style_choice}... 30-60 秒"):
+            result = generate_xinyan_music(style_choice, use_demo=False)
+
+        if result.get("success"):
+            st.success(f"✦ {style_choice} 真生成成功")
+            st.audio(result["audio_url"], format="audio/mp3", autoplay=False)
+            with st.expander("🔗 真生成 CDN URL"):
+                st.code(result["audio_url"], language="text")
+        else:
+            err = result.get("error", "未知错误")
+            st.error(f"❌ 真生成失败: {err}")
+            st.caption("✦ 检查本地 mavis daemon 是否运行 (mavis mcp ls)")
 
 # ── 历史记录 ──
 st.markdown("---")
-st.markdown("### 🕘 本次会话已生成")
+st.markdown("### 🕘 本次会话已聆听")
 history_keys = [k for k in st.session_state.keys() if k.startswith("audio_url_")]
 if history_keys:
     for k in history_keys:
         style_name = k.replace("audio_url_", "")
         url = st.session_state[k]
-        st.markdown(f"- 🎵 **{style_name}**: 已生成, [重新播放]({url})")
+        st.markdown(f"- 🎵 **{style_name}**: 已播放, [重新听]({url})")
 else:
-    st.caption("✦ 还没生成过音乐, 选个曲风点上面的按钮")
+    st.caption("✦ 还没听过曲风, 上面选一个曲风即可聆听")
 
 # ── 底部严守 ──
 st.markdown("---")

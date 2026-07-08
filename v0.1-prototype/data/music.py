@@ -49,6 +49,19 @@ MUSIC_STYLES = {
     },
 }
 
+# v0.7.1.1: 5 个示例 MP3 的 CDN URL (MiniMax hailuoai.com 永久 bucket)
+# 严守: 由 MiniMax AI 生成, 严守 8 禁用词 0 出现, prompt 已预审
+# Cloud 兼容: Streamlit Cloud 上 mavis.cmd 不可用, 用预生成示例绕过
+# 真生成 (本地 dev): UI 上「✨ 真生成」折叠按钮可调 MCP, 需本地 mavis daemon
+# CDN 链接有效期: MiniMax CDN 通常 7 天, 失效时刷新 demo 即可
+DEMO_URLS = {
+    "清润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783468760_eba347f3.mp3",
+    "温润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783468789_0790e546.mp3",
+    "通透": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783468833_aac36996.mp3",
+    "晨光": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783468869_f2e62690.mp3",
+    "黄昏": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783468905_14fe8f18.mp3",
+}
+
 # 心颜严守: 不允许的曲风关键词
 _FORBIDDEN_MUSIC_KEYWORDS = [
     "激烈", "焦虑", "痛苦", "愤怒", "恐惧", "绝望",
@@ -136,19 +149,23 @@ def call_minimax_generate_music(prompt: str, lyrics: str = "", sample_rate: int 
         return None
 
 
-def generate_xinyan_music(style_key: str) -> dict:
+def generate_xinyan_music(style_key: str, use_demo: bool = True) -> dict:
     """心颜专属音乐生成: 曲风 → MiniMax prompt → CDN URL
 
+    Args:
+        style_key: 曲风 key
+        use_demo: True 用预生成示例 (Cloud 兼容, 默认), False 调 MiniMax MCP (本地 dev)
     Returns:
         {
             "success": True,
             "style": "清润",
-            "prompt": "gentle, clear, refined piano solo, ...",
+            "prompt": "...",
             "audio_url": "https://...",
             "description": "...",
             "scene": "...",
             "icon": "💧",
             "color": "#A8D5BA",
+            "is_demo": True/False,  # 标记是否演示模式
         }
     """
     if style_key not in MUSIC_STYLES:
@@ -161,8 +178,16 @@ def generate_xinyan_music(style_key: str) -> dict:
     if not _validate_prompt(style_key, prompt):
         return {"success": False, "style": style_key, "error": "严守拦截"}
 
-    # 调用 MiniMax
-    audio_url = call_minimax_generate_music(prompt)
+    # Demo 模式 (Cloud 兼容): 用预生成 URL, 不调 MCP
+    audio_url = None
+    is_demo = False
+    if use_demo and style_key in DEMO_URLS:
+        audio_url = DEMO_URLS[style_key]
+        is_demo = True
+
+    # 真生成模式: 调 MiniMax MCP (本地 dev 需 mavis daemon)
+    if audio_url is None:
+        audio_url = call_minimax_generate_music(prompt)
 
     return {
         "success": audio_url is not None,
@@ -173,6 +198,7 @@ def generate_xinyan_music(style_key: str) -> dict:
         "scene": style["scene"],
         "icon": style["icon"],
         "color": style["color"],
+        "is_demo": is_demo,
     }
 
 
