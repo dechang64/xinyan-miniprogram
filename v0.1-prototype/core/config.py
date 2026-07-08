@@ -29,6 +29,7 @@ SOLAR_TERMS_2026 = [
 COMPLIANCE_DISCLAIMER = (
     "心颜是日常滋养陪伴, 不构成任何医学建议。"
     "经文与汤品仅供日常参考, 个体差异请咨询专业人士。"
+    "危机时刻: 全国心理援助热线 <b>12356</b> · 北京心理危机研究与干预中心 010-82951332"
 )
 
 # 9 体质 (王琦 9 体质) — 简版, 用于每日一汤推荐
@@ -72,7 +73,7 @@ def get_footer_note():
     """底部说明 — 所有 page 底部调用"""
     import streamlit as st
     st.markdown(
-        f'<div class="footer-note">{COMPLIANCE_DISCLAIMER}<br>v0.1 原型 · 2026-07-06 · Mavis</div>',
+        f'<div class="footer-note">{COMPLIANCE_DISCLAIMER}<br>v0.7.1.2 原型 · 2026-07-07 · Mavis</div>',
         unsafe_allow_html=True,
     )
 
