@@ -10,7 +10,7 @@ from core.config import (
 )
 from data.jingwen_30 import get_today_jingwen, get_all, get_by_id
 from core.poster_svg import get_decoration
-from data.guohua_gen import gen_guohua_b64
+from data.guohua_6 import get_guohua
 
 st.set_page_config(page_title="每日一经 · 心颜", page_icon="📜", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
@@ -83,41 +83,14 @@ bg, fg, stamp_color, direction = TEMPLATE_STYLES[template]
 direction_css = "writing-mode: vertical-rl; text-orientation: upright;" if direction == "vertical" else ""
 direction_text = "竖排古朴" if direction == "vertical" else "横排现代"
 
-# v0.7.1.7.3: AI 即时生成小品国画 (每人不同, 时令 + 经文)
-# 缓存键: 经文 id + 模板 (切换经文/模板重新生成)
-guohua_cache_key = f"guohua_{jw['id']}_{template}"
-if "guohua_cache" not in st.session_state:
-    st.session_state["guohua_cache"] = {}
+# v0.7.1.7.4: 6 模板国画小品 (预生成, base64 嵌进 repo, 不调 AI, 不依赖云)
+from data.guohua_6 import get_guohua
 
-# 生成按钮
-col_gen, col_info = st.columns([1, 3])
-with col_gen:
-    regen = st.button("🎨 生成我的专属画", key="regen_guohua", use_container_width=True)
-with col_info:
-    if guohua_cache_key in st.session_state["guohua_cache"]:
-        cached = st.session_state["guohua_cache"][guohua_cache_key]
-        st.caption("✦ 已生成 ({:.0f}s)".format(cached.get("elapsed", 0)))
-    else:
-        st.caption("✦ 点击按钮, AI 即时为您画一张写意小品")
-
-# 是否需要生成 (首次 / 重新点按钮)
-if regen or guohua_cache_key not in st.session_state["guohua_cache"]:
-    with st.spinner("🎨 正在为您生成专属写意小品 (约 30 秒)..."):
-        r = gen_guohua_b64(jw)
-        if r.get("success"):
-            st.session_state["guohua_cache"][guohua_cache_key] = r
-            st.success("✦ 生成完成, 您的专属画已就位")
-        else:
-            st.error("生成失败: {} 请刷新页面重试".format(r.get("error", "未知错误")))
-            guohua_html = '<div style="width:140px;height:180px;background:rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:center;color:#999;font-size:0.7rem;">生成失败</div>'
-
-# 取出缓存
-if guohua_cache_key in st.session_state["guohua_cache"]:
-    cached = st.session_state["guohua_cache"][guohua_cache_key]
-    guohua_html = '<img src="data:image/png;base64,{}" style="width:140px;height:180px;object-fit:cover;border-radius:4px;display:block;" />'.format(cached.get("b64", ""))
+guohua_b64 = get_guohua(template)
+if guohua_b64:
+    guohua_html = '<img src="data:image/png;base64,{}" style="width:140px;height:180px;object-fit:cover;border-radius:4px;display:block;" />'.format(guohua_b64)
 else:
-    if "guohua_html" not in dir():
-        guohua_html = '<div style="width:140px;height:180px;background:rgba(0,0,0,0.03);border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#999;font-size:0.75rem;">点击"生成我的专属画"</div>'
+    guohua_html = '<div style="width:140px;height:180px;background:rgba(0,0,0,0.03);border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#999;font-size:0.75rem;">画作准备中</div>'
 
 # v0.7.1.7.1: 海报顶部/底部 + 左右卷轴边饰 SVG
 deco_top, deco_bottom, deco_side = get_decoration(template)
