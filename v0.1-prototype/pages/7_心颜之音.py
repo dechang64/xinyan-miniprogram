@@ -48,24 +48,17 @@ with st.sidebar:
     st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
-    st.caption("v0.7.1.3 · 2026-07-07")
     st.caption("滋养 · 涵养 · 共修")
 
 get_brand_header()
 
-# ── 顶部严守声明 (v0.7.1.7.5 接入五行白皮书 v1.2) ──
+# ── 顶部卡 (v0.7.1.7.6 简化: 删技术细节, 给用户简单意境) ──
 st.markdown("""
 <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 1rem; margin-bottom: 1rem;">
     <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 心颜之音</div>
-    <div style="color: #2d3a2e; font-size: 0.92rem; line-height: 1.6;">
-        5 滋养曲风严格按 <b>《五行音乐映射规则白皮书 v1.2》</b> (中国音乐学院王教授审阅):<br>
-        • <b>清润</b> = 羽调式 (水) 60 BPM · 二胡+大提琴<br>
-        • <b>温润</b> = 宫调式 (土) 75 BPM · 埙+古筝<br>
-        • <b>通透</b> = 商调式 (金) 85 BPM · 钢琴+编钟<br>
-        • <b>晨光</b> = 角调式 (木) 70 BPM · 古琴+竹笛<br>
-        • <b>黄昏</b> = 徵调式 (火) 95 BPM · 琵琶+小提琴<br>
-        不用歌词 · 2 分钟 · 由 <b>MiniMax AI 音乐生成</b><br>
-        ✦ 仅在本机播放, 不上传云端, 不记录播放历史
+    <div style="color: #2d3a2e; font-size: 0.95rem; line-height: 1.7;">
+        5 段滋养曲风, 陪你慢慢静下来。<br>
+        <span style="color: #6b6b6b; font-size: 0.85rem;">不用歌词 · 意境陪伴 · 关浏览器即清</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -93,11 +86,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 显示 prompt 预览
-with st.expander("🔍 查看 MiniMax prompt (高级用户)"):
-    st.code(style['prompt'], language="text")
-    st.caption("✦ 这是送给 MiniMax 音乐模型的英文描述, 不进入用户界面")
-
 # ── 自动播放 demo MP3 (Cloud 兼容, base64 嵌进 repo) ──
 st.markdown("---")
 st.markdown("### 🎧 聆听滋养曲风")
@@ -105,14 +93,6 @@ st.markdown("### 🎧 聆听滋养曲风")
 if style_choice in DEMO_URLS:
     audio_url = DEMO_URLS[style_choice]
     st.audio(audio_url, format="audio/mp3", autoplay=False)
-
-    st.markdown(f"""
-    <div style="text-align: center; color: #6b6b6b; font-size: 0.85rem; padding: 0.5rem;">
-        🎵 由 <b>MiniMax AI 生成</b> · 2 分钟 · <b>{style['bpm']} BPM</b> · {style['mode']} ({style['wuxing']})<br>
-        {style['scale']} · 5 段式: 引入 → 主体 → 回归<br>
-        ✦ 仅供个人聆听, 不做商用 / 不宣称艺术创作
-    </div>
-    """, unsafe_allow_html=True)
 else:
     st.warning(f"⚠️ {style_choice} 暂无预生成示例, 请选择其他曲风")
 
@@ -159,17 +139,11 @@ if history_keys:
 else:
     st.caption("✦ 还没听过曲风, 上面选一个曲风即可聆听")
 
-# ── 底部严守 ──
+# ── 底部严守 (简化: 删技术细节) ──
 st.markdown("---")
 st.markdown(f"""
-<div class="card" style="background: #fffef8; padding: 1rem; margin-top: 1rem;">
-    <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 严守声明</div>
-    <div style="color: #6b6b6b; font-size: 0.85rem; line-height: 1.6;">
-        <b>5 滋养曲风只做情绪陪伴</b>, 不替代心理咨询 / 医疗 / 音乐治疗。<br>
-        <b>8 禁用词 0 出现</b>: 治疗 / 改善 / 缓解 / 治愈 / 祛斑 / 减肥 / 处方 / 医美 / 美颜 / 美白 / 瘦脸<br>
-        <b>音乐 prompt 预审</b>: 含消极/医疗/营销词自动拦截。<br>
-        ✦ 数据仅存浏览器, 关浏览器即清, 不上传云端。
-    </div>
+<div style="text-align: center; color: #a94442; font-size: 0.85rem; padding: 0.8rem; opacity: 0.85;">
+    情绪陪伴, 不替代心理咨询或医疗。
 </div>
 """, unsafe_allow_html=True)
 
