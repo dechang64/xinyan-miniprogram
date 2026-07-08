@@ -9,6 +9,7 @@ from core.config import (
     checkin_init, TIZHI_9,
 )
 from data.jingwen_30 import get_today_jingwen, get_all, get_by_id
+from core.poster_svg import get_decoration
 
 st.set_page_config(page_title="每日一经 · 心颜", page_icon="📜", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
@@ -81,8 +82,12 @@ bg, fg, stamp_color, direction = TEMPLATE_STYLES[template]
 direction_css = "writing-mode: vertical-rl; text-orientation: upright;" if direction == "vertical" else ""
 direction_text = "竖排古朴" if direction == "vertical" else "横排现代"
 
+# v0.7.1.7: 海报顶部/底部意境装饰 SVG
+deco_top, deco_bottom = get_decoration(template)
+
 st.markdown(f"""
 <div class="poster-frame" style="background: {bg}; border-color: {stamp_color};">
+    {deco_top}
     <div class="poster-eyebrow" style="color: {stamp_color};">心颜 · XINYAN</div>
     <div class="poster-title" style="color: {fg};">{jw['title']}</div>
     <div class="poster-content" style="color: {fg}; {direction_css}">
@@ -94,6 +99,7 @@ st.markdown(f"""
     <p style="color: {fg}; font-size: 0.75rem; margin-top: 1rem; opacity: 0.6;">
         {today_str} · 照镜子, 也是为了更好的自己
     </p>
+    {deco_bottom}
 </div>
 """, unsafe_allow_html=True)
 
