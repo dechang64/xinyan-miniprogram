@@ -108,12 +108,17 @@ with tab_mbti:
 
         col1, col2 = st.columns(2)
         with col1:
-            q1_q = q1["question"]
+            # MBTI_8_QUESTIONS 是 tuple: (question, A_text, A_label, B_text, B_label)
+            q1_q = q1[0]
+            q1_a_text = q1[1]
+            q1_a_label = q1[2]
+            q1_b_text = q1[3]
+            q1_b_label = q1[4]
             st.markdown("**" + q1_q + "**")
             choice1 = st.radio(
                 q1_q,
                 ["A", "B"],
-                format_func=lambda x, _q=q1: x + ". " + (_q["A_label"] if x == "A" else _q["B_label"]),
+                format_func=lambda x, _a=q1_a_text, _b=q1_b_text: x + ". " + (_a if x == "A" else _b),
                 key=f"mbti_q{q1_idx}",
                 index=0 if st.session_state.mbti_answers[q1_idx] is None else (0 if st.session_state.mbti_answers[q1_idx] == 'A' else 1),
                 label_visibility="collapsed",
@@ -121,12 +126,14 @@ with tab_mbti:
             st.session_state.mbti_answers[q1_idx] = choice1
 
         with col2:
-            q2_q = q2["question"]
+            q2_q = q2[0]
+            q2_a_text = q2[1]
+            q2_b_text = q2[3]
             st.markdown("**" + q2_q + "**")
             choice2 = st.radio(
                 q2_q,
                 ["A", "B"],
-                format_func=lambda x, _q=q2: x + ". " + (_q["A_label"] if x == "A" else _q["B_label"]),
+                format_func=lambda x, _a=q2_a_text, _b=q2_b_text: x + ". " + (_a if x == "A" else _b),
                 key=f"mbti_q{q2_idx}",
                 index=0 if st.session_state.mbti_answers[q2_idx] is None else (0 if st.session_state.mbti_answers[q2_idx] == 'A' else 1),
                 label_visibility="collapsed",
@@ -137,7 +144,16 @@ with tab_mbti:
 
     all_answered = all(a is not None for a in st.session_state.mbti_answers)
     if all_answered:
-        result = score_mbti(st.session_state.mbti_answers)
+        # 把 "A"/"B" 转换为对应字母 (E/I/S/N/T/F/J/P), 因为 MBTI_8_QUESTIONS 是 tuple
+        # 索引 2 = A_label, 4 = B_label
+        letters = []
+        for i, choice in enumerate(st.session_state.mbti_answers):
+            q = MBTI_8_QUESTIONS[i]
+            if choice == "A":
+                letters.append(q[2])  # A_label
+            else:
+                letters.append(q[4])  # B_label
+        result = score_mbti(letters)
         mbti_type = result["type"]
         type_name, type_desc = MBTI_16_TYPES[mbti_type]
 
