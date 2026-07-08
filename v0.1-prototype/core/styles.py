@@ -304,10 +304,11 @@ div[data-testid="stSidebarNav"] {display: none !important; visibility: hidden !i
     background: linear-gradient(135deg, #faf6f0 0%, #f0e9dc 100%);
     border: 2px solid var(--ink-green);
     border-radius: 12px;
-    padding: 1.5rem 1.2rem;
+    padding: 2.5rem 1.8rem;
     margin: 1rem 0;
     text-align: center;
     position: relative;
+    min-height: 480px;
 }
 .poster-frame::before, .poster-frame::after {
     content: '';
@@ -321,22 +322,22 @@ div[data-testid="stSidebarNav"] {display: none !important; visibility: hidden !i
 .poster-frame::after { bottom: 8px; right: 8px; }
 .poster-eyebrow {
     color: var(--cinnabar-red);
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     letter-spacing: 0.3em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
 }
 .poster-title {
     color: var(--ink-black);
-    font-size: 1.1rem;
-    margin: 0.4rem 0;
+    font-size: 1.25rem;
+    margin: 0.6rem 0;
     line-height: 1.5;
     font-weight: 500;
 }
 .poster-content {
     color: var(--ink-black);
-    font-size: 1.3rem;
-    line-height: 2;
-    margin: 0.8rem 0;
+    font-size: 1.5rem;
+    line-height: 2.2;
+    margin: 1.2rem 0;
     font-family: 'Source Han Serif SC', 'Songti SC', 'STSong', serif;
 }
 .poster-stamp {

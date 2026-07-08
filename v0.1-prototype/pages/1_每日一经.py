@@ -82,24 +82,28 @@ bg, fg, stamp_color, direction = TEMPLATE_STYLES[template]
 direction_css = "writing-mode: vertical-rl; text-orientation: upright;" if direction == "vertical" else ""
 direction_text = "竖排古朴" if direction == "vertical" else "横排现代"
 
-# v0.7.1.7: 海报顶部/底部意境装饰 SVG
-deco_top, deco_bottom = get_decoration(template)
+# v0.7.1.7.1: 海报顶部/底部 + 左右卷轴边饰 SVG
+deco_top, deco_bottom, deco_side = get_decoration(template)
 
 st.markdown(f"""
-<div class="poster-frame" style="background: {bg}; border-color: {stamp_color};">
-    {deco_top}
-    <div class="poster-eyebrow" style="color: {stamp_color};">心颜 · XINYAN</div>
-    <div class="poster-title" style="color: {fg};">{jw['title']}</div>
-    <div class="poster-content" style="color: {fg}; {direction_css}">
-        {jw['content']}
+<div class="poster-frame" style="background: {bg}; border-color: {stamp_color}; position: relative;">
+    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 30px; display: flex; align-items: stretch;">{deco_side}</div>
+    <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 30px; display: flex; align-items: stretch;">{deco_side}</div>
+    <div style="padding: 0 30px;">
+        {deco_top}
+        <div class="poster-eyebrow" style="color: {stamp_color};">心颜 · XINYAN</div>
+        <div class="poster-title" style="color: {fg};">{jw['title']}</div>
+        <div class="poster-content" style="color: {fg}; {direction_css}">
+            {jw['content']}
+        </div>
+        <div class="poster-stamp" style="color: {stamp_color}; border-color: {stamp_color};">
+            心颜共修 · {direction_text}
+        </div>
+        <p style="color: {fg}; font-size: 0.85rem; margin-top: 1rem; opacity: 0.6;">
+            {today_str} · 照镜子, 也是为了更好的自己
+        </p>
+        {deco_bottom}
     </div>
-    <div class="poster-stamp" style="color: {stamp_color}; border-color: {stamp_color};">
-        心颜共修 · {direction_text}
-    </div>
-    <p style="color: {fg}; font-size: 0.75rem; margin-top: 1rem; opacity: 0.6;">
-        {today_str} · 照镜子, 也是为了更好的自己
-    </p>
-    {deco_bottom}
 </div>
 """, unsafe_allow_html=True)
 
