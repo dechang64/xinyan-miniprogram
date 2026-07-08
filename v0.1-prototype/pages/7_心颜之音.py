@@ -24,7 +24,7 @@ from core.config import (
 )
 from data.music import (
     MUSIC_STYLES, list_styles, generate_xinyan_music, get_style_prompt,
-    DEMO_B64,
+    DEMO_URLS,
 )
 
 st.set_page_config(
@@ -102,8 +102,8 @@ with st.expander("🔍 查看 MiniMax prompt (高级用户)"):
 st.markdown("---")
 st.markdown("### 🎧 聆听滋养曲风")
 
-if style_choice in DEMO_B64:
-    audio_url = f"data:audio/mp3;base64,{DEMO_B64[style_choice]}"
+if style_choice in DEMO_URLS:
+    audio_url = DEMO_URLS[style_choice]
     st.audio(audio_url, format="audio/mp3", autoplay=False)
 
     st.markdown(f"""
