@@ -92,7 +92,7 @@ st.markdown("### 🎧 聆听滋养曲风")
 
 if style_choice in DEMO_URLS:
     audio_url = DEMO_URLS[style_choice]
-    st.audio(audio_url, format="audio/mp3", autoplay=False)
+    st.audio(audio_url, format="audio/mp3", autoplay=False, loop=True)
 else:
     st.warning(f"⚠️ {style_choice} 暂无预生成示例, 请选择其他曲风")
 
