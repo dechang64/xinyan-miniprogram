@@ -92,14 +92,38 @@ st.markdown(f"""
     <div style="padding: 0 30px;">
         {deco_top}
         <div class="poster-eyebrow" style="color: {stamp_color};">心颜 · XINYAN</div>
-        <div class="poster-title" style="color: {fg};">{jw['title']}</div>
-        <div class="poster-content" style="color: {fg}; {direction_css}">
-            {jw['content']}
+        <div class="poster-title" style="color: {fg}; text-align: right;">{jw['title']}</div>
+        <div style="display: flex; align-items: flex-start; gap: 1.2rem;">
+            <div class="poster-painting">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 180">
+                  <!-- 远山 -->
+                  <path d="M 0 110 L 30 70 L 60 90 L 90 60 L 140 95 L 140 180 L 0 180 Z" fill="#3a4a3a" opacity="0.35"/>
+                  <path d="M 0 130 L 40 95 L 80 115 L 140 100 L 140 180 L 0 180 Z" fill="#2d3a2e" opacity="0.55"/>
+                  <!-- 水面 -->
+                  <path d="M 0 150 Q 30 145 60 150 T 120 150 T 140 150" stroke="#2d3a2e" stroke-width="0.8" fill="none" opacity="0.4"/>
+                  <path d="M 0 160 Q 40 156 80 160 T 140 160" stroke="#2d3a2e" stroke-width="0.6" fill="none" opacity="0.3"/>
+                  <path d="M 0 168 Q 50 165 100 168 T 140 168" stroke="#2d3a2e" stroke-width="0.5" fill="none" opacity="0.25"/>
+                  <!-- 一叶扁舟 -->
+                  <path d="M 30 142 Q 35 138 45 138 Q 50 138 52 140 Q 50 142 45 142 Q 35 142 30 142 Z" fill="#2d3a2e" opacity="0.7"/>
+                  <line x1="40" y1="138" x2="40" y2="125" stroke="#2d3a2e" stroke-width="0.6" opacity="0.7"/>
+                  <!-- 飞鸟 (两三只) -->
+                  <path d="M 70 30 Q 75 27 80 30 M 80 30 Q 85 27 90 30" stroke="#2d3a2e" stroke-width="0.8" fill="none"/>
+                  <path d="M 95 45 Q 100 42 105 45 M 105 45 Q 110 42 115 45" stroke="#2d3a2e" stroke-width="0.8" fill="none"/>
+                  <!-- 小亭 -->
+                  <rect x="100" y="80" width="14" height="8" fill="#3d2817" opacity="0.7"/>
+                  <polygon points="98,80 116,80 107,75" fill="#3d2817" opacity="0.7"/>
+                </svg>
+                <!-- 印章 "心颜" -->
+                <div class="poster-seal">心颜</div>
+            </div>
+            <div class="poster-content" style="color: {fg}; {direction_css} flex: 1; text-align: right;">
+                {jw['content']}
+            </div>
         </div>
         <div class="poster-stamp" style="color: {stamp_color}; border-color: {stamp_color};">
             心颜共修 · {direction_text}
         </div>
-        <p style="color: {fg}; font-size: 0.85rem; margin-top: 1rem; opacity: 0.6;">
+        <p style="color: {fg}; font-size: 0.85rem; margin-top: 1rem; opacity: 0.6; text-align: right;">
             {today_str} · 照镜子, 也是为了更好的自己
         </p>
         {deco_bottom}

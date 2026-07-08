@@ -348,6 +348,34 @@ div[data-testid="stSidebarNav"] {display: none !important; visibility: hidden !i
     padding: 0.2rem 0.5rem;
     font-size: 0.78rem;
     margin-top: 0.6rem;
+    text-align: right;
+}
+.poster-painting {
+    flex: 0 0 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+.poster-painting svg {
+    width: 140px;
+    height: 180px;
+    display: block;
+}
+.poster-seal {
+    display: inline-block;
+    color: #a94442;
+    background: rgba(169, 68, 66, 0.08);
+    border: 2px solid #a94442;
+    border-radius: 4px;
+    padding: 0.4rem 0.5rem;
+    font-size: 1.2rem;
+    font-family: 'Source Han Serif SC', 'Songti SC', 'STSong', serif;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    margin-top: 0.3rem;
+    line-height: 1;
+}
     letter-spacing: 0.1em;
 }
 
