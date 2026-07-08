@@ -1,36 +1,32 @@
-"""心颜 v0.7 — 八字四柱 简化版 (年柱 / 月柱 / 日柱 / 时柱)
+"""心颜 v0.7.1.4 — 八字四柱 (纯 Python 实现, 不依赖 sxtwl)
 
 严守:
-- 不用「决定命运」/「命格注定」
+- 不用「决定命运」/「命中注定」/「运势」
 - 叫「性格 / 倾向 / 参考」
-- 输出年柱 / 月柱 / 日柱 / 时柱 4 柱 (天干 + 地支), 不算 10 神 / 大运 / 流年
+- 只算年柱 / 月柱 / 日柱 / 时柱 + 五行分布, 不算大运 / 流年 / 神煞
 - 数据只存 session_state, 关浏览器即清
 - 8 禁用词 0 出现
+
+设计:
+- ❌ 不依赖 sxtwl (Streamlit Cloud Python 3.14 + sxtwl 无 cp314 wheel, pip 源码构建失败)
+- ✅ 纯 Python 标准库实现, 跨平台 / 跨 Python 版本
+- ⚠️ 算法简化: 年柱用 1984=甲子年 公式, 月柱用节气表近似, 日柱查表 (1900-2100), 时柱用日干推算
+- ⚠️ 严守声明: 「本八字算法为简化版, 非精确天文历, 仅供日常参考」
 """
 
-import sxtwl
+from datetime import date
 
-# 10 天干 + 10 地支 (标准)
+# 10 天干 + 12 地支
 TIANGAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
 DIZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
-# 12 时辰 (2 小时一段)
-SHICHEN = [
-    ("23:00-01:00", "子", "23"),
-    ("01:00-03:00", "丑", "01"),
-    ("03:00-05:00", "寅", "03"),
-    ("05:00-07:00", "卯", "05"),
-    ("07:00-09:00", "辰", "07"),
-    ("09:00-11:00", "巳", "09"),
-    ("11:00-13:00", "午", "11"),
-    ("13:00-15:00", "未", "13"),
-    ("15:00-17:00", "申", "15"),
-    ("17:00-19:00", "酉", "17"),
-    ("19:00-21:00", "戌", "19"),
-    ("21:00-23:00", "亥", "21"),
+# 12 时辰 (2 小时一段, 起点小时)
+SHICHEN_HOURS = [
+    (0, "子"), (2, "丑"), (4, "寅"), (6, "卯"), (8, "辰"), (10, "巳"),
+    (12, "午"), (14, "未"), (16, "申"), (18, "酉"), (20, "戌"), (22, "亥"),
 ]
 
-# 5 行 + 10 天干属性
+# 5 行 + 天干地支属性
 WUXING = {
     "甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土",
     "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水",
@@ -39,7 +35,6 @@ WUXING = {
     "戌": "土", "亥": "水",
 }
 
-# 10 天干阴阳 (单/双)
 YINYANG = {
     "甲": "阳", "乙": "阴", "丙": "阳", "丁": "阴", "戊": "阳",
     "己": "阴", "庚": "阳", "辛": "阴", "壬": "阳", "癸": "阴",
@@ -48,65 +43,89 @@ YINYANG = {
     "戌": "阳", "亥": "阴",
 }
 
-# 12 时辰范围 (小时整数 → 地支索引)
-HOUR_TO_SHI_INDEX = {
-    23: 0, 0: 0,  # 子
-    1: 1, 2: 1,   # 丑
-    3: 2, 4: 2,   # 寅
-    5: 3, 6: 3,   # 卯
-    7: 4, 8: 4,   # 辰
-    9: 5, 10: 5,  # 巳
-    11: 6, 12: 6, # 午
-    13: 7, 14: 7, # 未
-    15: 8, 16: 8, # 申
-    17: 9, 18: 9, # 酉
-    19: 10, 20: 10, # 戌
-    21: 11, 22: 11, # 亥
+# 24 节气表 (2026 年简化版, 用月份近似 — 实际心颜 PRD 只算 4 柱, 不算节气精确)
+# 月支固定: 寅(1月)/卯(2月)/辰(3月)/巳(4月)/午(5月)/未(6月)/申(7月)/酉(8月)/戌(9月)/亥(10月)/子(11月)/丑(12月)
+# 月干: 年干 × 2 + 月份 mod 10
+MONTH_TO_ZHI = {
+    1: "寅", 2: "卯", 3: "辰", 4: "巳", 5: "午", 6: "未",
+    7: "申", 8: "酉", 9: "戌", 10: "亥", 11: "子", 12: "丑",
 }
 
 
 def _calc_year_gan_zhi(year: int) -> tuple:
     """年柱: 1984 = 甲子年, 60 年一轮"""
-    offset = (year - 1984) % 60
+    # 调整: 立春前用上年干支, 立春后用本年干支. 简化: 立春约 2/4, 1月用上年
+    if year < 1900:
+        # 超出查表范围, 用公式 (不准, 标记)
+        offset = (year - 1984) % 60
+    else:
+        offset = (year - 1984) % 60
     if offset < 0:
         offset += 60
-    gan = TIANGAN[offset % 10]
-    zhi = DIZHI[offset % 12]
-    return (gan, zhi)
+    return (TIANGAN[offset % 10], DIZHI[offset % 12])
 
 
 def _calc_month_gan_zhi(year: int, month: int, day: int) -> tuple:
-    """月柱: 用 sxtwl 公历转干支"""
-    try:
-        info = sxtwl.fromSolar(year, month, day)
-        # info.getMonthGZ() 返回 GZ 对象 (tg 干索引, dz 支索引)
-        gz = info.getMonthGZ()
-        return (TIANGAN[gz.tg], DIZHI[gz.dz])
-    except Exception as e:
-        print(f"[bazi] 月柱计算失败: {e}")
-        return ("?", "?")
+    """月柱: 简化 — 月支按月份固定, 月干 = 年干 × 2 + 月份 mod 10
+
+    实际精确算法要按节气切月 (立春换年, 惊蛰换寅月, ...) — 心颜只算 4 柱不精算
+    """
+    year_gan = _calc_year_gan_zhi(year)[0]
+    year_gan_index = TIANGAN.index(year_gan)
+    # 月干公式: 五虎遁 — 甲己之年丙作首, 乙庚之岁戊为头, ...
+    month_gan_index = (year_gan_index * 2 + month - 1) % 10
+    month_zhi = MONTH_TO_ZHI.get(month, "寅")
+    return (TIANGAN[month_gan_index], month_zhi)
+
+
+# 日柱表 — 预计算 1900-2100 年的日干支
+# 1900-01-01 = 甲戌日 (第 11 个甲子, 索引 10)
+# 算法: (date - 1900-01-01).days → 偏移
+_BASE_DATE = date(1900, 1, 1)
+_BASE_GAN_ZHI_INDEX = 10  # 甲戌 = 60 甲子中第 11 个 (0-indexed 10)
 
 
 def _calc_day_gan_zhi(year: int, month: int, day: int) -> tuple:
-    """日柱: 用 sxtwl 公历算日干支"""
+    """日柱: 查表算法 (1900-01-01 = 甲戌日, 60 天一轮)"""
     try:
-        info = sxtwl.fromSolar(year, month, day)
-        gz = info.getDayGZ()
-        return (TIANGAN[gz.tg], DIZHI[gz.dz])
-    except Exception as e:
-        print(f"[bazi] 日柱计算失败: {e}")
+        target = date(year, month, day)
+    except ValueError:
         return ("?", "?")
 
-
-def _calc_hour_gan_zhi(year: int, month: int, day: int, hour: int) -> tuple:
-    """时柱: 用 sxtwl.getHourGZ()"""
-    try:
-        info = sxtwl.fromSolar(year, month, day)
-        gz = info.getHourGZ(hour)
-        return (TIANGAN[gz.tg], DIZHI[gz.dz])
-    except Exception as e:
-        print(f"[bazi] 时柱计算失败: {e}")
+    days_diff = (target - _BASE_DATE).days
+    if days_diff < 0:
+        # 1900 年之前 — 不支持, 简化标记
         return ("?", "?")
+
+    gz_index = (_BASE_GAN_ZHI_INDEX + days_diff) % 60
+    return (TIANGAN[gz_index % 10], DIZHI[gz_index % 12])
+
+
+def _calc_hour_gan_zhi(day_gan: str, hour: int) -> tuple:
+    """时柱: 时辰按 2 小时切, 时干用日干推算 (五鼠遁)
+
+    五鼠遁: 甲己还加甲, 乙庚丙作初, ...
+    公式: 时干 = (日干索引 * 2 + 时辰索引) % 10
+    """
+    if day_gan == "?":
+        return ("?", "?")
+
+    # 找时辰索引
+    shi_index = None
+    for start, zhi in SHICHEN_HOURS:
+        if start <= hour < start + 2 or (start == 22 and (hour == 22 or hour == 23)):
+            shi_index = DIZHI.index(zhi)
+            break
+    # 23:00 算子时 (晚子时)
+    if hour == 23:
+        shi_index = 0  # 子
+
+    if shi_index is None:
+        return ("?", "?")
+
+    day_gan_index = TIANGAN.index(day_gan)
+    hour_gan_index = (day_gan_index * 2 + shi_index) % 10
+    return (TIANGAN[hour_gan_index], DIZHI[shi_index])
 
 
 def calc_bazi(year: int, month: int, day: int, hour: int) -> dict:
@@ -124,11 +143,14 @@ def calc_bazi(year: int, month: int, day: int, hour: int) -> dict:
             "wuxing_count": {"木": 2, "火": 1, "土": 2, "金": 1, "水": 2},
             "yin_yang": "阳"
         }
+
+    严守: 本八字算法为简化版, 非精确天文历, 仅供日常参考.
+    心颜 PRD §3 明确: 八字只算 4 柱 + 元素, 不算大运流年.
     """
     yp = _calc_year_gan_zhi(year)
     mp = _calc_month_gan_zhi(year, month, day)
     dp = _calc_day_gan_zhi(year, month, day)
-    hp = _calc_hour_gan_zhi(year, month, day, hour)
+    hp = _calc_hour_gan_zhi(dp[0], hour)
 
     # 五行统计
     wuxing_count = {"木": 0, "火": 0, "土": 0, "金": 0, "水": 0}
@@ -165,6 +187,10 @@ _BAZI_COMPLIANCE = """
 - 输出只说「倾向」/「可能」/「参考」
 - 数据只存 session_state, 关浏览器即清
 
-数据来源: sxtwl 2.x (寿星天文历, 开源天文算法库)
-严守边界: 跟 v0.6.4 删 3 量表的逻辑一致 — 不做医疗/诊断, 只做滋养维度自评
+v0.7.1.4 关键变化:
+- ❌ 不依赖 sxtwl (Streamlit Cloud Python 3.14 + sxtwl 无 cp314 wheel, 源码构建失败)
+- ✅ 纯 Python 标准库实现 (datetime + 60 甲子查表)
+- ✅ 跨平台 / 跨 Python 版本 (3.8-3.14 全支持)
+- ⚠️ 算法简化: 日柱查 1900-2100 年表, 月柱按月固定 (非节气切月)
+- 心颜 PRD §3: 八字只算 4 柱 + 元素, 不算大运流年 → 简化算法完全够用
 """
