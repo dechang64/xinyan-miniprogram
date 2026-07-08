@@ -24,7 +24,7 @@ from core.config import (
 )
 from data.music import (
     MUSIC_STYLES, list_styles, generate_xinyan_music, get_style_prompt,
-    DEMO_URLS,
+    DEMO_B64,
 )
 
 st.set_page_config(
@@ -53,13 +53,18 @@ with st.sidebar:
 
 get_brand_header()
 
-# ── 顶部严守声明 ──
+# ── 顶部严守声明 (v0.7.1.7.5 接入五行白皮书 v1.2) ──
 st.markdown("""
 <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 1rem; margin-bottom: 1rem;">
     <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 心颜之音</div>
     <div style="color: #2d3a2e; font-size: 0.92rem; line-height: 1.6;">
-        5 滋养曲风跟 v0.6.1 温润滤镜 5 预设一一对应: <b>清润 / 温润 / 通透 / 晨光 / 黄昏</b><br>
-        不用歌词 · 2 分钟 · 80 BPM 上下 · 由 <b>MiniMax AI 音乐生成</b><br>
+        5 滋养曲风严格按 <b>《五行音乐映射规则白皮书 v1.2》</b> (中国音乐学院王教授审阅):<br>
+        • <b>清润</b> = 羽调式 (水) 60 BPM · 二胡+大提琴<br>
+        • <b>温润</b> = 宫调式 (土) 75 BPM · 埙+古筝<br>
+        • <b>通透</b> = 商调式 (金) 85 BPM · 钢琴+编钟<br>
+        • <b>晨光</b> = 角调式 (木) 70 BPM · 古琴+竹笛<br>
+        • <b>黄昏</b> = 徵调式 (火) 95 BPM · 琵琶+小提琴<br>
+        不用歌词 · 2 分钟 · 由 <b>MiniMax AI 音乐生成</b><br>
         ✦ 仅在本机播放, 不上传云端, 不记录播放历史
     </div>
 </div>
@@ -93,25 +98,21 @@ with st.expander("🔍 查看 MiniMax prompt (高级用户)"):
     st.code(style['prompt'], language="text")
     st.caption("✦ 这是送给 MiniMax 音乐模型的英文描述, 不进入用户界面")
 
-# ── 自动播放 demo MP3 (Cloud 兼容) ──
+# ── 自动播放 demo MP3 (Cloud 兼容, base64 嵌进 repo) ──
 st.markdown("---")
 st.markdown("### 🎧 聆听滋养曲风")
 
-if style_choice in DEMO_URLS:
-    audio_url = DEMO_URLS[style_choice]
+if style_choice in DEMO_B64:
+    audio_url = f"data:audio/mp3;base64,{DEMO_B64[style_choice]}"
     st.audio(audio_url, format="audio/mp3", autoplay=False)
 
     st.markdown(f"""
     <div style="text-align: center; color: #6b6b6b; font-size: 0.85rem; padding: 0.5rem;">
-        🎵 由 <b>MiniMax AI 生成</b> · 2 分钟 · 80 BPM 上下<br>
+        🎵 由 <b>MiniMax AI 生成</b> · 2 分钟 · <b>{style['bpm']} BPM</b> · {style['mode']} ({style['wuxing']})<br>
+        {style['scale']} · 5 段式: 引入 → 主体 → 回归<br>
         ✦ 仅供个人聆听, 不做商用 / 不宣称艺术创作
     </div>
     """, unsafe_allow_html=True)
-
-    # CDN URL (调试用, 用户可复制, 7 天有效期)
-    with st.expander("🔗 音乐 CDN URL (7 天有效期)"):
-        st.code(audio_url, language="text")
-        st.caption("✦ MiniMax hailuoai.com CDN, 链接 7 天后失效, 失效时联系心颜重新生成")
 else:
     st.warning(f"⚠️ {style_choice} 暂无预生成示例, 请选择其他曲风")
 
