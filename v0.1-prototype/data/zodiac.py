@@ -6,6 +6,11 @@
 - 只算太阳星座 (基于生日), 月亮 + 上升需要精确时间 + 出生地, 暂用默认估算
 - 数据只存 session_state
 - 8 禁用词 0 出现
+
+设计:
+- ❌ 不依赖 sxtwl (Streamlit Cloud Python 3.14 + sxtwl 无 cp314 wheel)
+- ✅ 太阳星座用本地查表, 月亮星座用简化估算 (day-of-year % 12 哈希)
+- ✅ 上升星座用时辰 (12 时辰对应 12 星座)
 """
 
 # 12 星座 (按公历日期划分)
@@ -86,22 +91,10 @@ def calc_moon_sign(birth_year: int, birth_month: int, birth_day: int, hour: int)
     真实月亮星座需要精确到秒 + 出生地经纬度, 心颜用「生日 + 出生时辰」近似估算。
     严守声明: 这是「参考值」, 不是精确天文计算。
     """
-    if not SXTWL_AVAILABLE:
-        # 无 sxtwl 时降级: 用 day-of-year % 12 简单哈希 (本来就只是参考)
-        day_of_year = (birth_month - 1) * 30 + birth_day
-        sign_idx = day_of_year % 12
-        return SIGNS[sign_idx][0]
-
-    try:
-        info = sxtwl.fromSolar(birth_year, birth_month, birth_day)
-        # info.getLunarDay() 农历日
-        lunar_day = info.getLunarDay()
-        # 估算月亮星座: 农历日 % 28 → 月相, 月相 / 12 → 月亮星座
-        moon_phase_index = lunar_day % 28
-        moon_sign_index = (moon_phase_index * 12) // 28
-        return SIGNS[moon_sign_index][0]
-    except Exception:
-        return "未知"
+    # v0.7.1.4: 不依赖 sxtwl, 直接用 day-of-year % 12 简单哈希 (本来就只是参考)
+    day_of_year = (birth_month - 1) * 30 + birth_day
+    sign_idx = day_of_year % 12
+    return SIGNS[sign_idx][0]
 
 
 def calc_rising_sign(hour: int) -> str:
