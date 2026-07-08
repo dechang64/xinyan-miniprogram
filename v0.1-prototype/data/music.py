@@ -90,13 +90,12 @@ MUSIC_STYLES = {
 # 真生成 (本地 dev): UI 上「✨ 真生成」折叠按钮可调 MCP, 需本地 mavis daemon
 DEMO_URLS = {
     # 5 滋养曲风 (走五行白皮书 v1.2 prompt, 5.2 节模板), MiniMax hailuoai.com CDN 7 天有效
-    "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502569_999058bb.mp3": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783500442_a663c66c.mp3",  # 60 BPM 羽调式
-    "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502616_11c7604e.mp3": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783500489_bf60b1e1.mp3",  # 75 BPM 宫调式
-    "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502665_d532952c.mp3": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783500523_5cf1d3c7.mp3",  # 85 BPM 商调式
-    "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502769_452db1d0.mp3": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783500646_3e8d7b3c.mp3",  # 70 BPM 角调式
-    "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502846_a9a8175e.mp3": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783500712_3a4f1c1e.mp3",  # 95 BPM 徵调式
-}
-# 心颜严守: 不允许的曲风关键词
+    "清润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502569_999058bb.mp3",  # 60 BPM 羽调式
+    "温润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502616_11c7604e.mp3",  # 75 BPM 宫调式
+    "通透": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502665_d532952c.mp3",  # 85 BPM 商调式
+    "晨光": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502769_452db1d0.mp3",  # 70 BPM 角调式
+    "黄昏": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502846_a9a8175e.mp3",  # 95 BPM 徵调式
+}# 心颜严守: 不允许的曲风关键词
 _FORBIDDEN_MUSIC_KEYWORDS = [
     "激烈", "焦虑", "痛苦", "愤怒", "恐惧", "绝望",
     "治疗", "改善", "缓解", "治愈", "祛斑", "减肥", "处方", "医美",
