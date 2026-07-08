@@ -10,6 +10,7 @@ from core.config import (
 )
 from data.jingwen_30 import get_today_jingwen, get_all, get_by_id
 from core.poster_svg import get_decoration
+from data.guohua_gen import gen_guohua_b64
 
 st.set_page_config(page_title="每日一经 · 心颜", page_icon="📜", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
@@ -82,6 +83,42 @@ bg, fg, stamp_color, direction = TEMPLATE_STYLES[template]
 direction_css = "writing-mode: vertical-rl; text-orientation: upright;" if direction == "vertical" else ""
 direction_text = "竖排古朴" if direction == "vertical" else "横排现代"
 
+# v0.7.1.7.3: AI 即时生成小品国画 (每人不同, 时令 + 经文)
+# 缓存键: 经文 id + 模板 (切换经文/模板重新生成)
+guohua_cache_key = f"guohua_{jw['id']}_{template}"
+if "guohua_cache" not in st.session_state:
+    st.session_state["guohua_cache"] = {}
+
+# 生成按钮
+col_gen, col_info = st.columns([1, 3])
+with col_gen:
+    regen = st.button("🎨 生成我的专属画", key="regen_guohua", use_container_width=True)
+with col_info:
+    if guohua_cache_key in st.session_state["guohua_cache"]:
+        cached = st.session_state["guohua_cache"][guohua_cache_key]
+        st.caption("✦ 已生成 ({:.0f}s)".format(cached.get("elapsed", 0)))
+    else:
+        st.caption("✦ 点击按钮, AI 即时为您画一张写意小品")
+
+# 是否需要生成 (首次 / 重新点按钮)
+if regen or guohua_cache_key not in st.session_state["guohua_cache"]:
+    with st.spinner("🎨 正在为您生成专属写意小品 (约 30 秒)..."):
+        r = gen_guohua_b64(jw)
+        if r.get("success"):
+            st.session_state["guohua_cache"][guohua_cache_key] = r
+            st.success("✦ 生成完成, 您的专属画已就位")
+        else:
+            st.error("生成失败: {} 请刷新页面重试".format(r.get("error", "未知错误")))
+            guohua_html = '<div style="width:140px;height:180px;background:rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:center;color:#999;font-size:0.7rem;">生成失败</div>'
+
+# 取出缓存
+if guohua_cache_key in st.session_state["guohua_cache"]:
+    cached = st.session_state["guohua_cache"][guohua_cache_key]
+    guohua_html = '<img src="data:image/png;base64,{}" style="width:140px;height:180px;object-fit:cover;border-radius:4px;display:block;" />'.format(cached.get("b64", ""))
+else:
+    if "guohua_html" not in dir():
+        guohua_html = '<div style="width:140px;height:180px;background:rgba(0,0,0,0.03);border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#999;font-size:0.75rem;">点击"生成我的专属画"</div>'
+
 # v0.7.1.7.1: 海报顶部/底部 + 左右卷轴边饰 SVG
 deco_top, deco_bottom, deco_side = get_decoration(template)
 
@@ -95,24 +132,7 @@ st.markdown(f"""
         <div class="poster-title" style="color: {fg}; text-align: right;">{jw['title']}</div>
         <div style="display: flex; align-items: flex-start; gap: 1.2rem;">
             <div class="poster-painting">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 180">
-                  <!-- 远山 -->
-                  <path d="M 0 110 L 30 70 L 60 90 L 90 60 L 140 95 L 140 180 L 0 180 Z" fill="#3a4a3a" opacity="0.35"/>
-                  <path d="M 0 130 L 40 95 L 80 115 L 140 100 L 140 180 L 0 180 Z" fill="#2d3a2e" opacity="0.55"/>
-                  <!-- 水面 -->
-                  <path d="M 0 150 Q 30 145 60 150 T 120 150 T 140 150" stroke="#2d3a2e" stroke-width="0.8" fill="none" opacity="0.4"/>
-                  <path d="M 0 160 Q 40 156 80 160 T 140 160" stroke="#2d3a2e" stroke-width="0.6" fill="none" opacity="0.3"/>
-                  <path d="M 0 168 Q 50 165 100 168 T 140 168" stroke="#2d3a2e" stroke-width="0.5" fill="none" opacity="0.25"/>
-                  <!-- 一叶扁舟 -->
-                  <path d="M 30 142 Q 35 138 45 138 Q 50 138 52 140 Q 50 142 45 142 Q 35 142 30 142 Z" fill="#2d3a2e" opacity="0.7"/>
-                  <line x1="40" y1="138" x2="40" y2="125" stroke="#2d3a2e" stroke-width="0.6" opacity="0.7"/>
-                  <!-- 飞鸟 (两三只) -->
-                  <path d="M 70 30 Q 75 27 80 30 M 80 30 Q 85 27 90 30" stroke="#2d3a2e" stroke-width="0.8" fill="none"/>
-                  <path d="M 95 45 Q 100 42 105 45 M 105 45 Q 110 42 115 45" stroke="#2d3a2e" stroke-width="0.8" fill="none"/>
-                  <!-- 小亭 -->
-                  <rect x="100" y="80" width="14" height="8" fill="#3d2817" opacity="0.7"/>
-                  <polygon points="98,80 116,80 107,75" fill="#3d2817" opacity="0.7"/>
-                </svg>
+                {guohua_html}
                 <!-- 印章 "心颜" -->
                 <div class="poster-seal">心颜</div>
             </div>
