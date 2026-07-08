@@ -126,7 +126,10 @@ st.markdown("---")
 st.markdown("### 📚 往期经文")
 
 all_jw = get_all()
-options = {f"#{j['id']:02d} {j['source']} · {j['title']}": j["id"] for j in all_jw}
+options = {}
+for j in all_jw:
+    label = "#" + str(j["id"]).zfill(2) + " " + j["source"] + " · " + j["title"]
+    options[label] = j["id"]
 selected_label = st.selectbox("选择往期经文", list(options.keys()), index=jw['id']-1)
 selected_id = options[selected_label]
 

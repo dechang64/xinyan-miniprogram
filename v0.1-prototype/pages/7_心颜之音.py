@@ -71,7 +71,7 @@ st.markdown("### 🎼 选择滋养曲风")
 style_choice = st.selectbox(
     "曲风",
     options=list(MUSIC_STYLES.keys()),
-    format_func=lambda k: f"{MUSIC_STYLES[k]['icon']} {k} · {MUSIC_STYLES[k]['description']}",
+    format_func=lambda k: MUSIC_STYLES[k]["icon"] + " " + k + " · " + MUSIC_STYLES[k]["description"],
     key="music_style",
     label_visibility="collapsed",
 )

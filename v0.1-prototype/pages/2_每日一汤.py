@@ -94,7 +94,9 @@ samples = random.sample(others, k=min(3, len(others)))
 cols = st.columns(3)
 for i, s in enumerate(samples):
     with cols[i]:
-        if st.button(f"🍵 {s['name']}", key=f"swap_{s['id']}", use_container_width=True):
+        btn_label = "🍵 " + s["name"]
+        btn_key = "swap_" + str(s["id"])
+        if st.button(btn_label, key=btn_key, use_container_width=True):
             sp = s
             st.session_state['_selected_soup'] = s
             st.rerun()
@@ -201,7 +203,8 @@ else:
 
 st.caption(f"共 {len(filtered)} 款")
 for s in filtered[:10]:  # v0.1 简化, 只显示前 10
-    with st.expander(f"🍵 {s['name']} · {s['tizhi_tag']} · {s['season_tag']}"):
+    exp_label = "🍵 " + s["name"] + " · " + s["tizhi_tag"] + " · " + s["season_tag"]
+    with st.expander(exp_label):
         st.markdown(f"""
         <div class="card-soup">
             <div class="ingredients"><strong>食材</strong>: {s['ingredients']}</div>

@@ -82,7 +82,7 @@ tab_jw, tab_sp, tab_dl = st.tabs(["📜 经文", "🍵 汤品", "💬 自对话"
 with tab_jw:
     selected_jw = st.selectbox(
         "选择经文加入收藏",
-        [f"#{j['id']:02d} {j['source']} · {j['title']}" for j in JINGWEN_30],
+        ["#" + str(j["id"]).zfill(2) + " " + j["source"] + " · " + j["title"] for j in JINGWEN_30],
         key="fav_jw_add",
         label_visibility="collapsed",
     )
@@ -101,8 +101,8 @@ with tab_jw:
             if j:
                 cc1, cc2 = st.columns([5, 1])
                 with cc1:
-                    st.markdown(f"📜 **{j['source']}** · {j['title']}")
-                    st.caption(f"{j['content'][:40]}...")
+                    st.markdown("📜 **" + j["source"] + "** · " + j["title"])
+                    st.caption(j["content"][:40] + "...")
                 with cc2:
                     if st.button("🗑️", key=f"del_jw_{jid}"):
                         st.session_state.favorites["jingwen"].remove(jid)
@@ -113,7 +113,7 @@ with tab_jw:
 with tab_sp:
     selected_sp = st.selectbox(
         "选择汤品加入收藏",
-        [f"#{s['id']:02d} {s['name']} · {s['tizhi_tag']}" for s in SOUPS_30],
+        ["#" + str(s["id"]).zfill(2) + " " + s["name"] + " · " + s["tizhi_tag"] for s in SOUPS_30],
         key="fav_sp_add",
         label_visibility="collapsed",
     )
@@ -132,8 +132,8 @@ with tab_sp:
             if s:
                 cc1, cc2 = st.columns([5, 1])
                 with cc1:
-                    st.markdown(f"🍵 **{s['name']}** · {s['tizhi_tag']} · {s['season_tag']}")
-                    st.caption(f"{s['effect']}")
+                    st.markdown("🍵 **" + s["name"] + "** · " + s["tizhi_tag"] + " · " + s["season_tag"])
+                    st.caption(s["effect"])
                 with cc2:
                     if st.button("🗑️", key=f"del_sp_{sid}"):
                         st.session_state.favorites["soup"].remove(sid)
@@ -144,7 +144,7 @@ with tab_sp:
 with tab_dl:
     selected_dl = st.selectbox(
         "选择自对话加入收藏",
-        [f"#{d['id']:02d} [{d['type']}] {d['text']}" for d in SELF_DIALOGUE_30],
+        ["#" + str(d["id"]).zfill(2) + " [" + d["type"] + "] " + d["text"] for d in SELF_DIALOGUE_30],
         key="fav_dl_add",
         label_visibility="collapsed",
     )
@@ -163,7 +163,7 @@ with tab_dl:
             if d:
                 cc1, cc2 = st.columns([5, 1])
                 with cc1:
-                    st.markdown(f"💬 **[{d['type']}]** {d['text']}")
+                    st.markdown("💬 **[" + d["type"] + "]** " + d["text"])
                 with cc2:
                     if st.button("🗑️", key=f"del_dl_{did}"):
                         st.session_state.favorites["self_dialogue"].remove(did)
@@ -214,7 +214,7 @@ new_tizhi_label = st.selectbox(
 )
 if st.button("💾 保存体质"):
     st.session_state.tizhi = tizhi_options[new_tizhi_label]
-    st.success(f"✦ 已改体质: {tizhi_options[new_tizhi_label]}")
+    st.success("✦ 已改体质: " + tizhi_options[new_tizhi_label])
 
 st.markdown("#### 🌸 共修堂 3 任务")
 if st.button("🔄 重置今日 3 任务 (经文/汤品/自评)"):
