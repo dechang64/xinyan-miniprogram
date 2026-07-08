@@ -108,11 +108,12 @@ with tab_mbti:
 
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown(f"**{q1['question']}**")
+            q1_q = q1["question"]
+            st.markdown("**" + q1_q + "**")
             choice1 = st.radio(
-                q1["question"],
+                q1_q,
                 ["A", "B"],
-                format_func=lambda x: f"{x}. {q1['A_label'] if x == 'A' else q1['B_label']}",
+                format_func=lambda x, _q=q1: x + ". " + (_q["A_label"] if x == "A" else _q["B_label"]),
                 key=f"mbti_q{q1_idx}",
                 index=0 if st.session_state.mbti_answers[q1_idx] is None else (0 if st.session_state.mbti_answers[q1_idx] == 'A' else 1),
                 label_visibility="collapsed",
@@ -120,11 +121,12 @@ with tab_mbti:
             st.session_state.mbti_answers[q1_idx] = choice1
 
         with col2:
-            st.markdown(f"**{q2['question']}**")
+            q2_q = q2["question"]
+            st.markdown("**" + q2_q + "**")
             choice2 = st.radio(
-                q2["question"],
+                q2_q,
                 ["A", "B"],
-                format_func=lambda x: f"{x}. {q2['A_label'] if x == 'A' else q2['B_label']}",
+                format_func=lambda x, _q=q2: x + ". " + (_q["A_label"] if x == "A" else _q["B_label"]),
                 key=f"mbti_q{q2_idx}",
                 index=0 if st.session_state.mbti_answers[q2_idx] is None else (0 if st.session_state.mbti_answers[q2_idx] == 'A' else 1),
                 label_visibility="collapsed",
@@ -292,12 +294,14 @@ with tab_zodiac:
             el_max = max(el.values())
             el_dominant = [k for k, v in el.items() if v == el_max]
             if len(el_dominant) == 1 and el_max >= 2:
-                st.info(f"💡 你的 {el_dominant[0]} 元素占主导 ({el_max} 个), 注意: " + {
+                _tips = {
                     "火": "热情但易燃, 滋养提醒: 留空隙降温",
                     "土": "稳定但易沉, 滋养提醒: 加点流动",
                     "风": "灵活但易散, 滋养提醒: 找一份专注",
                     "水": "柔软但易溢, 滋养提醒: 给情绪画边界",
-                }.get(el_dominant[0], ""))
+                }
+                _tip = _tips.get(el_dominant[0], "")
+                st.info("💡 你的 " + el_dominant[0] + " 元素占主导 (" + str(el_max) + " 个), 注意: " + _tip)
 
             st.markdown("---")
             st.markdown("""
@@ -430,10 +434,11 @@ with tab_tizhi:
 
     st.markdown("#### 📝 9 题 × 3 选 1")
     for i, q_data in enumerate(TIZHI_9_QUESTIONS):
-        st.markdown(f"**{q_data['question']}**")
+        q_text = q_data["question"]
+        st.markdown("**" + q_text + "**")
         option_labels = [opt[0] for opt in q_data["options"]]
         choice_idx = st.radio(
-            q_data["question"],
+            q_text,
             option_labels,
             key=f"tizhi_q{i}",
             index=st.session_state.tizhi_answers[i] if st.session_state.tizhi_answers[i] < len(option_labels) else 0,
