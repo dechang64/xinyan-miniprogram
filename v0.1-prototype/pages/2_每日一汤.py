@@ -156,23 +156,15 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# v0.7.1.7.8: 食材国画 (按汤名匹配) + 下载按钮
-from data.food_9 import match_food, get_food
-food_b64 = match_food(sp['name'])
-if food_b64:
-    st.markdown("##### 🥢 食材意境")
-    st.markdown(
-        f'<img src="data:image/png;base64,{food_b64}" '
-        f'style="width:240px;height:320px;object-fit:cover;border-radius:4px;display:block;margin:0 auto;" />',
-        unsafe_allow_html=True,
-    )
-
+# v0.7.1.7.8-r3: 海报 (PIL 渲染, 含食材国画嵌入) + 1 张完整长按保存
 from core.poster_gen import gen_soup_poster
+from data.food_9 import match_food
 from datetime import date
 
 st.markdown("##### 📱 长按图片保存到手机分享")
 
-png_bytes = gen_soup_poster(sp, template, date.today())
+food_b64 = match_food(sp['name'])
+png_bytes = gen_soup_poster(sp, template, date.today(), food_b64=food_b64)
 st.image(png_bytes, use_container_width=True)
 st.caption("朋友圈 9:16 · 长按保存")
 

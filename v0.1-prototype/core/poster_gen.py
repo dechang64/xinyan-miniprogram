@@ -235,9 +235,10 @@ def gen_jingwen_poster(jw: dict, template: str, today: date, layout: str = "vert
     return buf.getvalue()
 
 
-def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizontal"):
+def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizontal", food_b64: str | None = None):
     """每日一汤 海报 (1080x1920, 9:16 朋友圈)
     sp: {name, ingredients, steps, effect}
+    food_b64: 食材国画 base64 (按汤名 match_food), 没传则用山水 fallback
     """
     W, H = 1080, 1920
     img = Image.new("RGB", (W, H))
@@ -249,20 +250,35 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
 
     _header(draw, img, template, "心颜 · 每日一汤", sp["name"])
 
-    # 国画 (汤品氛围, 跟食材意境关联 — 此处复用 page 1 山水, 跟"滋养共修"匹配)
-    _draw_guohua(img, template, "vertical")
+    # 食材国画 (顶部品类意境) 或 fallback 山水
+    if food_b64:
+        try:
+            food_img = Image.open(io.BytesIO(base64.b64decode(food_b64)))
+            target_w = 380
+            ratio = target_w / food_img.width
+            target_h = int(food_img.height * ratio)
+            food_img = food_img.resize((target_w, target_h))
+            x = (W - target_w) // 2
+            y = 320
+            bordered = Image.new("RGB", (target_w + 30, target_h + 30), "white")
+            bordered.paste(food_img, (15, 15))
+            img.paste(bordered, (x - 15, y - 15))
+        except Exception:
+            _draw_guohua(img, template, "vertical")
+    else:
+        _draw_guohua(img, template, "vertical")
 
     # 来源 (季节标签)
     source_text = f"{sp.get('season_tag', '')} · {sp.get('tizhi_tag', '')}"
     font_source = _font(36)
     bbox = draw.textbbox((0, 0), source_text, font=font_source)
     sw = bbox[2] - bbox[0]
-    draw.text(((W - sw) // 2, 240), source_text, fill=stamp, font=font_source)
+    draw.text(((W - sw) // 2, 280), source_text, fill=stamp, font=font_source)
 
-    # 食材 (大块区域)
+    # 食材 (大块区域) — 在国画下
     font_section = _font(40)
     font_body = _font(48)
-    y = 500
+    y = 800
     draw.text((80, y), "✦ 食材", fill=fg, font=font_section)
     y += 70
     ingredients_lines = _wrap_text(sp["ingredients"], font_body, W - 160)
@@ -279,7 +295,6 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
         y += 70
 
     y += 30
-    # 效果 (大块, 颜色用 stamp 朱砂红)
     draw.text((80, y), "✦ 滋养", fill=stamp, font=font_section)
     y += 70
     effect_lines = _wrap_text(sp["effect"], font_body, W - 160)
