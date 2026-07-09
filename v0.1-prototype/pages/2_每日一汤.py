@@ -148,12 +148,13 @@ from core.poster_gen import gen_soup_poster
 from data.food_9 import match_food
 from datetime import date
 
-st.markdown("##### 📱 长按图片保存到手机分享")
+st.markdown("##### 📱 长按下方海报保存到手机分享")
 
 food_b64 = match_food(sp['name'])
-png_bytes = gen_soup_poster(sp, template, date.today(), food_b64=food_b64)
-st.image(png_bytes, use_container_width=True)
-st.caption("朋友圈 9:16 · 长按保存")
+from core.poster_gen_html import gen_soup_poster_html
+poster_html = gen_soup_poster_html(sp, template, date.today(), food_b64=food_b64)
+st.markdown(poster_html, unsafe_allow_html=True)
+st.caption("CSS 渲染 · 长按图片保存到手机相册")
 
 # ══════════════════════════════════════════════════════════
 #  ✅ 共修打卡: 准备汤
