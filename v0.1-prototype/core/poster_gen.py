@@ -13,35 +13,49 @@ import base64
 from PIL import Image, ImageDraw, ImageFont
 from datetime import date
 
-# v0.7.1.7.8-r4: 中文 CJK 字体 (base64 嵌入 wqy-microhei, Cloud 容器没装字体也能渲染)
+# v0.7.1.7.8-r5: 中文 CJK 字体 (base64 嵌入 wqy-microhei, Cloud 容器没装字体也能渲染)
+import sys as _sys
 _FONT_BYTES = None
+_FONT_DEBUG = []
 try:
     from data.font_cjk import FONT_CJK_B64
     _FONT_BYTES = base64.b64decode(FONT_CJK_B64)
-except Exception:
-    pass
+    _FONT_DEBUG.append(f"font_cjk loaded: {len(_FONT_BYTES)//1024}KB")
+except Exception as _e:
+    _FONT_DEBUG.append(f"font_cjk FAIL: {_e}")
+    _FONT_BYTES = None
 
 import os
 _FONT_CANDIDATES = [
-    _FONT_BYTES,  # 嵌入的 wqy-microhei (优先级最高, Cloud 必走这条)
-    r"C:\Windows\Fonts\msyh.ttc",  # 微软雅黑 (Windows)
-    r"C:\Windows\Fonts\simhei.ttf",  # 黑体
-    r"/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",  # 文泉驿 (Linux)
-    r"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",  # Noto CJK (Linux)
-    r"/System/Library/Fonts/PingFang.ttc",  # macOS
+    ("cjk_embed", _FONT_BYTES),  # 嵌入的 wqy-microhei (优先级最高)
+    ("win_msyh", r"C:\Windows\Fonts\msyh.ttc"),
+    ("win_simhei", r"C:\Windows\Fonts\simhei.ttf"),
+    ("linux_wqy", r"/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"),
+    ("linux_noto", r"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+    ("mac_pingfang", r"/System/Library/Fonts/PingFang.ttc"),
 ]
 
 
 def _font(size: int):
-    for f in _FONT_CANDIDATES:
+    for name, f in _FONT_CANDIDATES:
         try:
             if isinstance(f, bytes):
-                return ImageFont.truetype(io.BytesIO(f), size)
+                font = ImageFont.truetype(io.BytesIO(f), size)
+                _FONT_DEBUG.append(f"USED: {name} (embed)")
+                return font
             if f and os.path.exists(f):
-                return ImageFont.truetype(f, size)
-        except Exception:
+                font = ImageFont.truetype(f, size)
+                _FONT_DEBUG.append(f"USED: {name} (file)")
+                return font
+        except Exception as e:
+            _FONT_DEBUG.append(f"FAIL {name}: {e}")
             continue
+    _FONT_DEBUG.append("FALLBACK: ImageFont.load_default()")
     return ImageFont.load_default()
+
+
+def font_debug():
+    return list(_FONT_DEBUG)
 
 
 # ══════════════════════════════════════════════════════════
