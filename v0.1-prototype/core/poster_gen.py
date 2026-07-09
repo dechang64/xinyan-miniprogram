@@ -13,28 +13,34 @@ import base64
 from PIL import Image, ImageDraw, ImageFont
 from datetime import date
 
-# 中文字体路径 (Windows)
+# v0.7.1.7.8-r4: 中文 CJK 字体 (base64 嵌入 wqy-microhei, Cloud 容器没装字体也能渲染)
+_FONT_BYTES = None
+try:
+    from data.font_cjk import FONT_CJK_B64
+    _FONT_BYTES = base64.b64decode(FONT_CJK_B64)
+except Exception:
+    pass
+
 import os
 _FONT_CANDIDATES = [
+    _FONT_BYTES,  # 嵌入的 wqy-microhei (优先级最高, Cloud 必走这条)
     r"C:\Windows\Fonts\msyh.ttc",  # 微软雅黑 (Windows)
     r"C:\Windows\Fonts\simhei.ttf",  # 黑体
     r"/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",  # 文泉驿 (Linux)
     r"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",  # Noto CJK (Linux)
     r"/System/Library/Fonts/PingFang.ttc",  # macOS
 ]
-FONT_PATH = None
-for _f in _FONT_CANDIDATES:
-    if os.path.exists(_f):
-        FONT_PATH = _f
-        break
-if not FONT_PATH:
-    # 备选: PIL default (不支持中文但 fallback)
-    FONT_PATH = None
 
 
 def _font(size: int):
-    if FONT_PATH:
-        return ImageFont.truetype(FONT_PATH, size)
+    for f in _FONT_CANDIDATES:
+        try:
+            if isinstance(f, bytes):
+                return ImageFont.truetype(io.BytesIO(f), size)
+            if f and os.path.exists(f):
+                return ImageFont.truetype(f, size)
+        except Exception:
+            continue
     return ImageFont.load_default()
 
 
@@ -82,8 +88,9 @@ def _vertical_text(draw, text: str, xy, fill, font, line_height: int = 50) -> in
     return y
 
 
-def _draw_guohua(img, template: str, layout: str):
-    """画 page 1 6 张国画之一到海报左上/右下角 (跟 base 海报协调)"""
+def _draw_guohua(img, template: str, layout: str, y_offset: int = 80):
+    """画 page 1 6 张国画之一到海报左上/右下角 (跟 base 海报协调)
+    y_offset: 国画顶部 y 坐标 (默认 80 = 顶部, 经文页用; 汤品页传 480 = 中部)"""
     try:
         from data.guohua_6 import get_guohua
         b64 = get_guohua(template)
@@ -97,7 +104,7 @@ def _draw_guohua(img, template: str, layout: str):
         guohua_img = guohua_img.resize((target_w, target_h))
         # 位置: 顶部居中
         x = (img.width - target_w) // 2
-        y = 80
+        y = y_offset
         # 白色边框
         bordered = Image.new("RGB", (target_w + 20, target_h + 20), "white")
         bordered.paste(guohua_img, (10, 10))
@@ -212,7 +219,11 @@ def gen_jingwen_poster(jw: dict, template: str, today: date, layout: str = "vert
         col_x = content_x + col_idx * 80
         col_y = content_y
         for ch in col:
-            draw.text((col_x, col_y), ch, fill=fg, font=font_content)
+            # 清洗 WQY 不支持的字符
+            ch_safe = ch if ord(ch) < 0x4E00 or ord(ch) > 0x9FFF else ch
+            if ch in ("✦", "◆", "★", "☆"):
+                ch_safe = "·"
+            draw.text((col_x, col_y), ch_safe, fill=fg, font=font_content)
             col_y += line_height
 
     # 来源 (顶部 eyebrow 下方)
@@ -250,7 +261,7 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
 
     _header(draw, img, template, "心颜 · 每日一汤", sp["name"])
 
-    # 食材国画 (顶部品类意境) 或 fallback 山水
+    # 食材国画 (中部, 跟经文页同款位置 y=480) 或 fallback 山水
     if food_b64:
         try:
             food_img = Image.open(io.BytesIO(base64.b64decode(food_b64)))
@@ -259,14 +270,14 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
             target_h = int(food_img.height * ratio)
             food_img = food_img.resize((target_w, target_h))
             x = (W - target_w) // 2
-            y = 320
+            y = 480
             bordered = Image.new("RGB", (target_w + 30, target_h + 30), "white")
             bordered.paste(food_img, (15, 15))
             img.paste(bordered, (x - 15, y - 15))
         except Exception:
-            _draw_guohua(img, template, "vertical")
+            _draw_guohua(img, template, "vertical", y_offset=480)
     else:
-        _draw_guohua(img, template, "vertical")
+        _draw_guohua(img, template, "vertical", y_offset=480)
 
     # 来源 (季节标签)
     source_text = f"{sp.get('season_tag', '')} · {sp.get('tizhi_tag', '')}"
@@ -279,7 +290,7 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
     font_section = _font(40)
     font_body = _font(48)
     y = 800
-    draw.text((80, y), "✦ 食材", fill=fg, font=font_section)
+    draw.text((80, y), "· 食材", fill=fg, font=font_section)
     y += 70
     ingredients_lines = _wrap_text(sp["ingredients"], font_body, W - 160)
     for line in ingredients_lines:
@@ -287,7 +298,7 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
         y += 70
 
     y += 30
-    draw.text((80, y), "✦ 做法", fill=fg, font=font_section)
+    draw.text((80, y), "· 做法", fill=fg, font=font_section)
     y += 70
     steps_lines = _wrap_text(sp["steps"], font_body, W - 160)
     for line in steps_lines:
@@ -295,11 +306,13 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
         y += 70
 
     y += 30
-    draw.text((80, y), "✦ 滋养", fill=stamp, font=font_section)
+    draw.text((80, y), "· 滋养", fill=stamp, font=font_section)
     y += 70
     effect_lines = _wrap_text(sp["effect"], font_body, W - 160)
     for line in effect_lines:
-        draw.text((100, y), line, fill=stamp, font=font_body)
+        # 清洗 WQY 不支持的字符
+        line_safe = line.replace("✦", "·").replace("◆", "·")
+        draw.text((100, y), line_safe, fill=stamp, font=font_body)
         y += 70
 
     # 底部

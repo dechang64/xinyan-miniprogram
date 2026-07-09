@@ -141,20 +141,7 @@ TEMPLATE_STYLES = {
 bg, fg, stamp_color, direction = TEMPLATE_STYLES[template]
 direction_css = "writing-mode: vertical-rl; text-orientation: upright;" if direction == "vertical" else ""
 
-st.markdown(f"""
-<div class="poster-frame" style="background: {bg}; border-color: {stamp_color};">
-    <div class="poster-eyebrow" style="color: {stamp_color};">心颜 · XINYAN</div>
-    <div class="poster-title" style="color: {fg};">{sp['name']}</div>
-    <div class="poster-content" style="color: {fg}; font-size: 1.05rem; line-height: 1.7;">
-        <strong>食材</strong>: {sp['ingredients']}<br><br>
-        <strong>做法</strong>: {sp['steps']}<br><br>
-        <em>✦ {sp['effect']}</em>
-    </div>
-    <div class="poster-stamp" style="color: {stamp_color}; border-color: {stamp_color};">
-        心颜共修 · 滋养一日
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# 海报预览 HTML 已删除 (user r3 反馈: 跟下面 PNG 海报重复), 只保留 1 张 PNG 海报供长按保存
 
 # v0.7.1.7.8-r3: 海报 (PIL 渲染, 含食材国画嵌入) + 1 张完整长按保存
 from core.poster_gen import gen_soup_poster
