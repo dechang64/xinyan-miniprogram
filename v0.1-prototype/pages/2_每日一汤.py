@@ -156,6 +156,36 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# v0.7.1.7.8: 食材国画 (按汤名匹配) + 下载按钮
+from data.food_9 import match_food, get_food
+food_b64 = match_food(sp['name'])
+if food_b64:
+    st.markdown("##### 🥢 食材意境")
+    st.markdown(
+        f'<img src="data:image/png;base64,{food_b64}" '
+        f'style="width:240px;height:320px;object-fit:cover;border-radius:4px;display:block;margin:0 auto;" />',
+        unsafe_allow_html=True,
+    )
+
+from core.poster_gen import gen_soup_poster
+from datetime import date
+
+st.markdown("##### 📥 保存到手机分享")
+
+col_dl1, col_dl2 = st.columns(2)
+with col_dl1:
+    # 嵌食材图到海报
+    png_bytes = gen_soup_poster(sp, template, date.today())
+    st.download_button(
+        label=f"📱 朋友圈 (9:16)",
+        data=png_bytes,
+        file_name=f"xinyan_soup_{date.today().isoformat()}.png",
+        mime="image/png",
+        use_container_width=True,
+    )
+with col_dl2:
+    st.caption("小红书 3:4 模板 v0.7.1.9+ 计划")
+
 # ══════════════════════════════════════════════════════════
 #  ✅ 共修打卡: 准备汤
 # ══════════════════════════════════════════════════════════
