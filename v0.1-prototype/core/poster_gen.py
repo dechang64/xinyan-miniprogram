@@ -13,49 +13,27 @@ import base64
 from PIL import Image, ImageDraw, ImageFont
 from datetime import date
 
-# v0.7.1.7.8-r5: 中文 CJK 字体 (base64 嵌入 wqy-microhei, Cloud 容器没装字体也能渲染)
-import sys as _sys
-_FONT_BYTES = None
-_FONT_DEBUG = []
-try:
-    from data.font_cjk import FONT_CJK_B64
-    _FONT_BYTES = base64.b64decode(FONT_CJK_B64)
-    _FONT_DEBUG.append(f"font_cjk loaded: {len(_FONT_BYTES)//1024}KB")
-except Exception as _e:
-    _FONT_DEBUG.append(f"font_cjk FAIL: {_e}")
-    _FONT_BYTES = None
-
+# v0.7.1.7.8-r7: PIL 海报字体 (Cloud 字体方案已废弃, 海报改走 poster_gen_html)
+# 保留 _font() 给本地 Windows 调试用 (msyh.ttc)
 import os
 _FONT_CANDIDATES = [
-    ("cjk_embed", _FONT_BYTES),  # 嵌入的 wqy-microhei (优先级最高)
-    ("win_msyh", r"C:\Windows\Fonts\msyh.ttc"),
-    ("win_simhei", r"C:\Windows\Fonts\simhei.ttf"),
-    ("linux_wqy", r"/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"),
-    ("linux_noto", r"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
-    ("mac_pingfang", r"/System/Library/Fonts/PingFang.ttc"),
+    r"C:\Windows\Fonts\msyh.ttc",
+    r"C:\Windows\Fonts\simhei.ttf",
+    r"/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+    r"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    r"/System/Library/Fonts/PingFang.ttc",
 ]
 
 
 def _font(size: int):
-    for name, f in _FONT_CANDIDATES:
+    """字体加载 (本地 msyh.ttc / Linux Noto CJK, Cloud 走 HTML 海报不用此函数)"""
+    for f in _FONT_CANDIDATES:
         try:
-            if isinstance(f, bytes):
-                font = ImageFont.truetype(io.BytesIO(f), size)
-                _FONT_DEBUG.append(f"USED: {name} (embed)")
-                return font
             if f and os.path.exists(f):
-                font = ImageFont.truetype(f, size)
-                _FONT_DEBUG.append(f"USED: {name} (file)")
-                return font
-        except Exception as e:
-            _FONT_DEBUG.append(f"FAIL {name}: {e}")
+                return ImageFont.truetype(f, size)
+        except Exception:
             continue
-    _FONT_DEBUG.append("FALLBACK: ImageFont.load_default()")
     return ImageFont.load_default()
-
-
-def font_debug():
-    return list(_FONT_DEBUG)
 
 
 # ══════════════════════════════════════════════════════════
