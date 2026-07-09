@@ -170,21 +170,11 @@ if food_b64:
 from core.poster_gen import gen_soup_poster
 from datetime import date
 
-st.markdown("##### 📥 保存到手机分享")
+st.markdown("##### 📱 长按图片保存到手机分享")
 
-col_dl1, col_dl2 = st.columns(2)
-with col_dl1:
-    # 嵌食材图到海报
-    png_bytes = gen_soup_poster(sp, template, date.today())
-    st.download_button(
-        label=f"📱 朋友圈 (9:16)",
-        data=png_bytes,
-        file_name=f"xinyan_soup_{date.today().isoformat()}.png",
-        mime="image/png",
-        use_container_width=True,
-    )
-with col_dl2:
-    st.caption("小红书 3:4 模板 v0.7.1.9+ 计划")
+png_bytes = gen_soup_poster(sp, template, date.today())
+st.image(png_bytes, use_container_width=True)
+st.caption("朋友圈 9:16 · 长按保存")
 
 # ══════════════════════════════════════════════════════════
 #  ✅ 共修打卡: 准备汤

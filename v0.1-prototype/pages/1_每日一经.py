@@ -124,31 +124,21 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# v0.7.1.7.8: 下载海报按钮 (PIL 渲染 9:16 朋友圈 + 3:4 小红书)
+# v0.7.1.7.8-r2: 海报长按保存 (Streamlit Cloud download_button CORS 阻断, 改用 st.image)
 from core.poster_gen import gen_jingwen_poster, gen_jingwen_poster_xhs
 from datetime import date
 
-st.markdown("##### 📥 保存到手机分享")
+st.markdown("##### 📱 长按图片保存到手机分享")
 
 col_dl1, col_dl2 = st.columns(2)
 with col_dl1:
+    st.caption("朋友圈 9:16")
     png_bytes = gen_jingwen_poster(jw, template, date.today())
-    st.download_button(
-        label=f"📱 朋友圈 (9:16)",
-        data=png_bytes,
-        file_name=f"xinyan_jingwen_{date.today().isoformat()}.png",
-        mime="image/png",
-        use_container_width=True,
-    )
+    st.image(png_bytes, use_container_width=True)
 with col_dl2:
+    st.caption("小红书 3:4")
     png_xhs = gen_jingwen_poster_xhs(jw, template, date.today())
-    st.download_button(
-        label=f"📕 小红书 (3:4)",
-        data=png_xhs,
-        file_name=f"xinyan_jingwen_xhs_{date.today().isoformat()}.png",
-        mime="image/png",
-        use_container_width=True,
-    )
+    st.image(png_xhs, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════
 #  ✅ 共修打卡: 读完经文
