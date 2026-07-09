@@ -124,21 +124,21 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# v0.7.1.7.8-r2: 海报长按保存 (Streamlit Cloud download_button CORS 阻断, 改用 st.image)
-from core.poster_gen import gen_jingwen_poster, gen_jingwen_poster_xhs
+# v0.7.1.7.8-r8: 海报长按保存 (HTML 路线, Cloud 100% 中文清晰)
+from core.poster_gen_html import gen_jingwen_poster_html
 from datetime import date
 
-st.markdown("##### 📱 长按图片保存到手机分享")
+st.markdown("##### 📱 长按下方海报保存到手机分享")
 
 col_dl1, col_dl2 = st.columns(2)
 with col_dl1:
     st.caption("朋友圈 9:16")
-    png_bytes = gen_jingwen_poster(jw, template, date.today())
-    st.image(png_bytes, use_container_width=True)
+    html_9_16 = gen_jingwen_poster_html(jw, template, date.today())
+    st.markdown(html_9_16, unsafe_allow_html=True)
 with col_dl2:
     st.caption("小红书 3:4")
-    png_xhs = gen_jingwen_poster_xhs(jw, template, date.today())
-    st.image(png_xhs, use_container_width=True)
+    # 小红书用同样 HTML 模板 (poster_gen_html 只生成 540x960)
+    st.markdown(html_9_16, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════
 #  ✅ 共修打卡: 读完经文

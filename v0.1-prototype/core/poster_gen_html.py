@@ -29,20 +29,31 @@ def _frame(html_inner: str, bg: str, fg: str, stamp: str) -> str:
 
 
 def gen_soup_poster_html(sp: dict, template: str, today: date, food_b64: str | None = None) -> str:
-    """汤品海报 HTML (CSS 字体走系统 fallback, Cloud 100% 可读)"""
+    """汤品海报 HTML (CSS 字体走系统 fallback, Cloud 100% 可读)
+    food_b64: 食材图 base64 (match_food), 没则 fallback 用 guohua_6 山水
+    """
     bg, fg, stamp = _template_colors(template)
     today_str = today.strftime("%Y年%m月%d日")
 
-    food_html = ""
-    if food_b64:
-        food_html = f'<img src="data:image/png;base64,{food_b64}" style="width:340px;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.15);margin:15px 0;" />'
+    # 优先食材图, fallback 山水国画
+    img_b64 = food_b64
+    if not img_b64:
+        try:
+            from data.guohua_6 import get_guohua
+            img_b64 = get_guohua(template)
+        except Exception:
+            img_b64 = None
+
+    img_html = ""
+    if img_b64:
+        img_html = f'<img src="data:image/png;base64,{img_b64}" style="width:300px;max-height:300px;object-fit:cover;border:2px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.15);margin:12px 0;border-radius:4px;" />'
 
     inner = f"""
   <div style="font-size:14px;letter-spacing:0.3em;color:{stamp};text-align:center;">心颜 · XINYAN</div>
   <div style="font-size:38px;font-weight:600;margin:10px 0;text-align:center;">{sp['name']}</div>
-  <div style="font-size:13px;color:{stamp};letter-spacing:0.15em;text-align:center;margin-bottom:20px;">{sp.get('season_tag', '')} · {sp.get('tizhi_tag', '')}</div>
-  {food_html}
-  <div style="width:100%;margin-top:15px;font-size:16px;line-height:1.7;">
+  <div style="font-size:13px;color:{stamp};letter-spacing:0.15em;text-align:center;margin-bottom:15px;">{sp.get('season_tag', '')} · {sp.get('tizhi_tag', '')}</div>
+  {img_html}
+  <div style="width:100%;margin-top:12px;font-size:16px;line-height:1.7;">
     <div style="color:{stamp};font-weight:600;margin-top:8px;">· 食材</div>
     <div style="margin:4px 0 8px 0;">{sp['ingredients']}</div>
     <div style="color:{stamp};font-weight:600;margin-top:8px;">· 做法</div>
