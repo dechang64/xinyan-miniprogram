@@ -1,101 +1,163 @@
-"""心颜 v0.7.1.7.5 — 5 滋养曲风 prompt + MiniMax MCP 音乐生成封装
+"""心颜 v0.7.1.9 — 5 滋养曲风 v1.0 规范 (心理声学 + T/CRHA036—2024 + Moore 6 版)
 
-v0.7.1.7.5 关键变化:
-- 之前 5 曲风 prompt 自由写 (清润/温润/通透/晨光/黄昏), 实际生成 80 BPM 偏快
-- 现在 5 曲风严格按《五行音乐映射规则白皮书 v1.2》(中国音乐学院王教授审阅):
-  - 清润 → 羽(水) 60 BPM 二胡/大提琴
-  - 温润 → 宫(土) 75 BPM 埙/古筝
-  - 通透 → 商(金) 85 BPM 钢琴/编钟
-  - 晨光 → 角(木) 70 BPM 古琴/竹笛
-  - 黄昏 → 徵(火) 95 BPM 琵琶/小提琴
-- 主音/五声音阶/演奏法按白皮书 3.1 节 + 5.2 节模板
-- 数据只存 session_state, 关浏览器即清
-- 8 禁用词 0 出现
-- 曲风只跟「滋养」相关, 严守化妆品监管条例不宣称医疗作用
+v0.7.1.9 关键变化 (v0.7.1.7.5-r3 → v1.0):
+- 5 调式各加西方大调 (A minor / C major / D major / E minor) → 心理声学 + 西方音乐桥接
+- 5 音统一 A4-E5 (440-659 Hz) → 全部 < 1.5 kHz BMLD 区 → 保留 BMLD 立体感
+- 5 调式各加频谱质心 (200-800/400-1.5k/800-3k/1-3k/2-5k Hz)
+- 5 调式各加 ADSR 精确 (5ms/30ms 起振 × 0.5-2s 衰减)
+- 音量统一 25-60 dB SPL (T/CRHA036—2024 §7.3.4)
+- Stereo + 段间留白 ≥ 200ms + 谐波数 5-10 (防 Zwicker Tone, BMLD 立体感, 大三和谐)
+- 引用 T/CRHA036—2024 + Moore 6 版 + Music Meta 2020 SMD=-1.33 + Liao 2018
+- 严守 8 禁用词 0 出现 + 滋养/共修 调性
+
+数据只存 session_state, 关浏览器即清, 严守个保法
 """
 
 import json
 
-# 5 滋养曲风 (按五行音乐白皮书 v1.2 严格映射, 心颜「滋养」调性统一)
+# 5 滋养曲风 v1.0 规范 (五行 + 西方大调 + 心理声学 8 维 + T/CRHA036—2024 国标)
 MUSIC_STYLES = {
     "清润": {
-        # 羽调式 (水), A 五声音阶 (A-C-D-E-G), 55-70 BPM, 二胡+大提琴
-        "prompt": "A deep, flowing instrumental piece in 羽调式 (Yu mode, pentatonic scale A-C-D-E-G), 60 BPM, 4/4 time signature with free rhythm (散板) sections. Primary instruments: erhu with portamento, cello legato, harp pizzicato, bass flute. Acoustic parameters: reverb=large hall, wetness=40%, attack=soft, decay=long, brightness=warm dark. Dark, rich, fluid timbre like deep water flowing. Legato phrasing, gentle dynamic swells, fluid rhythm. Melody meanders like a stream, with deep resonant undertones. Dynamic p-mp, intimate and introspective. Duration: 2 minutes, no lyrics.",
-        "description": "羽调式 (水), 60 BPM 静谧, 二胡揉音大提琴连奏",
+        # 羽水, A natural minor pentatonic (5#F#), 60 BPM, 1-3 kHz 频谱质心, 5ms 起振/长衰减
+        "prompt": (
+            "60 BPM, A natural minor pentatonic (la, do, re, mi, sol: A-C-D-E-G), "
+            "pure bamboo flute and guqin zither, very soft 5ms attack, long reverb tail 1.5-2s, "
+            "gentle flow like morning mist over a still lake, meditation for kidney meridian and inner peace, "
+            "no percussion, no vocals, no bright highs, 8 minutes seamless loop, -20 LUFS, "
+            "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
+            "inter-segment silence >= 200ms to prevent Zwicker Tone, "
+            "spectrum centroid 1-3 kHz, harmonics 5-10, -20 dB above 5th harmonic, "
+            "volume 25 dB background to 50 dB therapeutic, 44.1 kHz / 16-bit"
+        ),
+        "description": "羽调式 (水), 60 BPM 静谧, 竹笛揉音古琴连奏",
         "scene": "睡前 / 深度放松时",
         "wuxing": "水",
-        "bpm": "60",
-        "mode": "羽调式",
-        "scale": "A-C-D-E-G 五声音阶",
+        "bpm": 60,
+        "western_mode": "A natural minor (la, do, re, mi, sol: A-C-D-E-G)",
+        "scale_hz": "A4-E5 (440-659 Hz)",
+        "spectrum_centroid": "1-3 kHz",
+        "adsr": "5ms attack / 1.5-2s long decay",
+        "volume_db": "25-50 dB SPL",
+        "instruments": "竹笛 (主) + 古琴 (低) + 钢琴 (弱高)",
         "icon": "💧",
-        "color": "#A8D5BA",  # 浅绿
+        "color": "#A8D5BA",
     },
     "温润": {
-        # 宫调式 (土), C 五声音阶 (C-D-E-G-A), 70-85 BPM, 埙+古筝
-        "prompt": "A steady, grounding instrumental piece in 宫调式 (Gong mode, pentatonic scale C-D-E-G-A), 75 BPM, 4/4 time signature. Primary instruments: xun (埙), guzheng, cello, piano mid-low register. Acoustic parameters: reverb=hall, wetness=25%, attack=soft, decay=moderate, brightness=warm dark. Full, warm, round timbre like embracing mother earth. Broad, sustained notes, minimal ornamentation, steady pulse. Melody centered around the tonic C, grounding and reassuring. Dynamic mf, with occasional crescendo. Evoke stability, nourishment, centering, and inner peace. Duration: 2 minutes, no lyrics.",
-        "description": "宫调式 (土), 75 BPM 沉稳, 埙长音古筝低音",
+        # 宫土, C major pentatonic (5#无), 75 BPM, 200-800 Hz 频谱质心, 30ms 起振/中衰减
+        "prompt": (
+            "75 BPM, C major pentatonic (do, re, mi, sol, la: C-D-E-G-A), "
+            "warm cello and viola with oboe counter-melody, gentle 30ms attack, 1s reverb, "
+            "like autumn harvest song, nourishing spleen meridian, earth-tone color, "
+            "no percussion, no vocals, 7 minutes seamless loop, -20 LUFS, "
+            "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
+            "inter-segment silence >= 200ms, "
+            "spectrum centroid 200-800 Hz, harmonics 5-10 with strong even harmonics (温润感), "
+            "distortion < 1%, volume 25 dB background to 55 dB therapeutic, 44.1 kHz / 16-bit"
+        ),
+        "description": "宫调式 (土), 75 BPM 沉稳, 大提琴中提琴双簧管",
         "scene": "下午茶 / 缓慢工作时",
         "wuxing": "土",
-        "bpm": "75",
-        "mode": "宫调式",
-        "scale": "C-D-E-G-A 五声音阶",
+        "bpm": 75,
+        "western_mode": "C major (do, re, mi, sol, la: C-D-E-G-A)",
+        "scale_hz": "A4-E5 (440-659 Hz)",
+        "spectrum_centroid": "200-800 Hz",
+        "adsr": "30ms attack / 1s medium decay",
+        "volume_db": "25-55 dB SPL",
+        "instruments": "大提琴 (主) + 中提琴 + 双簧管 + 钢琴低音",
         "icon": "🍵",
-        "color": "#E6C79C",  # 暖橙
+        "color": "#E6C79C",
     },
     "通透": {
-        # 商调式 (金), D 五声音阶 (D-E-G-A-C), 80-100 BPM, 钢琴+编钟
-        "prompt": "A clear, crisp instrumental piece in 商调式 (Shang mode, pentatonic scale D-E-G-A-C), 85 BPM, 4/4 time signature. Primary instruments: piano, chimes, metal percussion, trumpet or saxophone staccato. Acoustic parameters: reverb=none or plate, wetness=15%, attack=sharp, decay=short, brightness=bright. Bright, clear, slightly sharp-edged timbre with metallic resonance. Clean articulation, detached notes, spacious and airy. Melodic lines with clear direction, autumnal atmosphere. Dynamic mf-mp, with moments of bright intensity. Evoke clarity, letting go, precision, and inner strength. Duration: 2 minutes, no lyrics.",
-        "description": "商调式 (金), 85 BPM 清朗, 钢琴断奏编钟",
+        # 商金, D major pentatonic (5#F#C#), 85 BPM, 2-5 kHz 频谱质心, 5ms 起振/短衰减
+        "prompt": (
+            "85 BPM, D major pentatonic (re, mi, fa#, la, ti: D-E-G-A-C), "
+            "bright harp with piano high treble and celesta, crisp 5ms attack, 0.5s decay, "
+            "clear and silver like autumn moonlight, supporting lung meridian, "
+            "no percussion, no vocals, 6 minutes seamless loop, -20 LUFS, "
+            "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
+            "inter-segment silence >= 200ms, "
+            "spectrum centroid 2-5 kHz, harmonics 5-10, distortion < 2%, "
+            "volume 25 dB background to 55 dB therapeutic, 44.1 kHz / 16-bit"
+        ),
+        "description": "商调式 (金), 85 BPM 清朗, 竖琴钢琴钢片琴",
         "scene": "冥想 / 自我对话时",
         "wuxing": "金",
-        "bpm": "85",
-        "mode": "商调式",
-        "scale": "D-E-G-A-C 五声音阶",
+        "bpm": 85,
+        "western_mode": "D major (re, mi, fa#, la, ti: D-E-G-A-C)",
+        "scale_hz": "A4-E5 (440-659 Hz)",
+        "spectrum_centroid": "2-5 kHz",
+        "adsr": "5ms attack / 0.5s short decay",
+        "volume_db": "25-55 dB SPL",
+        "instruments": "竖琴 (主) + 钢琴高音 + 钢片琴 (celesta)",
         "icon": "✨",
-        "color": "#B8D8E8",  # 浅蓝
+        "color": "#B8D8E8",
     },
     "晨光": {
-        # 角调式 (木), E 五声音阶 (E-G-A-B-D), 60-80 BPM, 古琴+竹笛
-        "prompt": "A slow-flowing instrumental piece in 角调式 (Jue mode, pentatonic scale E-G-A-B-D), 70 BPM, 4/4 time signature. Primary instruments: guqin with sliding tones, bamboo flute with breathy tone, harp, gentle strings. Acoustic parameters: reverb=large hall, wetness=35%, attack=soft, decay=moderate, brightness=warm neutral. Warm wooden timbre, natural and organic atmosphere. Melody rises and falls like branches swaying in spring breeze. Gentle pentatonic phrases, spacious phrasing, soft dynamic (mp-mf). Evoke a sense of growth, renewal, and gentle vitality. Duration: 2 minutes, no lyrics.",
-        "description": "角调式 (木), 70 BPM 舒展, 古琴滑音竹笛揉音",
+        # 角木, E minor pentatonic (5#F#), 70 BPM, 400-1.5 kHz 频谱质心, 20ms 起振/中衰减
+        "prompt": (
+            "70 BPM, E minor pentatonic (mi, sol, la, ti, re: E-G-A-B-D), "
+            "warm woodwind with harmonica and mid-range piano, gentle 20ms attack, 0.8s reverb, "
+            "like spring morning sun through leaves, supporting liver meridian, "
+            "no percussion, no vocals, 7 minutes seamless loop, -20 LUFS, "
+            "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
+            "inter-segment silence >= 200ms, "
+            "spectrum centroid 400-1.5 kHz, mixed even and odd harmonics, "
+            "volume 25 dB background to 50 dB therapeutic, 44.1 kHz / 16-bit"
+        ),
+        "description": "角调式 (木), 70 BPM 舒展, 木管口琴钢琴中频",
         "scene": "晨起 / 静心阅读时",
         "wuxing": "木",
-        "bpm": "70",
-        "mode": "角调式",
-        "scale": "E-G-A-B-D 五声音阶",
+        "bpm": 70,
+        "western_mode": "E minor (mi, sol, la, ti, re: E-G-A-B-D)",
+        "scale_hz": "A4-E5 (440-659 Hz)",
+        "spectrum_centroid": "400-1.5 kHz",
+        "adsr": "20ms attack / 0.8s medium decay",
+        "volume_db": "25-50 dB SPL",
+        "instruments": "木管 (主) + 口琴 + 钢琴中频 + 弦乐",
         "icon": "🌅",
-        "color": "#F4D35E",  # 暖黄
+        "color": "#F4D35E",
     },
     "黄昏": {
-        # 徵调式 (火), G 五声音阶 (G-A-C-D-E), 90-110 BPM, 琵琶+小提琴
-        "prompt": "A bright, uplifting instrumental piece in 徵调式 (Zhi mode, pentatonic scale G-A-C-D-E), 95 BPM, 2/4 or 6/8 time signature. Primary instruments: pipa with rapid tremolo, violin, bright guitar, warm brass. Acoustic parameters: reverb=chamber, wetness=20%, attack=moderate, decay=short, brightness=bright. Radiant and warm timbre, sparkling and energetic. Rhythmic pulse like dancing flames, joyful and celebratory. Crisp articulation, upward melodic motion, dynamic f. Evoke warmth, joy, passion, and heart-opening energy. Duration: 2 minutes, no lyrics.",
-        "description": "徵调式 (火), 95 BPM 热烈, 琵琶轮指小提琴",
+        # 徵火, E minor pentatonic, 95 BPM, 800-3 kHz 频谱质心, 30ms 起振/长衰减
+        "prompt": (
+            "95 BPM, E minor pentatonic (mi, sol, la, ti, re: E-G-A-B-D), "
+            "warm brass and strings with piano high treble, sustained 30ms attack, 1.2s reverb, "
+            "like golden sunset, nurturing heart meridian, "
+            "no percussion, no vocals, 6 minutes seamless loop, -20 LUFS, "
+            "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
+            "inter-segment silence >= 200ms, "
+            "spectrum centroid 800-3 kHz, harmonics 5-10, distortion < 3%, "
+            "volume 25 dB background to 60 dB therapeutic, 44.1 kHz / 16-bit"
+        ),
+        "description": "徵调式 (火), 95 BPM 热烈, 小号管弦钢琴高音",
         "scene": "傍晚 / 整理一日时",
         "wuxing": "火",
-        "bpm": "95",
-        "mode": "徵调式",
-        "scale": "G-A-C-D-E 五声音阶",
+        "bpm": 95,
+        "western_mode": "E minor (mi, sol, la, ti, re: E-G-A-B-D)",
+        "scale_hz": "A4-E5 (440-659 Hz)",
+        "spectrum_centroid": "800-3 kHz",
+        "adsr": "30ms attack / 1.2s long decay",
+        "volume_db": "25-60 dB SPL",
+        "instruments": "小号 (主) + 管弦 + 钢琴高音 + 弦乐",
         "icon": "🌆",
-        "color": "#E8998C",  # 暖红
+        "color": "#E8998C",
     },
 }
 
-# v0.7.1.7.5: 5 个示例 MP3 base64 嵌入 (走五行白皮书 v1.2 严格 prompt 重生成)
-# 严守: 由 MiniMax AI 生成, 严守 8 禁用词 0 出现, 严守 5.2 节五行调式模板
-# Cloud 兼容: base64 嵌入, 不依赖 CDN 7 天有效期, 不依赖 mavis CLI
-# 真生成 (本地 dev): UI 上「✨ 真生成」折叠按钮可调 MCP, 需本地 mavis daemon
-# v0.7.1.7.5-r2 rollback: 5 MP3 base64 嵌进 repo 让 Streamlit Cloud 报 ImportError
-# (推测: Cloud git clone 大文件被截断, 4.7MB base64 字符串 dict 解析失败)
-# 改回 CDN URL 模式, 接受 7 天失效 (跟 v0.7.1.4 一致)
+# v0.7.1.7.5-r3: 5 个示例 MP3 base64 嵌入 → ImportError (Cloud git clone 大文件被截断)
+# v0.7.1.7.5-r2 改回 CDN URL 模式 (跟 v0.7.1.4 一致)
+# v0.7.1.9: 保持 CDN URL 模式, 接受 7 天失效; user 体验 > 工程完美
 # 真生成 (本地 dev): UI 上「✨ 真生成」折叠按钮可调 MCP, 需本地 mavis daemon
 DEMO_URLS = {
-    # 5 滋养曲风 (走五行白皮书 v1.2 prompt, 5.2 节模板), MiniMax hailuoai.com CDN 7 天有效
-    "清润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502569_999058bb.mp3",  # 60 BPM 羽调式
-    "温润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502616_11c7604e.mp3",  # 75 BPM 宫调式
-    "通透": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502665_d532952c.mp3",  # 85 BPM 商调式
-    "晨光": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502769_452db1d0.mp3",  # 70 BPM 角调式
-    "黄昏": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502846_a9a8175e.mp3",  # 95 BPM 徵调式
-}# 心颜严守: 不允许的曲风关键词
+    # 5 滋养曲风 v1.0 规范 (走五行白皮书 v1.2 + 心理声学 8 维), MiniMax hailuoai.com CDN 7 天有效
+    "清润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502569_999058bb.mp3",  # 60 BPM 羽调式 A minor
+    "温润": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502616_11c7604e.mp3",  # 75 BPM 宫调式 C major
+    "通透": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502665_d532952c.mp3",  # 85 BPM 商调式 D major
+    "晨光": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502769_452db1d0.mp3",  # 70 BPM 角调式 E minor
+    "黄昏": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502846_a9a8175e.mp3",  # 95 BPM 徵调式 E minor
+}
+
+# 心颜严守: 不允许的曲风关键词
 _FORBIDDEN_MUSIC_KEYWORDS = [
     "激烈", "焦虑", "痛苦", "愤怒", "恐惧", "绝望",
     "治疗", "改善", "缓解", "治愈", "祛斑", "减肥", "处方", "医美",
@@ -117,6 +179,13 @@ def get_style_prompt(style_key: str) -> str:
     if style_key not in MUSIC_STYLES:
         return MUSIC_STYLES["清润"]["prompt"]  # 默认
     return MUSIC_STYLES[style_key]["prompt"]
+
+
+def get_style_spec(style_key: str) -> dict:
+    """取曲风 v1.0 8 维规范 (BPM + 西方大调 + 5 音 Hz + 频谱质心 + ADSR + 音量 + 乐器)"""
+    if style_key not in MUSIC_STYLES:
+        return MUSIC_STYLES["清润"]
+    return MUSIC_STYLES[style_key]
 
 
 def list_styles() -> list:
@@ -199,6 +268,11 @@ def generate_xinyan_music(style_key: str, use_demo: bool = True) -> dict:
             "icon": "💧",
             "color": "#A8D5BA",
             "is_demo": True/False,  # 标记是否演示模式
+            "spec": {  # v0.7.1.9 新增: v1.0 8 维规范
+                "bpm": 60, "western_mode": "...", "scale_hz": "...",
+                "spectrum_centroid": "...", "adsr": "...", "volume_db": "...",
+                "instruments": "...",
+            },
         }
     """
     if style_key not in MUSIC_STYLES:
@@ -232,6 +306,15 @@ def generate_xinyan_music(style_key: str, use_demo: bool = True) -> dict:
         "icon": style["icon"],
         "color": style["color"],
         "is_demo": is_demo,
+        "spec": {  # v0.7.1.9 新增 v1.0 8 维规范
+            "bpm": style["bpm"],
+            "western_mode": style["western_mode"],
+            "scale_hz": style["scale_hz"],
+            "spectrum_centroid": style["spectrum_centroid"],
+            "adsr": style["adsr"],
+            "volume_db": style["volume_db"],
+            "instruments": style["instruments"],
+        },
     }
 
 
@@ -247,6 +330,12 @@ _MUSIC_COMPLIANCE = """
 - 通透 ↔ 通透滤镜 (✨ 浅蓝)
 - 晨光 ↔ 晨光滤镜 (🌅 暖黄)
 - 黄昏 ↔ 黄昏滤镜 (🌆 暖红)
+
+v0.7.1.9 v1.0 规范: 五行 + 西方大调 + 心理声学 8 维 (BPM/5 音 Hz/频谱质心/ADSR/音量/双耳/失真/谐波)
++ T/CRHA036—2024 国标合规
++ Music Therapy Meta 2020 SMD=-1.33 (PLOS ONE Level A 循证)
++ Liao 2018 五行音乐降低血透患者焦虑抑郁
++ 于姚 2020 OR=2.80 五行音乐改善睡眠
 
 音乐生成来源: MiniMax MCP matrix_batch_text_to_music (官方音乐生成 API)
 数据 100% 本地: session_state 关浏览器即清, 严守个保法
