@@ -1,4 +1,4 @@
-"""心颜 v0.6 — page 5: 我的 (共修统计 + 收藏 + 海报历史 + 设置)"""
+"""悦济 v0.6 — page 5: 我的 (共修统计 + 收藏 + 海报历史 + 设置)"""
 import streamlit as st
 from datetime import date, datetime
 from core.styles import inject_css
@@ -11,13 +11,13 @@ from data.jingwen_30 import JINGWEN_30, get_by_id
 from data.soups_30 import SOUPS_30
 from data.self_dialogue import SELF_DIALOGUE_30, get_by_id
 
-st.set_page_config(page_title="我的 · 心颜", page_icon="🌿", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="我的 · 悦济", page_icon="🌿", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
 
 # sidebar: 只显示品牌 + 严守 caption (导航用 streamlit 自动顶部 nav, 不重复)
 # ── sidebar: 自定义中文菜单 (默认收起, 用户主动展开才显示) ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜")
+    st.markdown("### ✨ 悦济")
     st.markdown("---")
     st.page_link("app.py", label="🏠 主页")
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
@@ -25,7 +25,7 @@ with st.sidebar:
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
-    st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
+    st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v0.7.1.2 · 2026-07-07")
@@ -59,7 +59,7 @@ c4.metric("FL 模式", "🌐 开启" if fl_enabled else "✦ 关闭")
 
 st.markdown(f"""
 <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); text-align: center; padding: 1rem;">
-    <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">心颜客</div>
+    <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">悦济客</div>
     <div style="color: #2d3a2e; font-size: 0.95rem; font-style: italic;">"一群人一起, 慢慢变好"</div>
     <div style="color: #6b6b6b; font-size: 0.85rem; margin-top: 0.4rem;">{get_solar_term_strip()}</div>
 </div>
@@ -230,14 +230,14 @@ st.markdown("#### 🔒 隐私与严守")
 st.markdown(f"""
 <div class="compliance-note">
     <strong>✦ 严守</strong>: {COMPLIANCE_DISCLAIMER}<br>
-    <strong>✦ 隐私</strong>: 心颜所有数据只在本地浏览器 (session_state), 不上传到任何云端. 关浏览器即清空.<br>
-    <strong>✦ 自拍</strong>: 心颜自拍仅用于本地海报合成, 不上传, 不 AI 测肤, 不 AI 分析.<br>
+    <strong>✦ 隐私</strong>: 悦济所有数据只在本地浏览器 (session_state), 不上传到任何云端. 关浏览器即清空.<br>
+    <strong>✦ 自拍</strong>: 悦济自拍仅用于本地海报合成, 不上传, 不 AI 测肤, 不 AI 分析.<br>
     <strong>✦ FL 联邦</strong>: FL 模式默认关闭, 开启时 server 端只算加密聚合, 看不到单个 user.<br>
     <strong>✦ 严守 6 条意见</strong>: 滋养而非治疗 / 照镜子 / 不挂祺臻 / 重点社群 / 每日一经 / 每日一汤
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("#### 🌿 关于心颜")
+st.markdown("#### 🌿 关于悦济")
 st.markdown(f"""
 <div class="card">
     <div style="color: #4a7c59; font-size: 1.1rem; font-weight: 500; margin-bottom: 0.5rem;">{BRAND_NAME} · {BRAND_PY}</div>
@@ -255,7 +255,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 st.markdown("#### ⚠️ 重置全部数据")
-st.caption("✦ 清空心颜所有本地数据 (session_state)")
+st.caption("✦ 清空悦济所有本地数据 (session_state)")
 if st.button("🗑️ 重置全部 (慎点)", type="secondary"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]

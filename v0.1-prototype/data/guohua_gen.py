@@ -1,5 +1,5 @@
 """
-心颜 v0.7.1.7.3: 即时国画生成 (matrix_generate_image)
+悦济 v0.7.1.7.3: 即时国画生成 (matrix_generate_image)
 为 page 1 海报"生成我的专属画"按钮提供后端
 
 严守: 滋养/共修/涵养/清润 基调, 不出现文字/印章/营销/医美/美颜词
@@ -124,7 +124,7 @@ def call_minimax_generate(prompt: str, aspect_ratio: str = "2:3", timeout: int =
 def download_to_base64(url: str, timeout: int = 30) -> str | None:
     """下载 CDN URL 转 base64, 供 HTML img 嵌入 (7 天失效问题用 base64 解决)"""
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "xinyan/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "yueji/1.0"})
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             data = resp.read()
         return base64.b64encode(data).decode("ascii")

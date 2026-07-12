@@ -1,15 +1,15 @@
-# 心颜 (XINYAN) — 微信小程序 + Streamlit 原型
+# 悦济 (YUEJI) — 微信小程序 + Streamlit 原型
 
 > **照镜子, 也是为了更好的自己**
 
-心颜是一款关注现代女性「身心滋养」的陪伴型应用。
+悦济是一款关注现代女性「身心滋养」的陪伴型应用。
 技术栈: **微信小程序 + 微信云开发 + CloudBase AI / AMAX** (与祺臻心理共用底座, 但**完全独立**品牌)
 
 ## 当前状态
 
 | 版本 | 状态 | 路径 |
 |---|---|---|
-| **v0.5 镜中完整版** (Streamlit) | ✅ ready, 已部署 xinyan.streamlit.app | `v0.1-prototype/` |
+| **v0.5 镜中完整版** (Streamlit) | ✅ ready, 已部署 yueji.streamlit.app | `v0.1-prototype/` |
 | v0.5 = v0.1 + page 4 镜中 | 4 page: 每日一经 / 每日一汤 / 共修堂 / **镜中** | `v0.1-prototype/pages/` |
 | v1.0 微信小程序 | ⏳ 6 周 MVP 待启动 | `miniprogram/` (未来) |
 
@@ -50,17 +50,17 @@ streamlit run app.py
 ## 文件结构
 
 ```
-xinyan-miniprogram/
+yueji-miniprogram/
 ├── .gitignore                  # Python + Streamlit + Node 排除
 ├── LICENSE                     # MIT
 ├── README.md                   # 本文件
 ├── docs/                       # (未来) 调研 + PRD + 部署指南
-│   ├── XINYAN_PRD.md           # v0.1 PRD (526 行, user 6 条意见)
+│   ├── YUEJI_PRD.md           # v0.1 PRD (526 行, user 6 条意见)
 │   └── PHOTONIC_RESEARCH.md    # 夫人光子嫩肤调研 (40 KB)
 └── v0.1-prototype/             # ✅ 当前
     ├── .streamlit/config.toml  # 浅米白 + 墨绿 + 暖黄 主题
     ├── core/
-    │   ├── styles.py           # 心颜专属 CSS
+    │   ├── styles.py           # 悦济专属 CSS
     │   └── config.py           # 品牌 + 9 体质 + 节气
     ├── data/
     │   ├── jingwen_30.py       # 30 篇经文 + 简释
@@ -78,13 +78,13 @@ xinyan-miniprogram/
 
 ## 12 项决策 (待 user 拍板)
 
-详见 [`docs/XINYAN_PRD.md`](docs/XINYAN_PRD.md) §7
+详见 [`docs/YUEJI_PRD.md`](docs/YUEJI_PRD.md) §7
 
 | # | 决策 | 我的推荐 |
 |---|---|---|
-| 1 | 正式中文名 | **心颜** |
+| 1 | 正式中文名 | **悦济** |
 | 2 | AppID | **新申请** (独立) |
-| 3 | 云环境 | **新建**心颜环境 |
+| 3 | 云环境 | **新建**悦济环境 |
 | 4 | 目标用户 | **30-50 女性** |
 | 5 | MVP 范围 | **0.5 精简版** (3 page) |
 | 6 | MVP 时长 | **6 周** |

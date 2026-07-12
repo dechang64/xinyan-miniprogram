@@ -1,4 +1,4 @@
-"""心颜 v0.7.1.4 严格部署审计 — 模拟 Streamlit Cloud Python 3.14 + sxtwl 不可用
+"""悦济 v0.7.1.4 严格部署审计 — 模拟 Streamlit Cloud Python 3.14 + sxtwl 不可用
 
 跑 page 6 (人格画像) 6 tab 全部 imports + 关键函数, 验证没 ImportError
 """
@@ -25,16 +25,16 @@ for mod in ["streamlit", "PIL", "lunardate"]:
     except ImportError as e:
         print(f"  ✗ {mod}: {e}")
 
-# 3. 心颜 data 模块导入
+# 3. 悦济 data 模块导入
 print()
-print("B. 心颜 data 模块导入 (sxtwl 屏蔽)")
+print("B. 悦济 data 模块导入 (sxtwl 屏蔽)")
 
 # 清缓存
 for mod in list(sys.modules.keys()):
     if mod.startswith("data.") or mod.startswith("core."):
         del sys.modules[mod]
 
-sys.path.insert(0, r"C:\Users\decha\.mavis\agents\mavis\workspace\xinyan_prototype")
+sys.path.insert(0, r"C:\Users\decha\.mavis\agents\mavis\workspace\yueji_prototype")
 
 for mod in [
     "data.mbti",

@@ -1,4 +1,4 @@
-"""心颜 v0.1 原型 — page 3: 共修堂
+"""悦济 v0.1 原型 — page 3: 共修堂
 
 核心壁垒: 3 任务打卡 + 心愿流 + 排行 + 自我对话
 严守 6 条意见: 滋养, 照镜子, 共修 (不卖货, 不评美丑, 不医疗)
@@ -11,14 +11,14 @@ from core.config import (
     checkin_init, is_all_done,
 )
 
-st.set_page_config(page_title="心颜共修堂", page_icon="🌸", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="悦济共修堂", page_icon="🌸", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
 checkin_init()
 
 # ── sidebar ──
 # ── sidebar: 自定义中文菜单 (默认收起, 用户主动展开才显示) ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜")
+    st.markdown("### ✨ 悦济")
     st.markdown("---")
     st.page_link("app.py", label="🏠 主页")
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
@@ -26,7 +26,7 @@ with st.sidebar:
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
-    st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
+    st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v0.7.1.2 · 2026-07-07")
@@ -39,7 +39,7 @@ get_brand_header()
 # ══════════════════════════════════════════════════════════
 st.markdown("""
 <div style="text-align: center; padding: 0.5rem 0; color: #4a7c59; font-size: 1.1rem; font-weight: 500; letter-spacing: 0.1em;">
-    🌸 心颜共修堂
+    🌸 悦济共修堂
 </div>
 <div style="text-align: center; color: #6b6b6b; font-size: 0.85rem; margin-bottom: 1.5rem; font-style: italic;">
     一群人一起, 慢慢变好
@@ -131,7 +131,7 @@ if is_all_done():
         <p style="color: #2d3a2e; margin: 0.5rem 0;">一群人一起, 慢慢变好<br>愿今天的你, 离自己更近一点</p>
     </div>
     """, unsafe_allow_html=True)
-    if st.button("🌙 收下今日心颜签", use_container_width=True):
+    if st.button("🌙 收下今日悦济签", use_container_width=True):
         st.session_state['_show_sign'] = True
 
 # ══════════════════════════════════════════════════════════
@@ -205,7 +205,7 @@ if st.button("✦ 发布", use_container_width=True, type="primary"):
         st.session_state.wishes.insert(0, {
             "type": wish_type,
             "text": wish_text,
-            "from": wish_name if wish_name.strip() else "心颜客",
+            "from": wish_name if wish_name.strip() else "悦济客",
             "time": "刚刚",
         })
         st.success("✦ 心愿已发布")
@@ -227,7 +227,7 @@ with c1:
 with c2:
     st.metric("总共修", "1", "天")
 with c3:
-    st.metric("心愿数", f"{len([w for w in st.session_state.wishes if w['from'] != '心颜客' and w['from'] != '素心' and w['from'] != '清欢' and w['from'] != '暖阳' and w['from'] != '青禾' and w['from'] != '知行'])}", "条")
+    st.metric("心愿数", f"{len([w for w in st.session_state.wishes if w['from'] != '悦济客' and w['from'] != '素心' and w['from'] != '清欢' and w['from'] != '暖阳' and w['from'] != '青禾' and w['from'] != '知行'])}", "条")
 with c4:
     st.metric("共修伙伴", "12,840", "人")
 

@@ -1,4 +1,4 @@
-"""心颜 v0.7.1 — page 6: 人格画像
+"""悦济 v0.7.1 — page 6: 人格画像
 
 6 tab 自评工具 (全部严守「非诊断 / 参考」):
 - 🧠 MBTI: 8 题 4 维度 → 16 型
@@ -38,7 +38,7 @@ from data.scales import (
 from data.tizhi import TIZHI_9, TIZHI_9_QUESTIONS, score_tizhi
 
 st.set_page_config(
-    page_title="人格画像 · 心颜",
+    page_title="人格画像 · 悦济",
     page_icon="🪞",
     layout="centered",
     initial_sidebar_state="collapsed",
@@ -47,7 +47,7 @@ inject_css()
 
 # ── sidebar: 自定义中文菜单 ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜")
+    st.markdown("### ✨ 悦济")
     st.markdown("---")
     st.page_link("app.py", label="🏠 主页")
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
@@ -55,7 +55,7 @@ with st.sidebar:
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
-    st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
+    st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v0.7.1.3 · 2026-07-07")
@@ -85,7 +85,7 @@ tab_mbti, tab_bazi, tab_zodiac, tab_phq, tab_gad, tab_tizhi = st.tabs([
 # ═══════════════════════════════════════════════════════════
 with tab_mbti:
     st.markdown("### 🧠 MBTI 性格倾向 (8 题精简版)")
-    st.caption("✦ 标准 93 题太重, 心颜用 4 维度 × 2 题, 同样有 16 型结果")
+    st.caption("✦ 标准 93 题太重, 悦济用 4 维度 × 2 题, 同样有 16 型结果")
 
     if "mbti_answers" not in st.session_state:
         st.session_state.mbti_answers = [None] * 8
@@ -188,7 +188,7 @@ with tab_mbti:
 # ═══════════════════════════════════════════════════════════
 with tab_bazi:
     st.markdown("### ☯️ 八字四柱 (公历生日)")
-    st.caption("✦ 心颜只算年柱 / 月柱 / 日柱 / 时柱 + 元素平衡, 不算大运 / 流年 / 神煞")
+    st.caption("✦ 悦济只算年柱 / 月柱 / 日柱 / 时柱 + 元素平衡, 不算大运 / 流年 / 神煞")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -241,7 +241,7 @@ with tab_bazi:
             st.markdown("""
             <div style="text-align: center; color: #8a8a8a; font-size: 0.85rem; padding: 1rem;">
                 ✦ 八字只做元素平衡 + 性格倾向参考, 不算大运流年 / 不做命理预测<br>
-                ✦ 心颜严守: 「滋养」而非「决定」<br>
+                ✦ 悦济严守: 「滋养」而非「决定」<br>
                 <span style="color: #a94442;">危机时刻: 拨打 12356 心理援助热线</span>
             </div>
             """, unsafe_allow_html=True)
@@ -438,7 +438,7 @@ with tab_tizhi:
 
     st.markdown("""
     <div class="compliance-note">
-        <strong>✦ 严守声明</strong>: 9 体质是中医专业分类, 心颜只做「倾向参考」, 不构成医学判定。
+        <strong>✦ 严守声明</strong>: 9 体质是中医专业分类, 悦济只做「倾向参考」, 不构成医学判定。
         本问卷不替代专业中医体质辨识, 个体差异请咨询专业人士。
         数据仅存浏览器, 关浏览器即清。
     </div>

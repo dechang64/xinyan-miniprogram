@@ -9,7 +9,7 @@ proc = subprocess.Popen(
      "--server.headless", "true",
      "--browser.gatherUsageStats", "false",
      "--server.fileWatcherType", "none"],
-    stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=r"C:\Users\decha\.minimax\agents\mavis\workspace\xinyan_prototype"
+    stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=r"C:\Users\decha\.minimax\agents\mavis\workspace\yueji_prototype"
 )
 print(f"[boot] pid={proc.pid} port={PORT}")
 

@@ -1,4 +1,4 @@
-"""心颜 v0.1 原型 — 共享 CSS
+"""悦济 v0.1 原型 — 共享 CSS
 
 调性: 浅米白 + 墨绿 + 暖黄, 安静 / 涵养 / 共修
 严守: 不用「治疗/改善/缓解」, 用「滋养/涵养/陪伴/焕颜/共修」
@@ -299,7 +299,7 @@ div[data-testid="stSidebarNav"] {display: none !important; visibility: hidden !i
     line-height: 1.6;
 }
 
-/* ── 海报样式 (心颜专属, 朱砂红印章感) ── */
+/* ── 海报样式 (悦济专属, 朱砂红印章感) ── */
 .poster-frame {
     background: linear-gradient(135deg, #faf6f0 0%, #f0e9dc 100%);
     border: 2px solid var(--ink-green);
@@ -401,6 +401,6 @@ div[data-testid="stSidebarNav"] {display: none !important; visibility: hidden !i
 
 
 def inject_css():
-    """所有 page 第一行调用, 注入心颜专属 CSS"""
+    """所有 page 第一行调用, 注入悦济专属 CSS"""
     import streamlit as st
     st.markdown(CSS, unsafe_allow_html=True)

@@ -1,23 +1,23 @@
-# 心颜 (XINYAN) v1.0 微信小程序架构文档
+# 悦济 (YUEJI) v1.0 微信小程序架构文档
 
 > 撰写: Mavis · 2026-07-07
 > 状态: 调研完成, 待 user 拍板
-> 对应: Streamlit v0.6 (2026-07-07 已部署 https://xinyan.streamlit.app)
+> 对应: Streamlit v0.6 (2026-07-07 已部署 https://yueji.streamlit.app)
 
 ---
 
 ## §0 三句话总结
 
-1. **心颜是独立小程序** (不同 AppID / 不同云环境), **复用 qi_wechat 80%** 架构 (7 个云函数 + RAG + Self-Critique 守门员 + 双 provider), **加 4 个心颜专属云函数** + 离屏 Canvas 海报 + 真 FL 联邦聚合接入.
+1. **悦济是独立小程序** (不同 AppID / 不同云环境), **复用 qi_wechat 80%** 架构 (7 个云函数 + RAG + Self-Critique 守门员 + 双 provider), **加 4 个悦济专属云函数** + 离屏 Canvas 海报 + 真 FL 联邦聚合接入.
 2. **v0.6 Streamlit 验证通过**, v1.0 是把原型迁到微信小程序, **数据层和算法层 100% 对应**, UI 改 WXML/WXSS, 持久化从 session_state 改 wx.cloud.database, AI 从 Streamlit 内置 widget 改云函数 + CloudBase AI.
 3. **严守 6 条意见 + 化妆品监管条例 17/43/46/68**, 8 禁用词 0 出现, 自拍不传云, FL 默认关闭, 不挂祺臻品牌.
 
 ---
 
-## §1 心颜 v1.0 整体架构
+## §1 悦济 v1.0 整体架构
 
 \┌────────────────────────────────────────────────────────────┐
-│                    📱 微信小程序 (XINYAN)                    │
+│                    📱 微信小程序 (YUEJI)                    │
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
@@ -37,7 +37,7 @@
 │                  wx.cloud.callFunction                     │
 │                          │                                 │
 ├──────────────────────────┼─────────────────────────────────┤
-│       ☁️ 微信云开发 (心颜独立云环境, envId ≠ 祺臻)            │
+│       ☁️ 微信云开发 (悦济独立云环境, envId ≠ 祺臻)            │
 ├──────────────────────────┼─────────────────────────────────┤
 │                          ▼                                 │
 │  ┌─────────────────────────────────────────────────┐      │
@@ -51,7 +51,7 @@
 │  │     - crisis_hotline     12356 危机响应           │      │
 │  │     - log_audit          操作日志审计              │      │
 │  │     - weekly_report      周报生成                  │      │
-│  │  ✨ 心颜专属:                                       │      │
+│  │  ✨ 悦济专属:                                       │      │
 │  │     - daily_jingwen      每日一经 (30 篇经文池)    │      │
 │  │     - daily_soup         每日一汤 (30 款汤品池)    │      │
 │  │     - mirror_save        镜中数据持久化 (4 滑块)   │      │
@@ -59,7 +59,7 @@
 │  └─────────────────────────────────────────────────┘      │
 │                          │                                 │
 │  ┌─────────────────────────────────────────────────┐      │
-│  │           4 个数据库集合 (心颜专用)               │      │
+│  │           4 个数据库集合 (悦济专用)               │      │
 │  │  - mirror_records     镜中自评 (30 天滚动)        │      │
 │  │  - checkin_log        共修堂 3 任务打卡          │      │
 │  │  - favorite_log       收藏 (经文/汤品/自对话)    │      │
@@ -68,14 +68,14 @@
 │                          │                                 │
 │  ┌─────────────────────────────────────────────────┐      │
 │  │       知识库 (复用 qi_wechat 12 篇 + 加 12 篇)    │      │
-│  │  ✨ 心颜专属 12 篇:                                 │      │
+│  │  ✨ 悦济专属 12 篇:                                 │      │
 │  │     KB-01 道德经节选  / KB-02 清静经              │      │
 │  │     KB-03 易经系辞    / KB-04 黄帝内经素问        │      │
 │  │     KB-05 王琦 9 体质 / KB-06 30 款汤品           │      │
 │  │     KB-07 滋养 vs 治疗 / KB-08 照镜心理学          │      │
 │  │     KB-09 共修社会学 / KB-10 FL 联邦隐私           │      │
 │  │     KB-11 化妆品监管条例 17/43/46/68              │      │
-│  │     KB-12 心颜品牌语言手册                         │      │
+│  │     KB-12 悦济品牌语言手册                         │      │
 │  └─────────────────────────────────────────────────┘      │
 │                          │                                 │
 │  ┌─────────────────────────────────────────────────┐      │
@@ -94,25 +94,25 @@
 
 ### 复用 7 个云函数 (1:1 迁移)
 
-| 云函数 | qi_wechat 现状 | 心颜改造点 | 工作量 |
+| 云函数 | qi_wechat 现状 | 悦济改造点 | 工作量 |
 |---|---|---|---|
-| `rag_query` | 知识库 12 篇 .md | 加 12 篇心颜专属 .md | 0.5 天 |
+| `rag_query` | 知识库 12 篇 .md | 加 12 篇悦济专属 .md | 0.5 天 |
 | `guard` | Self-Critique P0 守门员 (8 禁用词 + 严守声明) | 直接复用, 严守清单完全一致 | 0.5 天 |
 | `tizhi_diagnose` | 9 体质测试 (王琦) | 直接复用, 体质定义完全一致 | 0.5 天 |
-| `chat` | AI 路由双 provider (CloudBase + AMAX) | 直接复用, prompt 改心颜 6 角色 | 1 天 |
+| `chat` | AI 路由双 provider (CloudBase + AMAX) | 直接复用, prompt 改悦济 6 角色 | 1 天 |
 | `crisis_hotline` | 12356 危机响应 | 直接复用, 文案改「共修社群紧急提示」 | 0.5 天 |
 | `log_audit` | 操作日志 | 直接复用 | 0.5 天 |
-| `weekly_report` | 周报生成 | 直接复用, 报告样式改心颜专属 | 1 天 |
+| `weekly_report` | 周报生成 | 直接复用, 报告样式改悦济专属 | 1 天 |
 | **小计** | | | **4.5 天** |
 
 ### 复用 UI 组件库 (60%)
 
-| 组件 | qi_wechat 路径 | 心颜改造点 |
+| 组件 | qi_wechat 路径 | 悦济改造点 |
 |---|---|---|
-| `card.*` | `miniprogram/components/card/` | CSS 改心颜色 (墨绿 #4a7c59 + 暖黄 #c9a961) |
+| `card.*` | `miniprogram/components/card/` | CSS 改悦济色 (墨绿 #4a7c59 + 暖黄 #c9a961) |
 | `tag.*` | `miniprogram/components/tag/` | 直接复用 |
 | `button.*` | `miniprogram/components/button/` | 直接复用 |
-| `poster-canvas.*` | 新增 | 心颜专属 (离屏 Canvas 海报) |
+| `poster-canvas.*` | 新增 | 悦济专属 (离屏 Canvas 海报) |
 
 ### 复用 4 个工具库 (100%)
 
@@ -125,7 +125,7 @@
 
 ---
 
-## §3 心颜专属 4 个云函数
+## §3 悦济专属 4 个云函数
 
 ### 3.1 daily_jingwen (每日一经)
 
@@ -148,7 +148,7 @@
     jieshi: '最高的善像水一样。水善于利益万物而不与之争夺...',
     poster_template: 'classic',  // 6 海报模板之一
   },
-  poster_url: 'cloud://xinyan-xxx/poster/jingwen_2026-07-07.png',
+  poster_url: 'cloud://yueji-xxx/poster/jingwen_2026-07-07.png',
 }
 ```
 
@@ -239,7 +239,7 @@
 ```js
 {
   ok: true,
-  poster_url: 'cloud://xinyan-xxx/poster/uuid.png',
+  poster_url: 'cloud://yueji-xxx/poster/uuid.png',
   size_bytes: 234567,
 }
 ```
@@ -267,7 +267,7 @@ const THEMES = ['jingwen', 'soup', 'mood', 'mirror', 'checkin', 'self_dialogue',
                 'mirror_today', 'mirror_30d', 'mirror_month'];
 const STYLES = ['classic', 'solar_term', 'minimal', 'literary', 'ink', 'modern'];
 
-const WATERMARK = '心颜 · 照镜子, 也是为了更好的自己';
+const WATERMARK = '悦济 · 照镜子, 也是为了更好的自己';
 
 exports.main = async (event) => {
   const { theme, style, text, bg_data } = event;
@@ -324,8 +324,8 @@ exports.main = async (event) => {
 **关键 WXML**:
 ```xml
 <view class="hero">
-  <view class="hero-eyebrow">XINYAN · DAILY · COMPANION</view>
-  <view class="hero-title">心颜</view>
+  <view class="hero-eyebrow">YUEJI · DAILY · COMPANION</view>
+  <view class="hero-title">悦济</view>
   <view class="hero-sub">{{BRAND_TAGLINE}}</view>
   <view class="hero-stamp">✦ 滋养 · 涵养 · 共修 ✦</view>
   <view class="hero-date">{{solar_term}}</view>
@@ -347,7 +347,7 @@ exports.main = async (event) => {
 </view>
 
 <navigator url="/pages/community/community" class="entry-card">
-  🌸 心颜共修堂 · 今日 {{done_count}} / 3
+  🌸 悦济共修堂 · 今日 {{done_count}} / 3
 </navigator>
 <navigator url="/pages/mirror/mirror" class="entry-card">
   🪞 镜中 · 4 滑块 + 30 天曲线 + 3 量表
@@ -357,7 +357,7 @@ exports.main = async (event) => {
 </navigator>
 
 <view class="compliance-note">
-  ✦ 滋养而非治疗: 心颜是日常陪伴, 不构成医学建议...
+  ✦ 滋养而非治疗: 悦济是日常陪伴, 不构成医学建议...
 </view>
 ```
 
@@ -532,22 +532,22 @@ Page({
 
 ## §6 知识库设计 (复用 + 新增)
 
-### 6.1 复用 qi_wechat 12 篇 + 加 12 篇心颜专属 = 24 篇
+### 6.1 复用 qi_wechat 12 篇 + 加 12 篇悦济专属 = 24 篇
 
 | KB ID | 来源 | 类别 | 复用状态 |
 |---|---|---|---|
-| KB-01 | 道德经节选 (心颜编辑) | 经文 | ✨ 新增 |
+| KB-01 | 道德经节选 (悦济编辑) | 经文 | ✨ 新增 |
 | KB-02 | 清静经 | 经文 | ✨ 新增 |
 | KB-03 | 易经系辞 | 经文 | ✨ 新增 |
 | KB-04 | 黄帝内经素问 | 经文 | ✨ 新增 |
 | KB-05 | 王琦 9 体质 (2009) | 体质 | ✨ 新增 |
 | KB-06 | 30 款汤品库 | 汤品 | ✨ 新增 (复用 v0.6 data/soups_30.py) |
-| KB-07 | 滋养 vs 治疗 (心颜品牌哲学) | 严守 | ✨ 新增 |
+| KB-07 | 滋养 vs 治疗 (悦济品牌哲学) | 严守 | ✨ 新增 |
 | KB-08 | 照镜心理学 (依恋理论) | 心理学 | ✨ 新增 |
 | KB-09 | 共修社会学 (社群动力学) | 社会学 | ✨ 新增 |
 | KB-10 | FL 联邦隐私协议 (E-Tag) | 隐私 | ✨ 新增 (复用 v0.6 data/fl_mock.py) |
 | KB-11 | 化妆品监管条例 17/43/46/68 | 法规 | ✨ 新增 |
-| KB-12 | 心颜品牌语言手册 (6 角色语气) | 品牌 | ✨ 新增 |
+| KB-12 | 悦济品牌语言手册 (6 角色语气) | 品牌 | ✨ 新增 |
 | KB-13 ~ KB-24 | (复用 qi_wechat 12 篇 SFBT/叙事/人本/C-SSRS) | 心理学 | 🔄 复用 |
 
 ### 6.2 知识库 RAG 检索
@@ -561,13 +561,13 @@ Page({
 
 ## §7 严守声明集成 (4/5 全到位)
 
-### 7.1 心颜专属严守声明
+### 7.1 悦济专属严守声明
 
 ```
-✦ 滋养而非治疗: 心颜是日常陪伴, 不构成医学建议。
+✦ 滋养而非治疗: 悦济是日常陪伴, 不构成医学建议。
 ✦ 照镜子: 镜中, 是正在成为自己的你。
 ✦ 共修社群: 一群人一起, 慢慢变好。
-✦ 不挂祺臻: 心颜与祺臻心理是独立小程序, 不同 AppID/不同云环境。
+✦ 不挂祺臻: 悦济与祺臻心理是独立小程序, 不同 AppID/不同云环境。
 ✦ 自拍隐私: 自拍仅本地合成海报, 不上传, 不 AI 测肤。
 ✦ FL 默认关闭: 开启时 server 端只算加密聚合, 看不到单个 user。
 ✦ 化妆品监管: 严守条例 17/43/46/68, 8 禁用词 0 出现。
@@ -585,16 +585,16 @@ Page({
 
 ## §8 双 provider AI 路由 (复用 qi_wechat)
 
-### 8.1 chat 云函数 (心颜专属)
+### 8.1 chat 云函数 (悦济专属)
 
 **改造点** (qi_wechat prompt 基础上):
-- 角色: 6 个心颜专属角色 (经典老师/汤品师傅/镜中知己/共修伙伴/经文解读/体质顾问)
+- 角色: 6 个悦济专属角色 (经典老师/汤品师傅/镜中知己/共修伙伴/经文解读/体质顾问)
 - 严守: 「滋养」语气, 8 禁用词 0 出现
 - 兜底: 危机检测 → 12356
 
-**Prompt 模板** (心颜 6 角色):
+**Prompt 模板** (悦济 6 角色):
 ```
-你是心颜, 一个 30-50 岁女性的日常陪伴者。今天是 {date}, 节气 {solar_term}.
+你是悦济, 一个 30-50 岁女性的日常陪伴者。今天是 {date}, 节气 {solar_term}.
 
 [6 角色矩阵]
 你是「{role}」, 负责 {role_desc}.
@@ -695,15 +695,15 @@ exports.main = async (event) => {
 
 ### Week 1-2: 基础架构 (复用 80%)
 
-- **Day 1-2**: 心颜独立 AppID 申请 + 云环境开通 + 项目脚手架
+- **Day 1-2**: 悦济独立 AppID 申请 + 云环境开通 + 项目脚手架
 - **Day 3-4**: 复用 qi_wechat 7 个云函数 (复制 + 改环境变量 + 测试)
 - **Day 5-6**: 复用 4 个工具库 (`api.js` / `auth.js` / `storage.js` / `audit.js`)
-- **Day 7-10**: 主页 + 每日一经 + 每日一汤 3 个 page (UI 改心颜色 + 严守声明)
+- **Day 7-10**: 主页 + 每日一经 + 每日一汤 3 个 page (UI 改悦济色 + 严守声明)
 
 ### Week 3: 镜中 (核心)
 
 - **Day 11-13**: `mirror` page + 4 滑块 + 3 量表 (PHQ-9/GAD-7/DLQI)
-- **Day 14-16**: `daily_jingwen` / `daily_soup` / `mirror_save` 3 个心颜专属云函数
+- **Day 14-16**: `daily_jingwen` / `daily_soup` / `mirror_save` 3 个悦济专属云函数
 - **Day 17-18**: 量表严守声明 + 危机响应 (PHQ-9 Q9≥1 → 12356)
 
 ### Week 4: 共修 + 海报 (社交壁垒)
@@ -730,10 +730,10 @@ exports.main = async (event) => {
 
 ## §11 关键避坑清单 (从 v0.6 Streamlit 沉淀)
 
-1. **云函数冷启动**: 首次调 1-3 秒, 心颜页面用 `wx.showLoading({ title: '...', mask: true })` 占位
+1. **云函数冷启动**: 首次调 1-3 秒, 悦济页面用 `wx.showLoading({ title: '...', mask: true })` 占位
 2. **云存储 URL 临时性**: `wx.cloud.getTempFileURL` 转临时 URL (2 小时有效), 不要用 fileID 直接渲染
 3. **数据库 100 条/次限制**: 列表分页用 `.skip().limit()`, 30 天心情曲线最多 30 条 OK
-4. **canvas API 限制**: 真机离屏 Canvas 性能差, 心颜海报改在**云函数**生成 (Node.js + `canvas` npm)
+4. **canvas API 限制**: 真机离屏 Canvas 性能差, 悦济海报改在**云函数**生成 (Node.js + `canvas` npm)
 5. **自拍隐私**: `wx.chooseMedia` → `wx.compressImage` → **不传云, 本地 base64 → 调 `poster_generate`** 云函数时 base64 是临时中转, 函数结束即释放
 6. **PHQ-9 Q9 自伤念头**: 严格转 12356, 不要自己写危机响应文案
 7. **严守 8 禁用词**: `guard` 守门员在 4 个位置调用 (chat 输入 / chat 输出 / rag 命中 / poster 文案), 不要省
@@ -764,9 +764,9 @@ exports.main = async (event) => {
 
 | # | 决策 | 我的推荐 |
 |---|---|---|
-| 1 | 心颜产品名 | **心颜 (XINYAN)** ✦ 滋养 ✦ 涵养 ✦ 共修 |
-| 2 | AppID | **新 AppID** (心颜独立, 不与祺臻心理混) |
-| 3 | 云环境 envId | **新云环境** (心颜独立, 不污染祺臻数据) |
+| 1 | 悦济产品名 | **悦济 (YUEJI)** ✦ 滋养 ✦ 涵养 ✦ 共修 |
+| 2 | AppID | **新 AppID** (悦济独立, 不与祺臻心理混) |
+| 3 | 云环境 envId | **新云环境** (悦济独立, 不污染祺臻数据) |
 | 4 | 目标用户 | **30-50 女性, 都市, 关注养生 / 心理 / 轻社交** |
 | 5 | 上线范围 | **MVP 6 周, 先微信小程序, 不上 iOS/Android 原生** |
 | 6 | 服务类目 | **微信小程序服务类目: 本地服务 → 美妆/美容 (非医疗)** |
@@ -784,16 +784,16 @@ exports.main = async (event) => {
 ### 共用 (云端基础设施)
 - ❌ 不共用 AppID
 - ❌ 不共用云环境 envId
-- ❌ 不共用数据库 (心颜独立 4 集合)
-- ❌ 不共用云存储 (心颜独立 bucket)
+- ❌ 不共用数据库 (悦济独立 4 集合)
+- ❌ 不共用云存储 (悦济独立 bucket)
 - ✅ 共用 knowledge base 文件 (本地 git, 不同 envId 拉不同 subset)
 - ✅ 共用 `guard` / `rag_query` / `chat` / `tizhi_diagnose` 云函数**代码** (不同 env 部署, 数据隔离)
 
 ### 用户体验隔离
 - ❌ 不互相跳转
-- ❌ 不共用 user (心颜 openid 与祺臻 openid 完全独立)
-- ❌ 心颜不出现「祺臻心理」品牌
-- ✅ 心颜与祺臻心理**技术栈完全相同**, 维护成本低
+- ❌ 不共用 user (悦济 openid 与祺臻 openid 完全独立)
+- ❌ 悦济不出现「祺臻心理」品牌
+- ✅ 悦济与祺臻心理**技术栈完全相同**, 维护成本低
 
 ---
 
@@ -804,15 +804,15 @@ exports.main = async (event) => {
 > 这份架构文档**不是写给夫人看的**, 是写给你和未来开发同事看的.
 > 每一条都有 v0.6 Streamlit 数据层 1:1 对应, 每一条都引用了具体文件路径.
 >
-> 等你拍板 12 项决策后, 就可以启动 6 周 MVP. **先复用 qi_wechat 80%, 再加心颜专属 20%**, 不会从零开始.
+> 等你拍板 12 项决策后, 就可以启动 6 周 MVP. **先复用 qi_wechat 80%, 再加悦济专属 20%**, 不会从零开始.
 >
 > — Mavis, 2026-07-07
 
 ---
 
 **附录**:
-- v0.6 Streamlit 部署: https://xinyan.streamlit.app
-- 心颜 PRD: `docs/XINYAN_PRD.md` (526 行)
-- 心颜调研: `docs/PHOTONIC_RESEARCH.md` (40 KB)
+- v0.6 Streamlit 部署: https://yueji.streamlit.app
+- 悦济 PRD: `docs/YUEJI_PRD.md` (526 行)
+- 悦济调研: `docs/PHOTONIC_RESEARCH.md` (40 KB)
 - 祺臻心理架构 (复用源): `qi_wechat/miniprogram/`
 - reading-fl SDK (Apache 2.0, FL 接入源): https://github.com/dechang64/Reading-FL

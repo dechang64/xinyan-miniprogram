@@ -1,4 +1,4 @@
-"""心颜 v0.5.2 - 联邦学习 (FL) Mock 数据
+"""悦济 v0.5.2 - 联邦学习 (FL) Mock 数据
 
 严守: FL 是"统计意义上的参考", 不构成任何医疗建议
 - 不上传人脸/自拍
@@ -18,7 +18,7 @@ from datetime import date
 #  FL 严守声明
 # ══════════════════════════════════════════════════════════
 FL_DISCLAIMER = (
-    "心颜 FL 联邦聚合仅做『统计意义上的参考』, "
+    "悦济 FL 联邦聚合仅做『统计意义上的参考』, "
     "不构成任何医学建议. "
     "严守: 不上传人脸/自拍/裸数据, "
     "server 端只算加密聚合 (E-Tag), 看不到单个 user."
@@ -45,7 +45,7 @@ def mood_to_bucket(mood: int) -> str:
         return "high"
 
 
-def hash_user_tag(user_id: str, salt: str = "xinyan_2026") -> str:
+def hash_user_tag(user_id: str, salt: str = "yueji_2026") -> str:
     """用户 id + salt -> hash (FL E-Tag)"""
     return hashlib.sha256(f"{user_id}_{salt}".encode()).hexdigest()[:12]
 
@@ -95,7 +95,7 @@ MOCK_FL_DATA = {
         ],
         "30-40": [
             {"rank": 1, "days": 412, "e_tag": "s9t0u1v2w3x4", "note": "资深共修"},
-            {"rank": 2, "days": 358, "e_tag": "y5z6a7b8c9d0", "note": "心颜客"},
+            {"rank": 2, "days": 358, "e_tag": "y5z6a7b8c9d0", "note": "悦济客"},
             {"rank": 3, "days": 312, "e_tag": "e1f2g3h4i5j6", "note": "无名氏"},
         ],
     },

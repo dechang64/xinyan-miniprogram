@@ -1,4 +1,4 @@
-"""心颜 v0.7.1.9 — 5 滋养曲风 v1.0 规范 (心理声学 + T/CRHA036—2024 + Moore 6 版)
+"""悦济 v0.7.1.9 — 5 滋养曲风 v1.0 规范 (心理声学 + T/CRHA036—2024 + Moore 6 版)
 
 v0.7.1.9 关键变化 (v0.7.1.7.5-r3 → v1.0):
 - 5 调式各加西方大调 (A minor / C major / D major / E minor) → 心理声学 + 西方音乐桥接
@@ -157,14 +157,14 @@ DEMO_URLS = {
     "黄昏": "https://cdn.hailuoai.com/mcp/u503581678484750338/music_tool/output/1783502846_a9a8175e.mp3",  # 95 BPM 徵调式 E minor
 }
 
-# 心颜严守: 不允许的曲风关键词
+# 悦济严守: 不允许的曲风关键词
 _FORBIDDEN_MUSIC_KEYWORDS = [
     "激烈", "焦虑", "痛苦", "愤怒", "恐惧", "绝望",
     "治疗", "改善", "缓解", "治愈", "祛斑", "减肥", "处方", "医美",
     "美颜", "美白", "瘦脸", "营销", "广告",
 ]
 
-# 心颜严守: 5 曲风描述 + prompt 都要过关键词预审
+# 悦济严守: 5 曲风描述 + prompt 都要过关键词预审
 def _validate_prompt(style_key: str, prompt: str) -> bool:
     """严守预审: 不允许消极/医疗/营销词进入"""
     for keyword in _FORBIDDEN_MUSIC_KEYWORDS:
@@ -198,7 +198,7 @@ def call_minimax_generate_music(prompt: str, lyrics: str = "", sample_rate: int 
 
     Args:
         prompt: 曲风 prompt (英文, MiniMax 训练数据)
-        lyrics: 歌词 (心颜不用歌词, 默认 "")
+        lyrics: 歌词 (悦济不用歌词, 默认 "")
         sample_rate: 采样率 16000/24000/32000/44100
         bitrate: 比特率 32000-256000
     Returns:
@@ -251,8 +251,8 @@ def call_minimax_generate_music(prompt: str, lyrics: str = "", sample_rate: int 
         return None
 
 
-def generate_xinyan_music(style_key: str, use_demo: bool = True) -> dict:
-    """心颜专属音乐生成: 曲风 → MiniMax prompt → CDN URL
+def generate_yueji_music(style_key: str, use_demo: bool = True) -> dict:
+    """悦济专属音乐生成: 曲风 → MiniMax prompt → CDN URL
 
     Args:
         style_key: 曲风 key
@@ -318,7 +318,7 @@ def generate_xinyan_music(style_key: str, use_demo: bool = True) -> dict:
     }
 
 
-# 心颜严守声明
+# 悦济严守声明
 _MUSIC_COMPLIANCE = """
 严守: 8 禁用词 0 出现 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美)
 严守: 营销词 0 出现 (美颜/美白/瘦脸/营销/广告)

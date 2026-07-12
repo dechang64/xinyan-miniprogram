@@ -1,4 +1,4 @@
-"""心颜 v0.6.4 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
+"""悦济 v0.6.4 — page 4: 镜中 (核心情感 — 照镜子, 也是为了更好的自己)
 
 6 个区块 (v0.6.4 大幅精简):
 1. 4 滑块自评 (心情/精力/睡眠/肌肤) + 保存
@@ -8,7 +8,7 @@
 5. 我的镜中签 (海报生成, 9 主题 x 6 风格 + 温润滤镜, 下载到本地)
 6. FL 联邦聚合 (v0.5.2 mock, 同城同龄人心情/汤品/共修排行)
 
-v0.6.4 删除: PHQ-9 / GAD-7 / DLQI 3 个量表 (与心颜「滋养而非治疗」基调冲突, 量表细节冗长)
+v0.6.4 删除: PHQ-9 / GAD-7 / DLQI 3 个量表 (与悦济「滋养而非治疗」基调冲突, 量表细节冗长)
 - 用户需要专业测评请去咨询专业人士 (12356 危机热线保留)
 
 严守 6 条意见: 滋养而非治疗, 照镜子, 不诊断
@@ -24,7 +24,7 @@ from core.config import (
     get_brand_header, get_footer_note, get_solar_term_strip,
     checkin_init, COMPLIANCE_DISCLAIMER,
 )
-# v0.6.4: 删除 3 个量表, 心颜严守「滋养」基调, 不放医疗量表
+# v0.6.4: 删除 3 个量表, 悦济严守「滋养」基调, 不放医疗量表
 # (scales.py 保留, 备未来需要时复用, 但镜中 page 不再调用)
 from data.self_dialogue import get_today_dialogue, SELF_DIALOGUE_30
 from data.jingwen_30 import get_today_jingwen
@@ -39,14 +39,14 @@ from data.fl_mock import (
     mock_fl_query_checkin, hash_user_tag, encrypt_mood, mood_to_bucket,
 )
 
-st.set_page_config(page_title="镜中 · 心颜", page_icon="🪞", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="镜中 · 悦济", page_icon="🪞", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
 checkin_init()
 
 # ── sidebar ──
 # ── sidebar: 自定义中文菜单 (默认收起, 用户主动展开才显示) ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜")
+    st.markdown("### ✨ 悦济")
     st.markdown("---")
     st.page_link("app.py", label="🏠 主页")
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
@@ -54,7 +54,7 @@ with st.sidebar:
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
-    st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
+    st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v0.7.1.2 · 2026-07-07")
@@ -186,13 +186,13 @@ else:
 # ══════════════════════════════════════════════════════════
 st.markdown("---")
 
-# v0.6.4: 替换成「滋养自评入口」+ 严守声明 (心颜不替用户做诊断, 需要专业测评请找专业人士)
-st.markdown("### 🪞 心颜自评 (滋养维度)")
+# v0.6.4: 替换成「滋养自评入口」+ 严守声明 (悦济不替用户做诊断, 需要专业测评请找专业人士)
+st.markdown("### 🪞 悦济自评 (滋养维度)")
 st.markdown(f"""
 <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc);">
     <div style="color: #a94442; font-size: 0.85rem; letter-spacing: 0.2em; margin-bottom: 0.5rem;">✦ 滋养而非诊断</div>
     <div style="color: #2d3a2e; line-height: 1.8;">
-        心颜是<strong>日常陪伴</strong>, 不是医疗工具.<br>
+        悦济是<strong>日常陪伴</strong>, 不是医疗工具.<br>
         镜中自评只看<strong>心情 / 精力 / 睡眠 / 肌肤</strong> 4 个滋养维度, 不做抑郁 / 焦虑 / 皮肤病诊断.<br>
         如果你最近持续心情低落、焦虑不安或皮肤问题反复, 请联系<strong>专业人士</strong>或拨打<strong>12356</strong> 心理援助热线.
     </div>
@@ -453,15 +453,15 @@ if "_poster_img" in st.session_state:
 
     # 下载按钮
     img_bytes = img_to_bytes(img, format="PNG")
-    filename = f"xinyan_mirror_{date.today().isoformat()}.png"
+    filename = f"yueji_mirror_{date.today().isoformat()}.png"
     st.download_button(
-        label="📥 下载心颜签 (PNG, 1080×1920)",
+        label="📥 下载悦济签 (PNG, 1080×1920)",
         data=img_bytes,
         file_name=filename,
         mime="image/png",
         use_container_width=True,
     )
-    st.caption("✦ 下载后: 微信扫码 → 选图片 → 朋友圈发布. 心颜不存图, 不传图, 不分析图.")
+    st.caption("✦ 下载后: 微信扫码 → 选图片 → 朋友圈发布. 悦济不存图, 不传图, 不分析图.")
     if st.session_state.get("_poster_bg_source"):
         st.caption(f"✦ 海报背景来源: {st.session_state.get('_poster_bg_source')} (本地 Pillow 处理, 不上传到任何 server)")
 
@@ -485,14 +485,14 @@ if not fl_enabled:
     st.markdown(f"""
     <div class="compliance-note">
         <strong>✦ FL 关闭</strong>: {FL_PRIVACY}<br>
-        <strong>✦ 严守</strong>: 心颜镜中不构成任何医学建议, 仅供日常滋养陪伴. 严重时务必就医.
+        <strong>✦ 严守</strong>: 悦济镜中不构成任何医学建议, 仅供日常滋养陪伴. 严重时务必就医.
     </div>
     """, unsafe_allow_html=True)
 else:
     st.markdown(f"""
     <div class="compliance-note">
         <strong>✦ FL 开启 (mock 模式)</strong>: {FL_DISCLAIMER}<br>
-        <strong>✦ 严守</strong>: 心颜镜中不构成任何医学建议, 仅供日常滋养陪伴. 严重时务必就医.
+        <strong>✦ 严守</strong>: 悦济镜中不构成任何医学建议, 仅供日常滋养陪伴. 严重时务必就医.
     </div>
     """, unsafe_allow_html=True)
 

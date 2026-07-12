@@ -1,4 +1,4 @@
-"""心颜 v0.6 原型 — 主入口 app.py
+"""悦济 v0.6 原型 — 主入口 app.py
 
 6 个 page: 主页 / 每日一经 / 每日一汤 / 共修堂 / 镜中 / 我的
 严守 6 条意见: 滋养而非治疗, 照镜子, 共修, 经文, 汤品, 不挂祺臻
@@ -14,7 +14,7 @@ from data.soups_30 import get_today_soup
 
 # ── 页面配置 (第一行 st 命令) ──
 st.set_page_config(
-    page_title="心颜 · 照镜子, 也是为了更好的自己",
+    page_title="悦济 · 照镜子, 也是为了更好的自己",
     page_icon="✨",
     layout="centered",
     initial_sidebar_state="collapsed",  # v0.6.3: sidebar 默认收起, 避免重复菜单困扰
@@ -26,7 +26,7 @@ checkin_init()
 
 # ── sidebar: 自定义中文菜单 (默认收起, 用户主动展开才显示) ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜")
+    st.markdown("### ✨ 悦济")
     st.markdown("---")
     st.page_link("app.py", label="🏠 主页")
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
@@ -34,7 +34,7 @@ with st.sidebar:
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
-    st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
+    st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v0.7.1.2 · 2026-07-07")
@@ -46,8 +46,8 @@ with st.sidebar:
 today_str = get_solar_term_strip()
 st.markdown(f"""
 <div class="hero fade-in">
-    <div class="hero-eyebrow">XINYAN · DAILY · COMPANION</div>
-    <div class="hero-title">心颜</div>
+    <div class="hero-eyebrow">YUEJI · DAILY · COMPANION</div>
+    <div class="hero-title">悦济</div>
     <div class="hero-sub">"{BRAND_TAGLINE}"</div>
     <div class="hero-stamp">✦ 滋养 · 涵养 · 共修 ✦</div>
     <p style="color: #6b6b6b; font-size: 0.85rem; margin-top: 1rem;">{today_str}</p>
@@ -110,7 +110,7 @@ done_count = sum([
 ])
 st.markdown(f"""
 <div class="card" style="text-align: center;">
-    <h3 style="color: #4a7c59 !important; margin: 0 0 0.5rem 0;">🌸 心颜共修堂</h3>
+    <h3 style="color: #4a7c59 !important; margin: 0 0 0.5rem 0;">🌸 悦济共修堂</h3>
     <p style="color: #2d3a2e; margin: 0.3rem 0;">一群人一起, 慢慢变好</p>
     <p style="color: #6b6b6b; font-size: 0.88rem; margin: 0.3rem 0;">今日共修: <strong style="color: #4a7c59;">{done_count} / 3</strong></p>
 </div>
@@ -154,7 +154,7 @@ if st.button("🌿 进入我的", use_container_width=True):
 # ══════════════════════════════════════════════════════════
 st.markdown(f"""
 <div class="compliance-note">
-    <strong>✦ 滋养而非治疗</strong>: 心颜是日常陪伴, 不构成医学建议。经文与汤品仅供日常参考, 个体差异请咨询专业人士。
+    <strong>✦ 滋养而非治疗</strong>: 悦济是日常陪伴, 不构成医学建议。经文与汤品仅供日常参考, 个体差异请咨询专业人士。
 </div>
 """, unsafe_allow_html=True)
 

@@ -1,4 +1,4 @@
-"""心颜 v0.1 原型 — page 1: 每日一经
+"""悦济 v0.1 原型 — page 1: 每日一经
 
 严守 6 条意见: 滋养而非治疗, 照镜子, 共修
 """
@@ -12,14 +12,14 @@ from data.jingwen_30 import get_today_jingwen, get_all, get_by_id
 from core.poster_svg import get_decoration
 from data.guohua_6 import get_guohua
 
-st.set_page_config(page_title="每日一经 · 心颜", page_icon="📜", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="每日一经 · 悦济", page_icon="📜", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
 checkin_init()
 
 # ── sidebar ──
 # ── sidebar: 自定义中文菜单 (默认收起, 用户主动展开才显示) ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜")
+    st.markdown("### ✨ 悦济")
     st.markdown("---")
     st.page_link("app.py", label="🏠 主页")
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
@@ -27,7 +27,7 @@ with st.sidebar:
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
-    st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
+    st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v0.7.1.2 · 2026-07-07")
@@ -101,20 +101,20 @@ st.markdown(f"""
     <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 30px; display: flex; align-items: stretch;">{deco_side}</div>
     <div style="padding: 0 30px;">
         {deco_top}
-        <div class="poster-eyebrow" style="color: {stamp_color};">心颜 · XINYAN</div>
+        <div class="poster-eyebrow" style="color: {stamp_color};">悦济 · YUEJI</div>
         <div class="poster-title" style="color: {fg}; text-align: right;">{jw['title']}</div>
         <div style="display: flex; align-items: flex-start; gap: 1.2rem;">
             <div class="poster-painting">
                 {guohua_html}
-                <!-- 印章 "心颜" -->
-                <div class="poster-seal">心颜</div>
+                <!-- 印章 "悦济" -->
+                <div class="poster-seal">悦济</div>
             </div>
             <div class="poster-content" style="color: {fg}; {direction_css} flex: 1; text-align: right;">
                 {jw['content']}
             </div>
         </div>
         <div class="poster-stamp" style="color: {stamp_color}; border-color: {stamp_color};">
-            心颜共修 · {direction_text}
+            悦济共修 · {direction_text}
         </div>
         <p style="color: {fg}; font-size: 0.85rem; margin-top: 1rem; opacity: 0.6; text-align: right;">
             {today_str} · 照镜子, 也是为了更好的自己

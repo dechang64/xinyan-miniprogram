@@ -1,8 +1,8 @@
-# 心颜 v0.1 — Streamlit 原型
+# 悦济 v0.1 — Streamlit 原型
 
 > **照镜子, 也是为了更好的自己**
 
-心颜是一款微信小程序 v0.1 原型, 用 **Streamlit** 跑通 3 个核心 page, 验证产品哲学:
+悦济是一款微信小程序 v0.1 原型, 用 **Streamlit** 跑通 3 个核心 page, 验证产品哲学:
 - **每日一经** (易经 / 清静经 / 道德经 / 黄帝内经)
 - **每日一汤** (9 体质 + 4 季 + 30 款养生美颜汤)
 - **共修堂** (3 任务打卡 + 心愿流 + 镜中自评)
@@ -19,7 +19,7 @@
 ## 跑起来
 
 ```bash
-cd xinyan_prototype
+cd yueji_prototype
 pip install -r requirements.txt
 streamlit run app.py
 ```
@@ -29,11 +29,11 @@ streamlit run app.py
 ## 文件结构
 
 ```
-xinyan_prototype/
+yueji_prototype/
 ├── .streamlit/
 │   └── config.toml        # 浅米白 + 墨绿 + 暖黄 主题
 ├── core/
-│   ├── styles.py          # 心颜专属 CSS
+│   ├── styles.py          # 悦济专属 CSS
 │   └── config.py          # 品牌 / 9 体质 / 节气 / 共修 session
 ├── data/
 │   ├── jingwen_30.py      # 30 篇经文 (易经 / 清静经 / 道德经 / 黄帝内经)
@@ -67,10 +67,10 @@ xinyan_prototype/
 
 ## 12 项决策 (待 user 拍板)
 
-详见 `docs/XINYAN_PRD.md` §7, 简版:
-- **正式名**: 心颜 (推荐) / 心语 / 心镜 / 心斋
+详见 `docs/YUEJI_PRD.md` §7, 简版:
+- **正式名**: 悦济 (推荐) / 心语 / 心镜 / 心斋
 - **AppID**: 新申请 (推荐, 独立)
-- **云环境**: 新建心颜环境 (推荐)
+- **云环境**: 新建悦济环境 (推荐)
 - **目标用户**: 30-50 女性 (推荐)
 - **MVP**: 0.5 精简版 (推荐)
 - **MVP 时长**: 6 周 (推荐)

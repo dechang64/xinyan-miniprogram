@@ -1,8 +1,8 @@
-# 心颜 5 段滋养曲风 v1.0 规范
+# 悦济 5 段滋养曲风 v1.0 规范
 
 > 制定: 2026-07-11 | 状态: v1.0 草案
 > 依据: docs/PSYCHOACOUSTICS_LIT_REVIEW.md v2 综述 + T/CRHA036—2024 国标
-> 5 段来源: 心颜 v0.7.1.7.5-r3 data/music.py (5 prompt + 5 CDN URL)
+> 5 段来源: 悦济 v0.7.1.7.5-r3 data/music.py (5 prompt + 5 CDN URL)
 
 ---
 
@@ -102,10 +102,10 @@ seamless loop, -20 LUFS, mono-to-stereo"
 
 ---
 
-## 5. 心颜 v1.0 共修堂空间规范 (T/CRHA036—2024 §5)
+## 5. 悦济 v1.0 共修堂空间规范 (T/CRHA036—2024 §5)
 
 - 房间 12-20 m² / 18-22℃ / 50-60% 湿度
-- RT60 ≤ 0.5 秒 (心颜 v0.7.1.9, Howard §7.1)
+- RT60 ≤ 0.5 秒 (悦济 v0.7.1.9, Howard §7.1)
 - 5 方位播放器 (东南中西北 = 木火土金水)
 - 25-60 dB 音量 + 段间留白 ≥ 200ms
 - 评估: ACR 5 等级 + 16 名体验者 + 6 周 (Howard §7.3)

@@ -1,5 +1,5 @@
 """
-心颜 v0.7.1.7.8: 海报生成器 (PIL)
+悦济 v0.7.1.7.8: 海报生成器 (PIL)
 - 固定 9:16 朋友圈尺寸 (1080x1920)
 - 固定 3:4 小红书尺寸 (1082x1440)
 - 支持经文 / 汤品 两种内容类型
@@ -37,7 +37,7 @@ def _font(size: int):
 
 
 # ══════════════════════════════════════════════════════════
-#  配色 (心颜基色, 跟 page 1 / page 2 海报对齐)
+#  配色 (悦济基色, 跟 page 1 / page 2 海报对齐)
 # ══════════════════════════════════════════════════════════
 PALETTE = {
     "📜 经典 (米色竖排)": dict(bg=(250, 246, 240), fg=(45, 58, 46), stamp=(169, 68, 66)),
@@ -106,7 +106,7 @@ def _draw_guohua(img, template: str, layout: str, y_offset: int = 80):
 
 
 def _draw_corner_seal(draw, template: str, xy, size: int = 60):
-    """画 朱砂红 "心颜" 印章 (2 字方印)"""
+    """画 朱砂红 "悦济" 印章 (2 字方印)"""
     palette = PALETTE.get(template, PALETTE["📜 经典 (米色竖排)"])
     x, y = xy
     stamp_color = palette["stamp"]
@@ -116,8 +116,8 @@ def _draw_corner_seal(draw, template: str, xy, size: int = 60):
     draw.rectangle([x + 6, y + 6, x + size - 6, y + size - 6], outline=stamp_color, width=1)
     # 字
     font = _font(int(size * 0.4))
-    # PIL 写中文: 心颜 (2 字, 居中)
-    text = "心颜"
+    # PIL 写中文: 悦济 (2 字, 居中)
+    text = "悦济"
     total_w = sum(font.getbbox(ch)[2] - font.getbbox(ch)[0] for ch in text) + 4
     cx = x + (size - total_w) // 2
     cy = y + (size - font.size) // 2 - 2
@@ -166,7 +166,7 @@ def _header(draw, img, template: str, eyebrow: str, title: str):
     w = img.width
     # 顶部装饰
     _frame_decor_top(draw, img, template)
-    # eyebrow (心颜 · XINYAN)
+    # eyebrow (悦济 · YUEJI)
     font_eyebrow = _font(36)
     bbox = draw.textbbox((0, 0), eyebrow, font=font_eyebrow)
     ew = bbox[2] - bbox[0]
@@ -193,7 +193,7 @@ def gen_jingwen_poster(jw: dict, template: str, today: date, layout: str = "vert
     fg = palette["fg"]
     stamp = palette["stamp"]
 
-    _header(draw, img, template, "心颜 · XINYAN", jw["title"])
+    _header(draw, img, template, "悦济 · YUEJI", jw["title"])
 
     # 国画 (顶部装饰下, 居中)
     _draw_guohua(img, template, "vertical")
@@ -251,7 +251,7 @@ def gen_soup_poster(sp: dict, template: str, today: date, layout: str = "horizon
     fg = palette["fg"]
     stamp = palette["stamp"]
 
-    _header(draw, img, template, "心颜 · 每日一汤", sp["name"])
+    _header(draw, img, template, "悦济 · 每日一汤", sp["name"])
 
     # 食材国画 (中部, 跟经文页同款位置 y=480) 或 fallback 山水
     if food_b64:
@@ -333,7 +333,7 @@ def gen_jingwen_poster_xhs(jw, template, today):
     fg = palette["fg"]
     stamp = palette["stamp"]
 
-    _header(draw, img, template, "心颜 · XINYAN", jw["title"])
+    _header(draw, img, template, "悦济 · YUEJI", jw["title"])
 
     # 国画缩小
     try:

@@ -1,4 +1,4 @@
-"""心颜 v0.7.1.1 — page 7: 心颜之音 (5 滋养曲风 + MiniMax AI 生成示例)
+"""悦济 v0.7.1.1 — page 7: 悦济之音 (5 滋养曲风 + MiniMax AI 生成示例)
 
 v0.7.1.1 关键变化:
 - 之前: 用户点「生成」按钮 → 调 mavis CLI → 调 MiniMax MCP 生成新 MP3
@@ -23,12 +23,12 @@ from core.config import (
     get_brand_header, get_footer_note,
 )
 from data.music import (
-    MUSIC_STYLES, list_styles, generate_xinyan_music, get_style_prompt,
+    MUSIC_STYLES, list_styles, generate_yueji_music, get_style_prompt,
     DEMO_URLS,
 )
 
 st.set_page_config(
-    page_title="心颜之音 · 心颜",
+    page_title="悦济之音 · 悦济",
     page_icon="🎵",
     layout="centered",
     initial_sidebar_state="collapsed",
@@ -37,7 +37,7 @@ inject_css()
 
 # ── sidebar: 自定义中文菜单 ──
 with st.sidebar:
-    st.markdown("### ✨ 心颜")
+    st.markdown("### ✨ 悦济")
     st.markdown("---")
     st.page_link("app.py", label="🏠 主页")
     st.page_link("pages/1_每日一经.py", label="📜 每日一经")
@@ -45,7 +45,7 @@ with st.sidebar:
     st.page_link("pages/3_共修堂.py", label="🌸 共修堂")
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
-    st.page_link("pages/7_心颜之音.py", label="🎵 心颜之音")
+    st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("滋养 · 涵养 · 共修")
@@ -55,7 +55,7 @@ get_brand_header()
 # ── 顶部卡 (v0.7.1.7.6 简化: 删技术细节, 给用户简单意境) ──
 st.markdown("""
 <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 1rem; margin-bottom: 1rem;">
-    <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 心颜之音</div>
+    <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 悦济之音</div>
     <div style="color: #2d3a2e; font-size: 0.95rem; line-height: 1.7;">
         5 段滋养曲风, 陪你慢慢静下来。<br>
         <span style="color: #6b6b6b; font-size: 0.85rem;">不用歌词 · 意境陪伴 · 关浏览器即清</span>
@@ -115,7 +115,7 @@ with st.expander("🔧 高级: 真生成模式 (本地 dev 需 mavis daemon)"):
 
     if real_gen_btn:
         with st.spinner(f"🎵 正在调 MiniMax MCP 真生成 {style_choice}... 30-60 秒"):
-            result = generate_xinyan_music(style_choice, use_demo=False)
+            result = generate_yueji_music(style_choice, use_demo=False)
 
         if result.get("success"):
             st.success(f"✦ {style_choice} 真生成成功")

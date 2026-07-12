@@ -1,4 +1,4 @@
-"""心颜 v0.1 原型 — 心颜配置 / 通用函数
+"""悦济 v0.1 原型 — 悦济配置 / 通用函数
 
 严守: 不挂「祺臻心理」品牌, 是独立小程序原型
 调性: 浅米白 + 墨绿 + 暖黄, 安静 / 涵养 / 共修
@@ -10,8 +10,8 @@ from datetime import date, datetime
 # ══════════════════════════════════════════════════════════
 #  品牌与文案
 # ══════════════════════════════════════════════════════════
-BRAND_NAME = "心颜"
-BRAND_PY = "XINYAN"
+BRAND_NAME = "悦济"
+BRAND_PY = "YUEJI"
 BRAND_TAGLINE = "照镜子, 也是为了更好的自己"
 BRAND_SUB = "滋养 · 涵养 · 共修"
 
@@ -27,7 +27,7 @@ SOLAR_TERMS_2026 = [
 
 # 严守 6 条意见 — 红线
 COMPLIANCE_DISCLAIMER = (
-    "心颜是日常滋养陪伴, 不构成任何医学建议。"
+    "悦济是日常滋养陪伴, 不构成任何医学建议。"
     "经文与汤品仅供日常参考, 个体差异请咨询专业人士。"
     "危机时刻: 全国心理援助热线 <b>12356</b> · 北京心理危机研究与干预中心 010-82951332"
 )
@@ -63,7 +63,7 @@ def get_brand_header():
     """顶部品牌头 — 所有 page 顶部调用"""
     import streamlit as st
     st.markdown(
-        f'<div class="brand-header">心颜 · {BRAND_PY}</div>'
+        f'<div class="brand-header">悦济 · {BRAND_PY}</div>'
         f'<div class="brand-sub">{BRAND_TAGLINE}</div>',
         unsafe_allow_html=True,
     )

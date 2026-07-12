@@ -1,4 +1,4 @@
-"""心颜 v0.5.2 — 我的镜中签 (海报生成)
+"""悦济 v0.5.2 — 我的镜中签 (海报生成)
 
 6 模板 × 6 主题 = 36 种组合
 严守 6 条意见: 不上传人脸/自拍, 不 AI 测肤, 海报右下角永久水印
@@ -61,11 +61,11 @@ POSTER_STYLES = {
 }
 
 # 严守水印 (右下角永久, 不可去掉)
-WATERMARK = "心颜 · 照镜子, 也是为了更好的自己"
+WATERMARK = "悦济 · 照镜子, 也是为了更好的自己"
 
 # 严守声明
 POSTER_DISCLAIMER = (
-    "心颜镜中签仅供日常滋养陪伴, "
+    "悦济镜中签仅供日常滋养陪伴, "
     "不上传人脸/自拍, 不 AI 测肤, 不构成任何医学建议。"
 )
 
@@ -264,8 +264,8 @@ def draw_poster(theme_key: str, style_key: str, mirror_history: list,
     font_watermark = get_font(28, style["font_family"])
 
     # 顶部品牌
-    draw.text((POSTER_W // 2 - 60, 200), "心颜", fill=style["stamp"], font=font_brand)
-    draw.text((POSTER_W // 2 - 60, 250), "XINYAN", fill=style["stamp"], font=font_brand)
+    draw.text((POSTER_W // 2 - 60, 200), "悦济", fill=style["stamp"], font=font_brand)
+    draw.text((POSTER_W // 2 - 60, 250), "YUEJI", fill=style["stamp"], font=font_brand)
 
     # 类型 (title)
     title = text_data["title"]
@@ -333,7 +333,7 @@ def draw_poster(theme_key: str, style_key: str, mirror_history: list,
             )
 
     # 印章 (底部)
-    stamp_text = "心颜共修"
+    stamp_text = "悦济共修"
     bbox = draw.textbbox((0, 0), stamp_text, font=font_stamp)
     stamp_w = bbox[2] - bbox[0]
     stamp_x = POSTER_W - 200
