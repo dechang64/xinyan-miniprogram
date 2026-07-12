@@ -1,0 +1,149 @@
+/* app.wxss — 悦济全局样式
+调性: 滋养/涵养/共修, 暖米色基调, 朱砂红点缀
+严守: 不出现任何医疗/医美营销字眼
+*/
+
+/* 全局基础 */
+page {
+  background-color: #fdfaf6;
+  color: #3d3a36;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+
+/* 严守声明条 */
+.compliance-bar {
+  background: #f5efe6;
+  border-left: 6rpx solid #a85a3e;
+  padding: 16rpx 24rpx;
+  margin: 24rpx 0;
+  font-size: 22rpx;
+  color: #7a6f5f;
+  border-radius: 8rpx;
+}
+
+/* 卡片 */
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin: 24rpx 32rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 标题 */
+.title-main {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #3d3a36;
+  margin-bottom: 16rpx;
+}
+
+.title-sub {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #5a534a;
+  margin-bottom: 12rpx;
+}
+
+.title-tag {
+  font-size: 24rpx;
+  color: #a85a3e;
+  background: #fdf3ee;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  display: inline-block;
+}
+
+/* 文本 */
+.text-body {
+  font-size: 28rpx;
+  color: #5a534a;
+  line-height: 1.8;
+}
+
+.text-quote {
+  font-size: 30rpx;
+  color: #3d3a36;
+  line-height: 2;
+  font-style: italic;
+  padding: 24rpx;
+  background: #faf6f0;
+  border-radius: 12rpx;
+  margin: 24rpx 0;
+}
+
+/* 按钮 */
+.btn-primary {
+  background: #a85a3e;
+  color: #fff;
+  border-radius: 40rpx;
+  padding: 24rpx 48rpx;
+  font-size: 28rpx;
+  display: inline-block;
+  margin: 16rpx 8rpx;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #a85a3e;
+  border: 2rpx solid #a85a3e;
+  border-radius: 40rpx;
+  padding: 22rpx 46rpx;
+  font-size: 28rpx;
+  display: inline-block;
+  margin: 16rpx 8rpx;
+}
+
+/* 滑块 */
+.slider-row {
+  display: flex;
+  align-items: center;
+  margin: 32rpx 0;
+}
+
+.slider-label {
+  width: 120rpx;
+  font-size: 26rpx;
+  color: #5a534a;
+}
+
+.slider-value {
+  width: 80rpx;
+  text-align: right;
+  font-size: 26rpx;
+  color: #a85a3e;
+  font-weight: 500;
+}
+
+/* 5 滋养曲风色块 (跟心颜 5 滤镜一致) */
+.color-清润 { background: #A8D5BA; }
+.color-温润 { background: #E6C79C; }
+.color-通透 { background: #B8D8E8; }
+.color-晨光 { background: #F4D35E; }
+.color-黄昏 { background: #E8998C; }
+
+/* 列表 */
+.list-row {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  border-bottom: 2rpx solid #f5efe6;
+}
+
+.list-icon {
+  font-size: 40rpx;
+  margin-right: 24rpx;
+}
+
+.list-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #3d3a36;
+}
+
+.list-arrow {
+  color: #a8a29e;
+  font-size: 28rpx;
+}

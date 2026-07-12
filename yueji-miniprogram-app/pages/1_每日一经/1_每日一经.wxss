@@ -1,0 +1,24 @@
+.page {
+  padding: 32rpx 0;
+}
+.header {
+  padding: 24rpx 48rpx 16rpx;
+}
+.nav-row {
+  display: flex;
+  justify-content: center;
+  margin: 32rpx 0;
+}
+.text-jieshi {
+  font-size: 28rpx;
+  color: #5a534a;
+  line-height: 1.8;
+  margin-top: 24rpx;
+  padding: 0 16rpx;
+}
+.footer-tip {
+  text-align: center;
+  color: #a8a29e;
+  font-size: 24rpx;
+  margin: 48rpx 0;
+}

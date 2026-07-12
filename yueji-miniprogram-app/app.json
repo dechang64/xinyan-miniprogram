@@ -1,0 +1,61 @@
+{
+  "pages": [
+    "pages/0_启动页/0_启动页",
+    "pages/1_每日一经/1_每日一经",
+    "pages/2_每日一汤/2_每日一汤",
+    "pages/3_共修堂/3_共修堂",
+    "pages/4_镜中/4_镜中",
+    "pages/5_我的/5_我的",
+    "pages/6_人格画像/6_人格画像",
+    "pages/7_悦济之音/7_悦济之音"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#fdfaf6",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "悦济",
+    "backgroundColor": "#fdfaf6",
+    "backgroundTextStyle": "light",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#a8a29e",
+    "selectedColor": "#a85a3e",
+    "backgroundColor": "#fdfaf6",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/1_每日一经/1_每日一经",
+        "text": "经",
+        "iconPath": "assets/tab_jing.png",
+        "selectedIconPath": "assets/tab_jing_sel.png"
+      },
+      {
+        "pagePath": "pages/2_每日一汤/2_每日一汤",
+        "text": "汤",
+        "iconPath": "assets/tab_tang.png",
+        "selectedIconPath": "assets/tab_tang_sel.png"
+      },
+      {
+        "pagePath": "pages/4_镜中/4_镜中",
+        "text": "镜中",
+        "iconPath": "assets/tab_jingzhong.png",
+        "selectedIconPath": "assets/tab_jingzhong_sel.png"
+      },
+      {
+        "pagePath": "pages/3_共修堂/3_共修堂",
+        "text": "共修",
+        "iconPath": "assets/tab_gongxiu.png",
+        "selectedIconPath": "assets/tab_gongxiu_sel.png"
+      },
+      {
+        "pagePath": "pages/5_我的/5_我的",
+        "text": "我的",
+        "iconPath": "assets/tab_mine.png",
+        "selectedIconPath": "assets/tab_mine_sel.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

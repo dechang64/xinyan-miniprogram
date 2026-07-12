@@ -1,0 +1,35 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">悦济之音</view>
+    <view class="title-sub">5 段滋养曲风 · 循环播放</view>
+  </view>
+
+  <view class="style-grid">
+    <view wx:for="{{styles}}" wx:key="key"
+      class="style-card {{selected == item.key ? 'style-card-active' : ''}}"
+      data-key="{{item.key}}" bindtap="onSelectStyle"
+      style="background: {{item.color}}30; border-color: {{item.color}};">
+      <view class="style-icon">{{item.icon}}</view>
+      <view class="style-name">{{item.key}}</view>
+      <view class="style-wuxing">{{item.wuxing}} · {{item.bpm}} BPM</view>
+      <view class="style-scene">{{item.scene}}</view>
+    </view>
+  </view>
+
+  <view class="card player-card">
+    <view class="title-sub">正在播放</view>
+    <view class="player-name">{{selected}}</view>
+    <view class="player-time" wx:if="{{duration > 0}}">
+      {{currentTime | number:0}}s / {{duration | number:0}}s
+    </view>
+    <view class="player-actions">
+      <view class="btn-primary" bindtap="onTogglePlay" wx:if="{{!isPlaying}}">▶ 播放</view>
+      <view class="btn-ghost" bindtap="onTogglePlay" wx:else>⏸ 暂停</view>
+      <view class="btn-ghost" bindtap="onStop">⏹ 停止</view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 5 段滋养曲风为生活陪伴, 不涉及医疗作用。音量建议 25-60 dB。
+  </view>
+</view>

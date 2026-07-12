@@ -1,0 +1,9 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "悦济 v1.0 chat 云函数 - AMAX/CloudBase + 6 类对话 + 严守 + RAG",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,64 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">镜中</view>
+    <view class="title-sub">是正在成为自己的你</view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">今天怎样</view>
+    <view class="slider-row" wx:for="{{keys}}" wx:key="*this">
+      <view class="slider-label">{{keyIcons[item]}} {{keyNames[item]}}</view>
+      <view class="slider-track">
+        <view class="slider-fill" style="width: {{sliders[item] * 10}}%; background: {{keyColors[item]}};"></view>
+      </view>
+      <view class="slider-value">{{sliders[item]}}</view>
+    </view>
+    <view class="btn-primary" bindtap="onSave" style="margin-top: 24rpx;">保存今天</view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">30 天曲线</view>
+    <view wx:if="{{history.length == 0}}" class="text-body" style="text-align: center; padding: 48rpx 0; color: #a8a29e;">
+      还没有数据, 记录一下今天吧
+    </view>
+    <view wx:else style="margin-top: 24rpx;">
+      <view wx:for="{{history}}" wx:key="date" class="history-row">
+        <text class="history-date">{{item.date}}</text>
+        <text class="history-val" style="color: #E8998C;">心 {{item.mood}}</text>
+        <text class="history-val" style="color: #F4D35E;">精 {{item.energy}}</text>
+        <text class="history-val" style="color: #B8D8E8;">眠 {{item.sleep}}</text>
+        <text class="history-val" style="color: #A8D5BA;">颜 {{item.skin}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">6 类暖心对话</view>
+    <view class="dialog-grid">
+      <view class="dialog-item" data-type="still" bindtap="onTapDialog">🪷 静下来</view>
+      <view class="dialog-item" data-type="company" bindtap="onTapDialog">🫂 陪伴</view>
+      <view class="dialog-item" data-type="hanyang" bindtap="onTapDialog">💧 涵养</view>
+      <view class="dialog-item" data-type="tongzhou" bindtap="onTapDialog">🚣 同舟</view>
+      <view class="dialog-item" data-type="gongxiu" bindtap="onTapDialog">🌿 共修</view>
+      <view class="dialog-item" data-type="yueji" bindtap="onTapDialog">✨ 悦己</view>
+    </view>
+  </view>
+
+  <!-- 6 类对话弹层 -->
+  <view wx:if="{{dialogResponse}}" class="dialog-modal" bindtap="onCloseDialog">
+    <view class="dialog-bubble" catchtap="">
+      <view class="dialog-bubble-text">{{dialogResponse}}</view>
+      <view class="dialog-bubble-hint">轻触关闭 · 悦济陪你</view>
+    </view>
+  </view>
+
+  <view class="card" bindtap="onWriteLetter">
+    <view class="title-sub">写给 3 个月后的自己</view>
+    <view class="text-body" style="margin-top: 16rpx; color: #a85a3e;">轻触进入 {{hasLetter ? '· 已有信' : '→'}}</view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 镜中只记录您的主观自评, 不识别情绪/皮肤状态。如有持续困扰, 请拨打 12356 全国心理援助热线。
+    <view class="hotline-btn" bindtap="onTapCallHotline">📞 一键拨打 12356</view>
+  </view>
+</view>

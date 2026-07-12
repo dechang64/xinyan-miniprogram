@@ -1,0 +1,18 @@
+.page { padding: 32rpx 0; }
+.header { padding: 24rpx 48rpx 16rpx; }
+.letter-textarea {
+  width: 100%;
+  min-height: 600rpx;
+  font-size: 30rpx;
+  line-height: 1.8;
+  color: #3d3a36;
+  padding: 24rpx;
+  background: #faf6f0;
+  border-radius: 16rpx;
+  box-sizing: border-box;
+}
+.action-row {
+  display: flex;
+  justify-content: center;
+  margin: 32rpx 0;
+}

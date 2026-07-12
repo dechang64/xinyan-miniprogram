@@ -1,0 +1,29 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">每日一汤</view>
+    <view class="title-sub">9 体质 × 4 季</view>
+  </view>
+
+  <scroll-view class="tizhi-row" scroll-x>
+    <view wx:for="{{tizhiList}}" wx:key="key"
+      class="tizhi-chip {{selectedTizhi == item.key ? 'tizhi-chip-active' : ''}}"
+      data-key="{{item.key}}" bindtap="onSelectTizhi">
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <view class="card" wx:if="{{today}}">
+    <view class="title-sub">{{today.name}}</view>
+    <view class="title-tag">{{today.season}}季 · {{tizhiList[tizhiList.findIndex(t => t.key == selectedTizhi)].name}}</view>
+    <view class="text-body" style="margin-top: 24rpx;">{{today.desc}}</view>
+  </view>
+
+  <view class="nav-row">
+    <view class="btn-ghost" bindtap="onTapPrev">换一汤</view>
+    <view class="btn-primary" bindtap="onTapNext">下一款</view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 9 体质仅作参考, 汤品仅为生活陪伴, 不涉及医疗作用。
+  </view>
+</view>

@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">每日一经</view>
+    <view class="title-sub">{{today.source}}</view>
+  </view>
+
+  <view class="card">
+    <view class="text-quote">{{today.text}}</view>
+    <view class="text-jieshi">{{today.jieshi}}</view>
+  </view>
+
+  <view class="nav-row">
+    <view class="btn-ghost" bindtap="onTapPrev">上一篇</view>
+    <view class="btn-primary" bindtap="onTapNext">下一篇</view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 悦济分享: 经典 + 简释, 不涉及医疗作用。
+  </view>
+
+  <view class="footer-tip">
+    <text>第 {{idx + 1}} / {{jingwenList.length}} 篇</text>
+  </view>
+</view>

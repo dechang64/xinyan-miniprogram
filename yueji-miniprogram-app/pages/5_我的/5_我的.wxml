@@ -1,0 +1,38 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">我的</view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">数据</view>
+    <view class="list-row" bindtap="onTapAbout">
+      <view class="list-icon">ℹ️</view>
+      <view class="list-text">关于悦济</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onReset">
+      <view class="list-icon">🗑️</view>
+      <view class="list-text">重置数据</view>
+      <view class="list-arrow">→</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">严守声明</view>
+    <view class="text-body" style="margin-top: 16rpx; color: #7a6f5f;">
+      {{compliance}}
+    </view>
+    <view class="text-body" style="margin-top: 16rpx; color: #7a6f5f; font-size: 24rpx;">
+      ✦ 8 禁用词 0 出现: 治疗/改善/缓解/治愈/祛斑/减肥/处方/医美<br/>
+      ✦ 营销词 0 出现: 美颜/美白/瘦脸<br/>
+      ✦ 主观自评 ✅ / 客观识别 ❌
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">隐私</view>
+    <view class="text-body" style="margin-top: 16rpx; color: #7a6f5f;">
+      悦济不收集您的个人信息。\n镜中数据仅存本地, 关 App 即清。
+    </view>
+  </view>
+</view>

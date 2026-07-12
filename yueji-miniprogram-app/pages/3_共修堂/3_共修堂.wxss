@@ -1,0 +1,7 @@
+/* 3_共修堂 wxss */
+.page {
+  padding: 32rpx 0;
+}
+.header {
+  padding: 24rpx 48rpx 16rpx;
+}

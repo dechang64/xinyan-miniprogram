@@ -1,0 +1,23 @@
+.tizhi-row {
+  white-space: nowrap;
+  padding: 16rpx 32rpx;
+  border-bottom: 2rpx solid #f5efe6;
+}
+.tizhi-chip {
+  display: inline-block;
+  padding: 12rpx 28rpx;
+  margin: 0 12rpx;
+  background: #faf6f0;
+  color: #5a534a;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+}
+.tizhi-chip-active {
+  background: #a85a3e;
+  color: #fff;
+}
+.nav-row {
+  display: flex;
+  justify-content: center;
+  margin: 32rpx 0;
+}

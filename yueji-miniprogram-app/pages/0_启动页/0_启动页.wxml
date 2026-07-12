@@ -1,0 +1,6 @@
+<view class="splash">
+  <view class="splash-icon">悦</view>
+  <view class="splash-slogan">{{slogan}}</view>
+  <view class="splash-sub">{{sub}}</view>
+  <view class="splash-skip" bindtap="onTapSkip">轻触进入 →</view>
+</view>

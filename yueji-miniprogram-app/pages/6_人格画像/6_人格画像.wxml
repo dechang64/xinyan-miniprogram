@@ -1,0 +1,141 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">人格画像</view>
+    <view class="title-sub">了解自己, 滋养自己</view>
+  </view>
+
+  <scroll-view class="tab-row" scroll-x>
+    <view wx:for="{{tabs}}" wx:key="key"
+      class="tab-chip {{activeTab == item.key ? 'tab-chip-active' : ''}}"
+      data-key="{{item.key}}" bindtap="onSwitchTab">
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <!-- MBTI -->
+  <view wx:if="{{activeTab == 'mbti'}}" class="card">
+    <view class="title-sub">MBTI 8 题</view>
+    <view wx:if="{{mbtiResult}}" class="result-card">
+      <view class="result-type">{{mbtiResult.type}} · {{mbtiResult.type_name}}</view>
+      <view class="result-desc">{{mbtiResult.type_desc}}</view>
+      <view class="btn-ghost" bindtap="onMBTISubmit">重测</view>
+    </view>
+    <view wx:else>
+      <view wx:for="{{mbtiQuestions}}" wx:key="index" wx:for-index="idx" class="q-row">
+        <view class="q-text">{{idx + 1}}. {{item.q}}</view>
+        <view class="q-options">
+          <view class="q-opt {{mbtiAnswers[idx] == 'A' ? 'q-opt-active' : ''}}"
+            data-qi="A" data-idx="{{idx}}" bindtap="onMBTISelect">A</view>
+          <view class="q-opt {{mbtiAnswers[idx] == 'B' ? 'q-opt-active' : ''}}"
+            data-qi="B" data-idx="{{idx}}" bindtap="onMBTISelect">B</view>
+        </view>
+      </view>
+      <view class="btn-primary" bindtap="onMBTISubmit">提交</view>
+    </view>
+  </view>
+
+  <!-- 八字 + 星盘 -->
+  <view wx:if="{{activeTab == 'bazi' || activeTab == 'zodiac'}}" class="card">
+    <view class="title-sub">出生日期</view>
+    <view class="birth-row">
+      <view class="birth-input">
+        <text>年</text>
+        <input type="number" value="{{birthYear}}" data-field="birthYear" bindinput="onBirthChange" />
+      </view>
+      <view class="birth-input">
+        <text>月</text>
+        <input type="number" value="{{birthMonth}}" data-field="birthMonth" bindinput="onBirthChange" />
+      </view>
+      <view class="birth-input">
+        <text>日</text>
+        <input type="number" value="{{birthDay}}" data-field="birthDay" bindinput="onBirthChange" />
+      </view>
+    </view>
+    <view class="btn-primary" bindtap="onCalcBazi">推算</view>
+    <view wx:if="{{baziResult}}" class="result-card">
+      <view class="result-sub">八字 (年/月/日 柱)</view>
+      <view class="result-line">年柱: {{baziResult.year_pillar[0]}}{{baziResult.year_pillar[1]}}</view>
+      <view class="result-line">月柱: {{baziResult.month_pillar[0]}}{{baziResult.month_pillar[1]}}</view>
+      <view class="result-line">日柱: {{baziResult.day_pillar[0]}}{{baziResult.day_pillar[1]}}</view>
+    </view>
+    <view wx:if="{{zodiacResult}}" class="result-card">
+      <view class="result-sub">星盘 (太阳/月/升)</view>
+      <view class="result-line">太阳: {{zodiacResult.sun_sign}}</view>
+      <view class="result-line">月亮: {{zodiacResult.moon_sign}}</view>
+      <view class="result-line">上升: {{zodiacResult.rising_sign}}</view>
+    </view>
+  </view>
+
+  <!-- PHQ-9 -->
+  <view wx:if="{{activeTab == 'phq9'}}" class="card">
+    <view class="title-sub">PHQ-9 心情 (量表自评, 不诊断)</view>
+    <view wx:if="{{phq9Result}}" class="result-card">
+      <view class="result-type">{{phq9Result.total}} / {{phq9Result.max}} · {{phq9Result.level}}</view>
+      <view class="result-desc">{{phq9Result.advice}}</view>
+      <view class="btn-ghost" bindtap="onPHQ9Submit">重测</view>
+    </view>
+    <view wx:else>
+      <view wx:for="{{phq9Questions}}" wx:key="*this" wx:for-index="idx" class="q-row">
+        <view class="q-text">{{idx + 1}}. {{item}}</view>
+        <view class="q-options">
+          <view wx:for="{{phq9Options}}" wx:key="*this" wx:for-index="vi"
+            class="q-opt {{phq9Answers[idx] == vi ? 'q-opt-active' : ''}}"
+            data-idx="{{idx}}" data-value="{{vi}}" bindtap="onPHQ9Select">
+            {{item}}
+          </view>
+        </view>
+      </view>
+      <view class="btn-primary" bindtap="onPHQ9Submit">提交</view>
+    </view>
+  </view>
+
+  <!-- GAD-7 -->
+  <view wx:if="{{activeTab == 'gad7'}}" class="card">
+    <view class="title-sub">GAD-7 焦虑 (量表自评, 不诊断)</view>
+    <view wx:if="{{gad7Result}}" class="result-card">
+      <view class="result-type">{{gad7Result.total}} / {{gad7Result.max}} · {{gad7Result.level}}</view>
+      <view class="result-desc">{{gad7Result.advice}}</view>
+      <view class="btn-ghost" bindtap="onGAD7Submit">重测</view>
+    </view>
+    <view wx:else>
+      <view wx:for="{{gad7Questions}}" wx:key="*this" wx:for-index="idx" class="q-row">
+        <view class="q-text">{{idx + 1}}. {{item}}</view>
+        <view class="q-options">
+          <view wx:for="{{gad7Options}}" wx:key="*this" wx:for-index="vi"
+            class="q-opt {{gad7Answers[idx] == vi ? 'q-opt-active' : ''}}"
+            data-idx="{{idx}}" data-value="{{vi}}" bindtap="onGAD7Select">
+            {{item}}
+          </view>
+        </view>
+      </view>
+      <view class="btn-primary" bindtap="onGAD7Submit">提交</view>
+    </view>
+  </view>
+
+  <!-- 9 体质 -->
+  <view wx:if="{{activeTab == 'tizhi'}}" class="card">
+    <view class="title-sub">9 体质 (王琦, 仅作参考)</view>
+    <view wx:if="{{tizhiResult}}" class="result-card">
+      <view class="result-type">{{tizhiResult.winner_name}}</view>
+      <view class="result-desc">投票: {{tizhiResult.votes[tizhiResult.winner]}}/9</view>
+      <view class="btn-ghost" bindtap="onTizhiSubmit">重测</view>
+    </view>
+    <view wx:else>
+      <view wx:for="{{tizhiQuestions}}" wx:key="index" wx:for-index="idx" class="q-row">
+        <view class="q-text">{{idx + 1}}. {{item.q}}</view>
+        <view class="q-options q-options-stack">
+          <view wx:for="{{item.options}}" wx:key="*this" wx:for-index="oi"
+            class="q-opt-stack {{tizhiAnswers[idx] == item[1] ? 'q-opt-active' : ''}}"
+            data-qi="{{oi}}" data-idx="{{idx}}" data-value="{{item[1]}}" bindtap="onTizhiSelect">
+            {{item[0]}}
+          </view>
+        </view>
+      </view>
+      <view class="btn-primary" bindtap="onTizhiSubmit">提交</view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 量表仅作主观自评参考, 不作任何医学诊断。如有持续困扰, 请拨打 12356 全国心理援助热线。
+  </view>
+</view>
