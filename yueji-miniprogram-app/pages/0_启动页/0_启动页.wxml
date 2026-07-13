@@ -35,6 +35,13 @@
     <view class="content">老子 · 周文王 · 岐伯 · 元神</view>
   </view>
 
+  <!-- v3.0.5 阶段 1.5: 4 类小动 5 分钟 (9 体质 + 镜中 4 维 → 推荐) -->
+  <view class="card-jingwen" bindtap="onTapMotion" style="border-left: 8rpx solid #a8c8a8;">
+    <view class="source">今日一动 · 5 分钟小动</view>
+    <view class="title">静坐 · 拉筋 · 拍打 · 呼吸</view>
+    <view class="content">9 体质 + 镜中 4 维, 选 1 类陪你慢慢做</view>
+  </view>
+
   <!-- 3 入口按钮 -->
   <view class="entry-row">
     <view class="btn-primary" bindtap="onTapJingwen">经文库</view>

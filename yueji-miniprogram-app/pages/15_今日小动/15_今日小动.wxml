@@ -1,0 +1,38 @@
+<!-- 15_今日小动.wxml — 悦济 v3.0.5 阶段 1.5 -->
+<view class="page-motion">
+  <view class="hero" style="background: linear-gradient(180deg, {{motion.color}}33 0%, {{motion.color}}11 100%);">
+    <view class="hero-icon">{{motion.icon}}</view>
+    <view class="hero-name">{{motion.name}}</view>
+    <view class="hero-desc">{{motion.desc}}</view>
+    <view class="hero-duration">5 分钟</view>
+  </view>
+
+  <view class="meta">
+    <view class="meta-row">
+      <text class="meta-label">9 体质</text>
+      <text class="meta-value">{{tizhiName}}</text>
+    </view>
+    <view class="meta-row">
+      <text class="meta-label">镜中 4 维</text>
+      <text class="meta-value">心情 {{latest4.mood}} · 精力 {{latest4.energy}} · 睡眠 {{latest4.sleep}} · 肌肤 {{latest4.skin}}</text>
+    </view>
+  </view>
+
+  <view class="ai-hint" wx:if="{{aiHint}}">
+    <text class="ai-label">养友说</text>
+    <text class="ai-text">{{aiHint}}</text>
+  </view>
+
+  <view class="steps">
+    <view class="steps-title">5 分钟, 慢慢做</view>
+    <view class="step" wx:for="{{motion.steps}}" wx:key="*this">
+      <view class="step-num">{{index + 1}}</view>
+      <view class="step-text">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="btn-start" bindtap="onStart">开始 5 分钟</button>
+    <button class="btn-close" bindtap="onClose">回到悦济</button>
+  </view>
+</view>

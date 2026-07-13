@@ -49,6 +49,8 @@ Page({
   onTapTodayJing() { wx.switchTab({ url: '/pages/1_每日一经/1_每日一经' }); },
   onTapTodaySoup() { wx.switchTab({ url: '/pages/2_每日一汤/2_每日一汤' }); },
   onTapTodayHuman() { wx.navigateTo({ url: '/pages/8_4经数字人/8_4经数字人' }); },
+  // v3.0.5 阶段 1.5: 4 类小动 5 分钟 (9 体质 + 镜中 4 维 → 推荐)
+  onTapMotion() { wx.navigateTo({ url: '/pages/15_今日小动/15_今日小动' }); },
   onTapJingwen() { wx.switchTab({ url: '/pages/1_每日一经/1_每日一经' }); },
   onTapSoup() { wx.switchTab({ url: '/pages/2_每日一汤/2_每日一汤' }); },
   onTapJingzhong() { wx.switchTab({ url: '/pages/4_镜中/4_镜中' }); },
