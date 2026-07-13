@@ -1,0 +1,34 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">镜中签</view>
+    <view class="title-sub">6 模板 · 1080×1920 海报 · 一键保存</view>
+  </view>
+
+  <!-- 模板选择 -->
+  <view class="card">
+    <view class="title-sub">选模板</view>
+    <view class="tpl-row">
+      <view wx:for="{{templates}}" wx:key="id"
+            class="tpl-chip {{currentTpl === item.id ? 'tpl-chip-on' : ''}}"
+            data-id="{{item.id}}" bindtap="onPickTpl">
+        {{item.name}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 海报画布 (微信原生 canvas 2d) -->
+  <view class="card">
+    <view class="title-sub">海报预览</view>
+    <canvas type="2d" id="posterCanvas"
+            class="poster-canvas"
+            style="width: 540rpx; height: 960rpx;" />
+    <view class="entry-row" style="margin-top: 24rpx;">
+      <view class="btn-secondary" bindtap="onPrev">换一句</view>
+      <view class="btn-primary" bindtap="onSave">保存到相册</view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 滋养陪伴, 不涉及医疗作用。
+  </view>
+</view>

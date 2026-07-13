@@ -19,6 +19,24 @@
   font-size: 24rpx;
   color: #5a534a;
 }
+.curve-canvas {
+  width: 660rpx;
+  height: 400rpx;
+  margin: 16rpx auto;
+  background: #faf6f0;
+  border: 2rpx solid #e8dfc8;
+  border-radius: 8rpx;
+  display: block;
+}
+.curve-legend {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 16rpx;
+  font-size: 24rpx;
+}
+.legend-item {
+  font-weight: 500;
+}
 .history-date {
   width: 200rpx;
 }

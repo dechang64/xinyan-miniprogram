@@ -19,8 +19,8 @@
   <view class="card player-card">
     <view class="title-sub">正在播放</view>
     <view class="player-name">{{selected}}</view>
-    <view class="player-time" wx:if="{{duration > 0}}">
-      {{currentTime | number:0}}s / {{duration | number:0}}s
+    <view class="player-time" wx:if="{{hasDuration}}">
+      {{timeDisplay}}
     </view>
     <view class="player-actions">
       <view class="btn-primary" bindtap="onTogglePlay" wx:if="{{!isPlaying}}">▶ 播放</view>

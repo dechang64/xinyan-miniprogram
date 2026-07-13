@@ -12,10 +12,11 @@
     </view>
   </scroll-view>
 
-  <view class="card" wx:if="{{today}}">
-    <view class="title-sub">{{today.name}}</view>
-    <view class="title-tag">{{today.season}}季 · {{tizhiList[tizhiList.findIndex(t => t.key == selectedTizhi)].name}}</view>
-    <view class="text-body" style="margin-top: 24rpx;">{{today.desc}}</view>
+  <view class="card-soup" wx:if="{{today}}">
+    <image class="food-img" src="{{foodImg}}" mode="aspectFit" wx:if="{{foodImg}}" />
+    <view class="name">{{today.name}}</view>
+    <view class="badge">{{today.season}}季 · {{tizhiName}}</view>
+    <view class="ingredients">{{today.desc}}</view>
   </view>
 
   <view class="nav-row">
@@ -24,6 +25,6 @@
   </view>
 
   <view class="compliance-bar">
-    ✦ 严守声明: 9 体质仅作参考, 汤品仅为生活陪伴, 滋养而非治疗, 不涉及医疗作用。
+    ✦ 滋养陪伴, 不涉及医疗作用 · 主观自评 ✅ · 客观识别 ❌
   </view>
 </view>

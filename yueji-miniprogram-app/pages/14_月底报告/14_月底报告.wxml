@@ -1,0 +1,58 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">月底报告</view>
+    <view class="title-sub">AMAX 真生成 · 30 天镜中总结</view>
+  </view>
+
+  <view class="card" wx:if="{{!hasData}}">
+    <view class="title-sub">还没有数据</view>
+    <view class="text-body" style="margin-top: 16rpx; color: #6b6b6b;">
+      在镜中记录 30 天的心情 / 精力 / 睡眠 / 肌肤 (4 滑块), 才能生成月底报告.
+    </view>
+    <view class="btn-primary" style="margin-top: 16rpx;" bindtap="onGotoJingzhong">去镜中记录</view>
+  </view>
+
+  <view wx:else>
+    <view class="card">
+      <view class="title-sub">{{monthLabel}}</view>
+      <view class="stat-row">
+        <view class="stat-cell">
+          <view class="stat-num">{{stats.avgMood}}</view>
+          <view class="stat-label">心情</view>
+        </view>
+        <view class="stat-cell">
+          <view class="stat-num">{{stats.avgEnergy}}</view>
+          <view class="stat-label">精力</view>
+        </view>
+        <view class="stat-cell">
+          <view class="stat-num">{{stats.avgSleep}}</view>
+          <view class="stat-label">睡眠</view>
+        </view>
+        <view class="stat-cell">
+          <view class="stat-num">{{stats.avgSkin}}</view>
+          <view class="stat-label">肌肤</view>
+        </view>
+      </view>
+      <view class="text-body" style="margin-top: 12rpx; color: #a8a29e; font-size: 24rpx;">
+        共记录 {{stats.days}} 天 · 趋势: {{stats.trend}}
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title-sub">悦济陪伴</view>
+      <view class="btn-primary" style="margin-top: 16rpx;" bindtap="onGenerate" disabled="{{generating}}">
+        {{generating ? 'AMAX 正在生成...' : '🎨 AMAX 生成月底报告'}}
+      </view>
+      <view wx:if="{{aiReport}}" class="text-body" style="margin-top: 16rpx; line-height: 1.8; color: #2d3a2e;">
+        {{aiReport}}
+      </view>
+      <view wx:if="{{aiError}}" class="text-body" style="margin-top: 16rpx; color: #a94442;">
+        {{aiError}}
+      </view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 滋养而非治疗 · 悦济独立设计
+  </view>
+</view>

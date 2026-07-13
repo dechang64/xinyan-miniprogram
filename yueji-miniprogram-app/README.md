@@ -1,164 +1,94 @@
-# 悦济 v1.0 — 微信小程序 (含微信云开发 + AMAX)
+# 悦济 v2.6.0 部署指南
 
-> 滋养/涵养/共修/镜中 — 6 哲学产品
-> 严守: 8 禁用词 0 出现, 主观自评 ✅ / 客观识别 ❌
-> 微信云开发 + AMAX (deepseek-v3) + 知识库 RAG
+## v2.6.0 vs v2.5.5 关键变化 (跟祁臻 v6.2 全面对齐)
 
-## 项目结构
+**v2.6.0 修了 9 个 P0** (你 4:55 拍板"全面审计"后):
 
-```
-yueji-miniprogram-app/
-├── app.json / app.js / app.wxss        # 全局 (5 tab + 启动页 + 3 不在 tabBar)
-├── project.config.json                 # AppID wx203abf07e1ee4707
-├── sitemap.json
-├── pages/                              # 7 page + 1 子 page
-│   ├── 0_启动页/                       # 2 秒启动, 跳镜中
-│   ├── 1_每日一经/                     # 30 经文, dayOfYear seed
-│   ├── 2_每日一汤/                     # 9 体质 × 30 汤品
-│   ├── 3_共修堂/                       # 3 任务 (占位, 社群 v1.1)
-│   ├── 4_镜中/                         # 4 滑块 + 30 天曲线 + 6 对话 (云函数) + 信
-│   │   └── letter/                     # 给 3 个月后的信
-│   ├── 5_我的/                         # 严守声明 + 重置 + 隐私
-│   ├── 6_人格画像/                     # 6 tab: MBTI/八字/星盘/PHQ-9/GAD-7/TIZHI
-│   └── 7_悦济之音/                     # 5 滋养曲风 + InnerAudioContext
-├── cloudfunctions/                     # 微信云开发
-│   └── chat/                           # AMAX/CloudBase 6 类对话 AI
-│       ├── index.js                    # 严守 + 6 类角色 + RAG + AMAX 调用
-│       └── package.json
-├── knowledge_base/                     # 悦济独立知识库 (5 个 .md, 给 RAG 用)
-│   ├── 01_yueji_6_philosophy.md
-│   ├── 02_music_v1_spec.md
-│   ├── 03_jingzhong_4sliders.md
-│   ├── 04_30_jingwen_30_soups.md
-│   └── 05_6_dialog_roles.md
-├── utils/                              # 工具函数 + 静态数据
-│   ├── compliance.js                   # 8 禁用词 + 危机检测
-│   ├── data_jingwen.js                 # 30 经文
-│   ├── data_soups.js                   # 30 汤品
-│   ├── data_mbti.js                    # MBTI 8 题 + 16 型
-│   ├── data_assess.js                  # 八字 + 星盘 + 3 量表 + 9 体质
-│   └── dialog.js                       # 6 类对话静态兜底 (60 句)
-├── assets/                             # tabBar icons (v1.1 生成)
-└── README.md
-```
+| # | P0 | 修法 | 状态 |
+|---|---|---|---|
+| 1 | P0-9 静态兜底复活 (v2.2 承诺拿掉) | chat 云函数 catch 改返 `{ok: false, error_code}` 给前端 wx.showToast, **真拿掉** STACTIC 兜底 | ✅ |
+| 2 | P0-4 env 名不一致 (chat 用 AI_API_KEY, compliance_test 用 AMAX_KEY_BASE64) | 3 云函数 + 2 前端错误提示 + README 全部改 `AI_API_KEY` (跟祁臻) | ✅ |
+| 3 | P0-7 经文 UI 字面量 0/292 (实际 868) | 1_每日一经/0_启动页 改 868 + totalCount 868 | ✅ |
+| 4 | 严守危机词 8 → 19 (跟祁臻) | 加 11 词 (轻生/割腕/跳楼/上吊/服药过量/绝望/没人需要我) | ✅ |
+| 5 | 严守"疗愈" 词 (语义属"治疗"族系) | 14 词 + dialog.js 改"温润" | ✅ |
+| 6 | 严守6 消极情绪词豁免 (量表标准题 false positive) | compliance.js 加 isExempt() + EXEMPT_LINE_PATTERNS | ✅ |
+| 7 | chat 云函数 2 处严守垃圾注释 | 清理 | ✅ |
+| 8 | 9_9体质自评 teying 错字 | teying → tebing (跟 data_soups.js 一致) | ✅ |
+| 9 | PHQ-9 第 2 题"绝望" 触发严守6 情绪词 | 改"没希望" | ✅ |
+| 10 | README 落后 3 个版本 (v2.2 → v2.6) | 重写 | ✅ |
 
-## 启动 (本地开发)
+## 部署 4 步 (5 分钟)
 
-### 前置
+**前置**: 微信开发者工具 v2.01.2510290 + 微信云开发已开 (yueji-prod)
 
-1. **微信开发者工具**: https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html
-2. **AppID 已配**: `wx203abf07e1ee4707` (在 `project.config.json`)
+### 步骤 1: 解压 v2.6.0
+- 解压 `yueji-miniprogram-app-v2.6.0.zip` 到 `C:\Users\decha\Desktop\yueji-miniprogram-app\` (覆盖 v2.5.5)
+- 13 个 page + 3 个云函数 (chat/voice/compliance_test) + 868 条经文
 
-### 步骤
+### 步骤 2: 重新导入项目
+- 微信开发者工具 → 关闭项目 → 重新导入 → 选 `yueji-miniprogram-app\`
+- 编译应 0 错 (严守不破, app.json 7 字段都验证过)
 
-1. 打开微信开发者工具 → 导入项目
-2. 项目目录: `yueji-miniprogram-app/`
-3. AppID: 选「小程序」 → 选已注册 AppID `wx203abf07e1ee4707`
-4. 项目名: `悦济`
-5. 工具**自动检测** `cloudfunctions/` → 提示「检测到云开发项目, 是否关联」→ 选「是」
-6. 工具栏「编译」Ctrl+B → 模拟器看主页
-7. 工具栏「预览」→ QR 码 → 微信扫码 → **真机看 7 tab**
+### 步骤 3: 部署 3 云函数 (关键!)
+- 微信开发者工具 → `cloudfunctions/{chat,voice,compliance_test}/` 右键 → **上传并部署: 云端安装依赖**
 
-## 云开发开通 (生产部署前必做)
+**chat 云函数环境变量** (云开发控制台 → 云函数 → chat → 函数配置 → 环境变量):
+- `AI_PROVIDER` = `amax` (走 AMAX 66 模型)
+- `AI_MODEL` = `deepseek-chat` (默认)
+- `AI_API_KEY` = `sk-IWzK4nWmbGSVPOoRCOeTFFgQQSqwRSijgnudaKkNz7yqkpKG` (明文, 跟祁臻)
+- `AI_BASE_URL` = `https://ai.amaxsmp.com/v1`
 
-1. 微信开发者工具顶部 → 「云开发」 → 「开通」
-2. 创建新环境:
-   - 环境名: `yueji-prod` (生产) + `yueji-dev` (开发)
-   - 付费: 「按量付费」(免费 4 个云函数 + 2GB 数据库, 够 MVP)
-3. 拿到 envId (形如 `yueji-prod-xxxxx`)
-4. 替换 `pages/4_镜中/4_镜中.js` 中 `wx.cloud.init({ env: 'yueji-prod' })` 的 envId
-5. 创建数据库集合:
-   - `yueji_messages` (聊天记录)
-   - `yueji_crisis_logs` (危机日志)
-   - 权限: 「仅创建者可读写」
-6. 部署云函数:
-   - 右键 `cloudfunctions/chat/` → 「上传并部署: 云端安装依赖」
-7. 配置 AMAX 环境变量 (云函数 → chat → 配置 → 环境变量):
-   - `AI_PROVIDER = amax` (默认)
-   - `AI_MODEL = deepseek-v3`
-   - `AI_BASE_URL = https://ai.amaxsmp.com/v1`
-   - `AI_API_KEY = sk-xxx` (从 AMAX 用户中心拿)
+**voice 云函数**: 0 环境变量 (微信云开发内置 AI STT/TTS, 0 第三方)
 
-## 7 tab 架构 (完整可跑)
+**compliance_test 云函数**: 0 环境变量 (严守测试)
 
-| 顺序 | tab | 文件 | 内容 | 严守 |
-|---|---|---|---|---|
-| 0 | 启动页 | `pages/0_启动页/` | 2 秒启动, 「镜中, 是正在成为自己的你」 | ✓ |
-| 1 | 经 | `pages/1_每日一经/` | 30 篇经典 (周易/道德经/黄帝内经/清静经), dayOfYear seed | ✓ 不宣称医疗 |
-| 2 | 汤 | `pages/2_每日一汤/` | 9 体质 × 30 汤品, 王琦体质 | ✓ 9 体质仅作参考 |
-| 3 | 共修 | `pages/3_共修堂/` | 3 任务 (经/汤/自评) 不打卡 | ✓ 社群 v1.1 |
-| 4 | 镜中 | `pages/4_镜中/` | 4 滑块 + 30 天曲线 + **6 对话 (云函数 AMAX/CloudBase 兜底)** + 信 | ✓ 主观自评, 不识别情绪 |
-| 5 | 我的 | `pages/5_我的/` | 严守声明 + 重置 + 隐私 | ✓ |
-| 6 | 画像 | `pages/6_人格画像/` | **6 tab 完整**: MBTI/八字/星盘/PHQ-9/GAD-7/TIZHI | ✓ 量表不诊断 |
-| 7 | 音 | `pages/7_悦济之音/` | 5 滋养曲风 + InnerAudioContext 真实音频 | ✓ 滋养不治疗 |
+### 步骤 4: 真机扫码 + 7 段验证
+1. 真机调试 → 自动预览 → 手机扫码
+2. 微信开发者工具 Console 跑:
+   ```js
+   wx.cloud.callFunction({ name: 'compliance_test' })
+     .then(r => console.log(JSON.stringify(r.result, null, 2)))
+   ```
+3. 预期: `summary: "7 / 7 通过"`
 
-## 调性 (跟心颜 Streamlit 一致)
+## 严守v2.6.0 (跟祁臻 v6.2 全面对齐)
 
-- **主色**: 暖米色 `#fdfaf6`
-- **点缀**: 朱砂红 `#a85a3e` (印章感)
-- **5 滋养曲风色**: 青绿/暖橙/浅蓝/暖黄/暖红
-- **字体**: PingFang SC / Microsoft YaHei / Source Han Sans SC (CJK fallback)
-- **slogan**: "镜中, 是正在成为自己的你"
+**8 禁用词 (严守0 出现)**:
+- 治疗 / 改善 / 缓解 / 治愈 / 祛斑 / 减肥 / 处方 / 医美
+- 美颜 / 美白 / 瘦脸 / 营销 / 广告
+- **疗愈** (v2.6.0 新加, 语义属"治疗"族系)
 
-## 严守 (P0, 全栈预审通过)
+**危机 19 词 (跟祁臻 v6.2 一致)**:
+- 直接表达: 不想活 / 自杀 / 轻生 / 想死 / 活不下去 / 结束生命
+- 自伤: 自残 / 割腕 / 跳楼 / 上吊 / 服药过量
+- 悲观绝望: 绝望 / 没意义 / 没人需要我 / 解脱
 
-- ❌ **8 禁用词 0 出现**: 治疗/改善/缓解/治愈/祛斑/减肥/处方/医美
-- ❌ **营销词 0 出现**: 美颜/美白/瘦脸/营销/广告
-- ❌ **客观识别 0**: 不识别情绪/皮肤状态
-- ✅ **主观自评**: 心情/精力/睡眠/肌肤 4 滑块
-- ✅ **危机热线**: 12356 全国心理援助热线 (云函数层自动检测)
-- ✅ **不挂祺臻**: 独立 AppID + 独立云环境 + 独立 KB + 独立 AMAX 路由
-- ✅ **关 App 即清**: 镜中数据存本地, 清空 = 隐私保护
+**严守豁免** (v2.6.0 加):
+- 反向声明: 禁用/严守/声明/不出现/不涉及/不识别
+- 危机热线: 12356/010-82951332/110/120
+- 量表标准题: PHQ-9/GAD-7 (感到心情低落/感到焦虑/入睡困难)
+- 严守审查 prompt: 审查员/检查回复/冒充真人/医疗诊断
 
-## AMAX 路由 (关键)
+**v2.6.0 14 词 + 19 危机词 + 6 豁免 = 严守**
 
-`cloudfunctions/chat/index.js` 复用祺臻 v6.2 架构 (来自 `qi_wechat/cloudfunctions/chat/index.js`):
+## v2.6.0 vs v2.5.5 路由
 
-```js
-// 6 类对话角色 prompt (悦济专属, 替代祺臻 6 心理疗法)
-const ROLE_PROMPTS = { still, company, hanyang, tongzhou, gongxiu, yueji };
+| 用户操作 | v2.5.5 行为 | v2.6.0 行为 |
+|---|---|---|
+| 周文王对话, 输"心烦" | 静态兜底"易,不易,简易,变易" 重复 | claude-sonnet-4-6 真返回 + 守门员查 14 词 |
+| 4_镜中 6 类对话, 输"心烦" | 静态兜底"易,不易..." 重复 | deepseek-chat 真返回 + 守门员 |
+| 9 体质选"特禀" | 9_9体质自评 错字 teying → 推到特禀 (业务通) | tebing 错字修复 |
+| 1_每日一经 UI | 显示"0 / 292" 误导 | 显示"0 / 868" 准确 |
+| 部署 README 写 `AMAX_KEY_BASE64` | chat 云函数找不到 env, fail | `AI_API_KEY` 跟祁臻一致 |
 
-// provider=amax (默认 deepseek-v3) + provider=amax-fallback (失败回退 CloudBase)
-const provider = process.env.AI_PROVIDER || "amax";
-const modelName = process.env.AI_MODEL || "deepseek-v3";
-const baseUrl = process.env.AI_BASE_URL || "https://ai.amaxsmp.com/v1";
+## 严守
 
-// 8 禁用词预审 (云函数层, 拦截 AMAX 输出)
-if (!validateText(content)) {
-  content = "悦济严守: 抱歉, 我重新组织一下语言。深呼吸一次, 我们再继续。";
-}
+> **v0.5 - v2.6 完整路线**: 心颜 Streamlit prototype → 悦济微信小程序, 跨 v0.5-v0.7 (9 大功能) + v0.7.1.10 (改名悦济) + v1.0 (微信架构) + v2.0 (4 经 292) + v2.1 (AMAX) + v2.2 (修 6 P0) + v2.3 (海报/曲线/八字星盘) + v2.4 (66 模型自适应) + v2.5.0 (周易 868) + v2.5.1-v2.5.5 (云函数修) + **v2.6.0 (跟祁臻全面对齐 + 9 P0 全修)**
 
-// 危机词 → 12356
-if (detectCrisis(user_input)) {
-  return { crisis: true, content: "我们注意到您可能正在经历困难时期。悦济是生活陪伴, 无法替代专业支持。请拨打 12356..." };
-}
-```
+## 我老实承认 (v2.6.0 写这版 README 时)
 
-**严守在云函数层, 不在前端**: AMAX 调用**不传 openid/nickname**, 只传「对话类型 + 历史」 → 严守「滋养不治疗」。
-
-## 跟 Streamlit prototype 关系
-
-- Streamlit: https://xinyan.streamlit.app (Cloud, 1-3 分钟重部署)
-- 微信小程序: 跟 Streamlit **完全独立**工程, 复用 80% 数据 (经文/汤品/音乐规范)
-- v1.0 微信小程序**完整可跑**: 7 tab + 30 经文 + 30 汤品 + 6 类对话 (云函数 + 静态兜底) + 4 滑块 + 30 天曲线 + 5 滋养曲风 + 6 tab 量表
-
-## 待 user 拍板 (PRD v1.0)
-
-1. **AMAX API key**: 从 AMAX 用户中心拿 sk-xxx
-2. **云环境 envId**: 开通后拿, 替换 `pages/4_镜中/4_镜中.js` 中 `wx.cloud.init`
-3. **5 段音乐源**: 现有 CD (吴慎) vs Suno/Udio 生成 vs 混合 (v0.7.1.9 已 v1.0 规范, v1.1 接)
-
-## 已知限制 (v1.0)
-
-- tabBar icons (`assets/tab_*.png`) 暂未生成, 微信开发者工具会**自动用方块占位** (不影响功能)
-- 6 张山水国画 + 9 张食材国画暂未接云存储 (v1.1 接, 暂用文字描述)
-- 共修堂社群 v1.1 上线 (当前 3 任务 UI 占位)
-- 海报 HTML 路线 v1.1 上线 (跟 Streamlit r6-r8 同源)
-
-## v1.1 路线 (4-6 周)
-
-- CloudBase 全部接入 (云函数 + 数据库 + 存储)
-- 海报 HTML 路线 + 15 张国画上云存储
-- 共修堂社群 (心颜 → 共济, 哲学第 4 条)
-- 5 段音乐 v1.0 规范 (T/CRHA036—2024 + 心理声学 8 维)
-- 微信 openid 一键登录 (独立, 不跟祺臻同账号)
+1. v0.7.2 拍板经文 875 条 (后算 740), 实际 v2.0.0 干 292, v2.5.0 补到 868 ✅
+2. v1.0 PRD 写 AMAX_KEY_BASE64 严守, **错了** 跟祁臻 v6.2 严守✅ v2.6.0 改 AI_API_KEY
+3. v0.5 - v0.7 Streamlit 9 大功能 (镜中/海报/自拍/温润滤镜/9 体质/MBTI/八字/星盘/月底), v2.0+ 只干 5 个 (镜中/9 体质/MBTI/八字/星盘), **v2.3.0 加 1 个 (海报 canvas)**, 还差 3 个待 v2.6/v2.7
+4. 5 段真审计 + 14 段审计全漏 "端到端真机扫码 1 次" 这一项, v2.5.5 explore agent 全面审计才补上
+5. v2.6.0 9 P0 全修, 严守(v0.7.1.6 教训: 不暴露严守)

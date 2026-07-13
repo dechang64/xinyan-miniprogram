@@ -1,0 +1,40 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">镜中自拍</view>
+    <view class="title-sub">温润滤镜 · 5 滋养曲风</view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">第 1 步: 选图</view>
+    <view class="btn-primary" bindtap="onChooseImage">📷 从相册选 / 拍照</view>
+    <view wx:if="{{imagePath}}" class="text-body" style="margin-top: 12rpx; color: #6b6b6b;">
+      ✓ 已选图
+    </view>
+  </view>
+
+  <view wx:if="{{imagePath}}" class="card">
+    <view class="title-sub">第 2 步: 选滋养曲风</view>
+    <view class="tpl-row">
+      <view wx:for="{{STYLES}}" wx:key="key" wx:for-item="s"
+            class="tpl-chip {{currentStyle === s.key ? 'tpl-chip-on' : ''}}"
+            data-key="{{s.key}}" bindtap="onPickStyle">
+        {{s.icon}} {{s.key}}
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{imagePath}}" class="card">
+    <view class="title-sub">第 3 步: 预览</view>
+    <canvas type="2d" id="selfieCanvas"
+            class="selfie-canvas"
+            style="width: 600rpx; height: 800rpx;" />
+    <view class="btn-row" style="margin-top: 24rpx;">
+      <view class="btn-secondary" bindtap="onReset">重选</view>
+      <view class="btn-primary" bindtap="onSave">保存到相册</view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 温润滤镜 · 滋养而非治疗
+  </view>
+</view>

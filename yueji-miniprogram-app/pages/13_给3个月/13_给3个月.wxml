@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">给 3 个月后的自己</view>
+    <view class="title-sub">90 天后打开 · 只给未来的你</view>
+  </view>
+
+  <view class="card" wx:if="{{!hasLetter}}">
+    <view class="title-sub">写一封信</view>
+    <view class="text-body" style="margin-top: 12rpx; color: #6b6b6b;">
+      3 个月后的你, 看着这封信时会怎么想? 写下你的心情, 90 天后悦济提醒你打开。
+    </view>
+    <textarea
+      class="letter-textarea"
+      maxlength="500"
+      placeholder="今天的我, 想跟 3 个月后的你说..."
+      value="{{letterText}}"
+      bindinput="onInput"
+    />
+    <view class="text-body" style="font-size: 22rpx; color: #a8a29e; text-align: right;">
+      {{letterText.length}} / 500
+    </view>
+    <view class="btn-primary" style="margin-top: 16rpx;" bindtap="onSave">保存 (90 天后才能看)</view>
+  </view>
+
+  <view class="card" wx:elif="{{!canOpen}}">
+    <view class="title-sub">信已封存</view>
+    <view class="text-body" style="margin-top: 16rpx; color: #6b6b6b;">
+      写入日期: {{letterDate}}<br/>
+      打开日期: {{openDate}}<br/>
+      还需要: <text style="color: #a94442; font-weight: 600;">{{daysLeft}} 天</text>
+    </view>
+    <view class="btn-secondary" style="margin-top: 16rpx;" bindtap="onDelete">作废重写</view>
+  </view>
+
+  <view class="card" wx:else>
+    <view class="title-sub">3 个月前的你, 写给现在的你</view>
+    <view class="text-body" style="margin-top: 16rpx; color: #2d3a2e; line-height: 1.8;">
+      {{letterText}}
+    </view>
+    <view class="text-body" style="margin-top: 16rpx; font-size: 24rpx; color: #a8a29e;">
+      写入日期: {{letterDate}}
+    </view>
+    <view class="btn-secondary" style="margin-top: 16rpx;" bindtap="onDelete">作废重写</view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 信件只存本地, 关 App 即清. 不上传云端.
+  </view>
+</view>

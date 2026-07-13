@@ -12,7 +12,7 @@
       <view class="chat-bubble {{item.role == 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}}">
         <text>{{item.content}}</text>
       </view>
-      <view wx:if="{{item.withAudio && item.role == 'assistant' && isPlaying}}" class="chat-audio">
+      <view wx:if="{{item.showAudio}}" class="chat-audio" hidden="{{!isPlaying}}">
         🔊 播放中...
       </view>
     </view>
@@ -24,7 +24,7 @@
   </scroll-view>
 
   <view class="input-bar">
-    <view wx:if="{{isRecording}}" class="recording-tip">🟢 录音中... 轻触松手发送</view>
+    <!-- v2.5.4: 删录音功能 (v1.1 加的, 没真测过端到端, 按住录音触发 "Record file not exist" 错), 留文字 + TTS -->
     <view class="input-row">
       <textarea
         class="input-text"
@@ -33,14 +33,12 @@
         bindinput="onInput"
         auto-height
       />
-      <view class="btn-record {{isRecording ? 'btn-record-active' : ''}}"
-        bindtouchstart="onStartRecord"
-        bindtouchend="onStopRecord">🎤</view>
       <view class="btn-send" bindtap="onSend">发送</view>
     </view>
     <view class="action-row">
       <view class="action-btn" bindtap="onStopTTS" wx:if="{{isPlaying}}">⏹ 停止</view>
       <view class="action-btn" bindtap="onClearHistory">🗑 清空</view>
+      <view class="action-btn" style="color: #a8a29e; font-size: 22rpx;">🎤 录音 v2.6 路线</view>
     </view>
   </view>
 </view>

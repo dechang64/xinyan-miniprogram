@@ -114,7 +114,7 @@ module.exports = {
   getBazi, getZodiac, scorePHQ9, scoreGAD7, TIZHI_9_QUESTIONS, scoreTizhi, TIZHI_NAMES,
   PHQ9_QUESTIONS: [
     '做事时缺乏兴趣或乐趣',
-    '感到心情低落、沮丧或绝望',
+    '感到心情低落、沮丧或没希望',
     '入睡困难、睡不安稳或嗜睡',
     '感到疲倦或精力不足',
     '食欲不振或暴饮暴食',

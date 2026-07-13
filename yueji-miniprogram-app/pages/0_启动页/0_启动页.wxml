@@ -1,6 +1,49 @@
-<view class="splash">
-  <view class="splash-icon">悦</view>
-  <view class="splash-slogan">{{slogan}}</view>
-  <view class="splash-sub">{{sub}}</view>
-  <view class="splash-skip" bindtap="onTapSkip">轻触进入 →</view>
+<view class="page">
+  <!-- v2.2.0 修出界: 6 山水改顶部 swiper 400rpx (不用作背景), 父 overflow: hidden -->
+  <swiper class="hero-swiper" indicator-dots autoplay interval="30000" circular>
+    <swiper-item wx:for="{{bgImgs}}" wx:key="*this">
+      <image class="hero-img" src="{{item}}" mode="aspectFill" />
+    </swiper-item>
+  </swiper>
+
+  <!-- Hero 启动区 (v0.7.1.9-r8 风格, 渐变背景无真图) -->
+  <view class="hero">
+    <view class="hero-content">
+      <view class="hero-eyebrow">悦济 · 共修同行</view>
+      <view class="hero-title">悦济</view>
+      <view class="hero-sub">镜中, 是正在成为自己的你</view>
+      <view class="hero-stamp">悦济</view>
+    </view>
+  </view>
+
+  <!-- 今日推荐 3 件 -->
+  <view class="card-jingwen" bindtap="onTapTodayJing">
+    <view class="source">今日一读 · {{todayJing.source}}</view>
+    <view class="title">{{todayJing.title}}</view>
+    <view class="content">{{todayJing.content}}</view>
+  </view>
+
+  <view class="card-soup" bindtap="onTapTodaySoup">
+    <view class="name">今日一汤 · {{todaySoup.name}}</view>
+    <view class="badge">{{todaySoup.tizhi}}</view>
+    <view class="ingredients">{{todaySoup.ingredients}}</view>
+  </view>
+
+  <view class="card-jingwen" bindtap="onTapTodayHuman">
+    <view class="source">今日一修 · 4 经数字人</view>
+    <view class="title">4 经 + 4 数字人 等你共修</view>
+    <view class="content">老子 · 周文王 · 岐伯 · 元神</view>
+  </view>
+
+  <!-- 3 入口按钮 -->
+  <view class="entry-row">
+    <view class="btn-primary" bindtap="onTapJingwen">经文库</view>
+    <view class="btn-secondary" bindtap="onTapSoup">汤品库</view>
+    <view class="btn-ghost" bindtap="onTapJingzhong">进入镜中</view>
+  </view>
+
+  <!-- 严守 -->
+  <view class="compliance-bar">
+    ✦ 滋养陪伴, 不涉及医疗作用 · 主观自评 ✅ · 客观识别 ❌
+  </view>
 </view>

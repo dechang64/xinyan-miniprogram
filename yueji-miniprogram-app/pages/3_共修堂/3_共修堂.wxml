@@ -4,19 +4,20 @@
     <view class="title-sub">一群人, 慢慢变好</view>
   </view>
 
+  <!-- v2.2.0 修 3 链点不动 + 删"敬请期待": 3 任务真跳, 社群改成 v2.3 路线 -->
   <view class="card">
-    <view class="title-sub">3 任务</view>
-    <view class="list-row">
+    <view class="title-sub">3 任务 (今天你做了几件?)</view>
+    <view class="list-row" bindtap="onTapJing">
       <view class="list-icon">📖</view>
       <view class="list-text">每日一经</view>
       <view class="list-arrow">→</view>
     </view>
-    <view class="list-row">
+    <view class="list-row" bindtap="onTapSoup">
       <view class="list-icon">🍵</view>
       <view class="list-text">每日一汤</view>
       <view class="list-arrow">→</view>
     </view>
-    <view class="list-row">
+    <view class="list-row" bindtap="onTapJingzhong">
       <view class="list-icon">🪞</view>
       <view class="list-text">镜中自评</view>
       <view class="list-arrow">→</view>
@@ -25,12 +26,17 @@
 
   <view class="card">
     <view class="title-sub">本周共修</view>
-    <view class="text-body" style="text-align: center; padding: 48rpx 0; color: #a8a29e;">
-      社群功能 v1.1 上线
+    <view class="text-body" style="margin-top: 16rpx;">
+      社群 v2.3 路线 (待 v2.3 拍板):
+    </view>
+    <view class="text-body" style="margin-top: 8rpx; color: #7a6f5f; font-size: 24rpx;">
+      • 同修圈: 9 体质 / 24 节气 / 4 经 / 6 类对话 4 大主题圈<br/>
+      • 慢共修: 不打卡, 30 天同一群人慢慢走<br/>
+      • 严守: 不比较 / 不排名 / 不焦虑
     </view>
   </view>
 
   <view class="compliance-bar">
-    ✦ 共修不打卡, 慢慢来。社群功能 v1.1 上线, 敬请期待。
+    ✦ 共修不打卡, 慢慢来。
   </view>
 </view>

@@ -1,0 +1,57 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">MBTI 16 型快测</view>
+    <view class="title-sub">8 维度 · 主观自评 (仅供参考)</view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">您最近的状态</view>
+    <block wx:for="{{questions}}" wx:key="key" wx:for-item="q">
+      <view class="text-body" style="margin-top: 24rpx;">{{q.id + 1}}. {{q.text}}</view>
+      <slider
+        min="0" max="100" step="10" value="{{answers[q.key]}}"
+        show-value
+        block-size="20"
+        activeColor="#c9a961"
+        backgroundColor="#e8dfc8"
+        data-key="{{q.key}}"
+        bindchange="onSlide"
+      />
+      <view class="text-body" style="font-size: 22rpx; color: #a8a29e;">
+        0 = 完全偏 {{q.leftLabel}} · 100 = 完全偏 {{q.rightLabel}}
+      </view>
+    </block>
+
+    <view class="btn-primary" style="margin-top: 32rpx;" bindtap="onSubmit">看 4 字母</view>
+  </view>
+
+  <view wx:if="{{result}}">
+    <view class="card">
+      <view class="title-sub">您的 MBTI 倾向</view>
+      <view class="text-body" style="margin-top: 12rpx; color: #c9a961; font-weight: 600; font-size: 48rpx; letter-spacing: 8rpx;">
+        {{result.type}}
+      </view>
+      <view class="text-body" style="margin-top: 12rpx; color: #6b6b6b;">
+        {{result.desc}}
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title-sub">推荐 4 经 (按调性)</view>
+      <view class="text-body" wx:for="{{result.jingwen}}" wx:key="id" wx:for-item="j" style="margin-top: 12rpx;">
+        • {{j.source}} · {{j.title}}
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title-sub">推荐数字人</view>
+      <view class="text-body" style="margin-top: 12rpx;">
+        <view class="btn-secondary" bindtap="onTapDigital" data-key="{{result.human}}">跟 {{result.humanName}} 聊聊 →</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 主观自评 ✅ · 客观识别 ❌ · MBTI 16 型仅供生活参考, 不构成人格判定。
+  </view>
+</view>

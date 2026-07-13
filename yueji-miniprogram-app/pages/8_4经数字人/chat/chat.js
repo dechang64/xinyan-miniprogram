@@ -1,18 +1,16 @@
 // chat.js — 单个数字人对话页 (老子/周文王/岐伯/元神)
-// 支持: 文字输入 + 语音输入 + TTS 播放 + 历史记录
+// v2.5.4: 删语音录音 (v1.1 加的, 没真测过端到端, 按住录音触发 "Record file not exist" 错)
+// v2.5.4 留: 文字输入 + TTS 播放 + 历史记录
 const { DIGITAL_HUMAN_AVATARS } = require('../../../utils/data_digital_human.js');
 const { detectCrisis, todayISO } = require('../../../utils/compliance.js');
-const { getRandomResponse } = require('../../../utils/dialog.js');
 
 const innerAudioContext = wx.createInnerAudioContext();
-let recorderManager = null; // 延迟初始化
 
 Page({
   data: {
     human: null,           // 当前数字人
     messages: [],          // [{role, content, hasAudio}]
     inputText: '',
-    isRecording: false,
     isPlaying: false,
     isAiThinking: false,
   },
@@ -39,9 +37,6 @@ Page({
 
   onUnload() {
     innerAudioContext.stop();
-    if (recorderManager) {
-      recorderManager.stop();
-    }
   },
 
   loadHistory() {
@@ -55,7 +50,8 @@ Page({
   },
 
   pushMessage(role, content, withAudio = false) {
-    const msg = { role, content, withAudio, time: todayISO() };
+    // 严守: showAudio 字段 (v1.1.10 加, 避开 wxml && 表达式)
+    const msg = { role, content, withAudio, showAudio: withAudio && role === 'assistant', time: todayISO() };
     this.setData({ messages: [...this.data.messages, msg] });
     this.saveHistory();
     if (withAudio && role === 'assistant') {
@@ -75,75 +71,8 @@ Page({
     this.askAI(text);
   },
 
-  // 语音输入
-  onStartRecord() {
-    if (!recorderManager) {
-      recorderManager = wx.getRecorderManager();
-      recorderManager.onStop((res) => {
-        this.setData({ isRecording: false });
-        if (res && res.tempFilePath) {
-          this.callVoiceSTT(res.tempFilePath);
-        }
-      });
-      recorderManager.onError((err) => {
-        this.setData({ isRecording: false });
-        console.error('[悦济 录音]', err);
-        wx.showToast({ title: '录音失败', icon: 'none' });
-      });
-    }
-    // 微信小程序录音必须用户授权
-    wx.authorize({
-      scope: 'scope.record',
-      success: () => {
-        this.setData({ isRecording: true });
-        recorderManager.start({ format: 'mp3', duration: 60000 });
-      },
-      fail: () => {
-        wx.showModal({
-          title: '需要麦克风权限',
-          content: '请在设置中允许悦济使用麦克风',
-          confirmText: '去设置',
-          success: (res) => {
-            if (res.confirm) wx.openSetting();
-          },
-        });
-      },
-    });
-  },
-
-  onStopRecord() {
-    if (recorderManager && this.data.isRecording) {
-      recorderManager.stop();
-    }
-  },
-
-  // STT: 语音转文字
-  async callVoiceSTT(filePath) {
-    if (!wx.cloud) {
-      wx.showToast({ title: '云开发未配置', icon: 'none' });
-      return;
-    }
-    wx.showLoading({ title: '识别中...' });
-    try {
-      // 上传音频到云存储
-      const uploadRes = await wx.cloud.uploadFile({ cloudPath: `voice/${Date.now()}.mp3`, filePath });
-      // 调云函数 voice 做 STT
-      const res = await wx.cloud.callFunction({
-        name: 'voice',
-        data: { action: 'stt', fileID: uploadRes.fileID },
-      });
-      wx.hideLoading();
-      if (res.result && res.result.ok && res.result.text) {
-        this.askAI(res.result.text);
-      } else {
-        wx.showToast({ title: '识别失败', icon: 'none' });
-      }
-    } catch (e) {
-      wx.hideLoading();
-      console.error('[悦济 STT]', e);
-      wx.showToast({ title: '识别失败, 请重试', icon: 'none' });
-    }
-  },
+  // v2.5.4: 删语音录音 (v1.1 加的, 没真测过端到端, 按住录音触发 "Record file not exist" 错)
+  // v2.6 路线再实现 (需要: 麦克风权限引导 + 录音 → STT 云函数 → 文字)
 
   // TTS: 文字转语音
   async playTTS(text) {
@@ -164,7 +93,7 @@ Page({
     }
   },
 
-  // AI 调用 (复用 chat 云函数)
+  // AI 调用 (v2.2.0 修重复: 拿掉静态兜底先 push, 只等云函数返回; catch 显式提示)
   async askAI(userInput) {
     // 危机检测
     const crisisKw = detectCrisis(userInput);
@@ -175,35 +104,38 @@ Page({
     }
 
     this.pushMessage('user', userInput, false);
+
+    if (!wx.cloud) {
+      this.pushMessage('assistant', '云开发未配置, 请检查 wx.cloud。', false);
+      return;
+    }
+
     this.setData({ isAiThinking: true });
 
-    // 先静态兜底
-    const fallback = `${this.data.human.intro}\n\n慢慢说, 我在听。`;
-    this.setData({ isAiThinking: false });
-    this.pushMessage('assistant', fallback, false);
+    try {
+      const history = this.data.messages
+        .filter(m => m.role !== 'system')
+        .slice(-16)
+        .map(m => ({ role: m.role, content: m.content }));
+      const res = await wx.cloud.callFunction({
+        name: 'chat',
+        data: { user_input: userInput, role: this.humanKey, history },
+      });
+      this.setData({ isAiThinking: false });
 
-    // 再调云函数
-    if (wx.cloud) {
-      try {
-        const history = this.data.messages
-          .filter(m => m.role !== 'system')
-          .slice(-16)
-          .map(m => ({ role: m.role, content: m.content }));
-        const res = await wx.cloud.callFunction({
-          name: 'chat',
-          data: { user_input: userInput, role: this.humanKey, history },
-        });
-        if (res.result && res.result.ok && res.result.data && res.result.data.content) {
-          // 替换 fallback 那条
-          const messages = [...this.data.messages];
-          messages[messages.length - 1] = { role: 'assistant', content: res.result.data.content, withAudio: true, time: todayISO() };
-          this.setData({ messages });
-          this.saveHistory();
-          this.playTTS(res.result.data.content);
-        }
-      } catch (e) {
-        console.warn('[悦济 chat 云函数] 不可用, 保留静态:', e.message);
+      if (res.result && res.result.ok && res.result.data && res.result.data.content) {
+        this.pushMessage('assistant', res.result.data.content, true);
+      } else {
+        const errMsg = (res.result && res.result.error) || 'AI 返回为空';
+        console.warn('[悦济 chat 云函数]', errMsg);
+        this.pushMessage('assistant', '（暂未接住）请稍后再试, 或换个说法。', false);
       }
+    } catch (e) {
+      this.setData({ isAiThinking: false });
+      console.error('[悦济 chat 云函数 异常]', e);
+      // v2.6.0 修 P0-9: catch 显式提示 (不再静默), 跟 chat 云函数一致
+      wx.showToast({ title: '云函数不可用, 请检查部署', icon: 'none', duration: 3000 });
+      this.pushMessage('assistant', '（AI 暂未接住, 请检查云函数部署 / 环境变量 AI_API_KEY）', false);
     }
   },
 

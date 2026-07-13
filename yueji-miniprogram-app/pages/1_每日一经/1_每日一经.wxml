@@ -1,24 +1,67 @@
 <view class="page">
+  <!-- 头部 -->
   <view class="header">
-    <view class="title-main">每日一经</view>
-    <view class="title-sub">{{today.source}}</view>
+    <view class="title-main">经文库</view>
+    <view class="title-sub">{{progressText}} ({{progressPercent}}%)</view>
   </view>
 
-  <view class="card">
-    <view class="text-quote">{{today.text}}</view>
-    <view class="text-jieshi">{{today.jieshi}}</view>
+  <!-- 进度条 -->
+  <view class="progress-bar">
+    <view class="progress-fill" style="width: {{progressPercent}}%"></view>
   </view>
 
-  <view class="nav-row">
-    <view class="btn-ghost" bindtap="onTapPrev">上一篇</view>
-    <view class="btn-primary" bindtap="onTapNext">下一篇</view>
+  <!-- 搜索框 -->
+  <view class="search-bar">
+    <text class="list-icon">🔍</text>
+    <input class="search-input" placeholder="搜索经文..." value="{{searchQuery}}" bindinput="onSearchInput" />
   </view>
 
-  <view class="compliance-bar">
-    ✦ 严守声明: 经典 + 简释为悦济原创, 滋养而非治疗, 不涉及医疗作用。如有困扰, 请拨打 12356 全国心理援助热线。
+  <!-- 4 经 tab -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab == 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTabChange">全部 {{totalCount}}</view>
+    <view class="tab-item {{activeTab == 'daodejing' ? 'active' : ''}}" data-tab="daodejing" bindtap="onTabChange">道德经 {{daodejingCount}}</view>
+    <view class="tab-item {{activeTab == 'zhouyi' ? 'active' : ''}}" data-tab="zhouyi" bindtap="onTabChange">周易 {{zhouyiCount}}</view>
+    <view class="tab-item {{activeTab == 'huangdi' ? 'active' : ''}}" data-tab="huangdi" bindtap="onTabChange">黄帝内经 {{huangdiCount}}</view>
+    <view class="tab-item {{activeTab == 'qingjing' ? 'active' : ''}}" data-tab="qingjing" bindtap="onTabChange">清静经 {{qingjingCount}}</view>
   </view>
 
-  <view class="footer-tip">
-    <text>第 {{idx + 1}} / {{jingwenList.length}} 篇</text>
+  <!-- 收藏筛选 -->
+  <view class="filter-row">
+    <text class="status-tag {{filterStatus == 'all' ? 'status-done' : 'status-unread'}}" data-status="all" bindtap="onFilterStatus">全部</text>
+    <text class="status-tag {{filterStatus == 'unread' ? 'status-done' : 'status-unread'}}" data-status="unread" bindtap="onFilterStatus">未读</text>
+    <text class="status-tag {{filterStatus == 'reading' ? 'status-done' : 'status-unread'}}" data-status="reading" bindtap="onFilterStatus">学习中</text>
+    <text class="status-tag {{filterStatus == 'done' ? 'status-done' : 'status-unread'}}" data-status="done" bindtap="onFilterStatus">已读</text>
+    <text class="status-tag {{filterStatus == 'favorite' ? 'status-done' : 'status-unread'}}" data-status="favorite" bindtap="onFilterStatus">★ 收藏</text>
+  </view>
+
+  <!-- 经文列表 -->
+  <scroll-view scroll-y class="jingwen-list">
+    <view wx:for="{{filteredList}}" wx:key="id" class="card-jingwen" data-id="{{item.id}}" bindtap="onTapItem">
+      <view class="source">{{item.source}} · {{item.title}}</view>
+      <view class="content">{{item.content}}</view>
+      <view class="meta-row">
+        <text class="status-tag status-{{item.status}}" wx:if="{{item.status != 'unread'}}">{{item.status == 'reading' ? '学习中' : item.status == 'done' ? '已读' : '已收藏'}}</text>
+        <text class="status-tag status-unread" wx:if="{{item.status == 'unread'}}">未读</text>
+        <text class="fav-star" wx:if="{{item.favorite}}">★</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 详情弹层 (点击经文后) -->
+  <view class="modal-mask" wx:if="{{showDetail}}" bindtap="onCloseDetail">
+    <view class="modal-content" catchtap="">
+      <view class="modal-header">
+        <view class="modal-title">{{detail.title}}</view>
+        <view class="modal-source">{{detail.source}}</view>
+      </view>
+      <scroll-view scroll-y class="modal-body">
+        <view class="modal-content-text">{{detail.content}}</view>
+      </scroll-view>
+      <view class="modal-actions">
+        <view class="btn-ghost" data-status="reading" data-id="{{detail.id}}" bindtap="onSetStatus">学习中</view>
+        <view class="btn-ghost" data-status="done" data-id="{{detail.id}}" bindtap="onSetStatus">已读</view>
+        <view class="btn-primary" data-id="{{detail.id}}" bindtap="onToggleFavorite">{{detail.favorite ? '★ 已收藏' : '☆ 收藏'}}</view>
+      </view>
+    </view>
   </view>
 </view>

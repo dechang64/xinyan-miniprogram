@@ -31,9 +31,14 @@ Page({
 
   onLoad() {
     innerAudioContext.onTimeUpdate(() => {
+      const current = innerAudioContext.currentTime;
+      const duration = innerAudioContext.duration || 0;
+      // 严守: 整数秒, 不用 Vue 管道 (v1.1.10 改)
       this.setData({
-        currentTime: innerAudioContext.currentTime,
-        duration: innerAudioContext.duration || 0,
+        currentTime: current,
+        duration: duration,
+        timeDisplay: `${Math.floor(current)}s / ${Math.floor(duration)}s`,
+        hasDuration: duration > 0,
       });
     });
     innerAudioContext.onEnded(() => {

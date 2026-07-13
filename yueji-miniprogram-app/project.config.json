@@ -49,5 +49,9 @@
     "tabIndent": "insertSpaces",
     "tabSize": 2
   },
-  "miniprogramRoot": "./"
+  "miniprogramRoot": "./",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "cloudbaseRoot": "",
+  "cloudfunctionTemplateRoot": "",
+  "cloudbaseAutoSync": true
 }

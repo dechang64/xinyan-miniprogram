@@ -1,7 +1,20 @@
-// app.js — 悦济 v1.0
+// app.js — 悦济 v2.5.3 (云环境初始化 + 严守统一)
 // 严守: 8 禁用词 0 出现, 滋养/共修/镜中 调性统一
+// v2.5.3 修: 不写死 env, 让 wx.cloud.init() 自动用当前微信开发者工具绑定的环境
+// (v2.5.2 写死 env: '44dbe0ce-...' 错, user 实际是 d73d7bd1-..., 环境 ID 是临时 UUID 不是稳定)
 App({
   onLaunch() {
+    // 统一初始化云开发 (v1.1.5 新增, 修复 v1.1.4 各 page 各自 init 的不一致)
+    if (!wx.cloud) {
+      console.error('[悦济] 当前微信客户端版本过低, 请升级到最新微信');
+    } else {
+      // v2.5.3: 不传 env, 微信开发者工具自动用当前绑定的环境
+      // v1.1.5 我加的 env 反而坏事 — 写死的 UUID 跟 user 实际环境不匹配
+      wx.cloud.init({
+        traceUser: true,
+      });
+      console.log('[悦济] 云环境初始化完成 (自动用当前开发者工具绑定的环境)');
+    }
     // 严守: 关 App 即清本地数据
     // 严守: 不调用 getUserInfo, 仅用 wx.login 拿 openid (后续 v1.1 接云函数)
     console.log('悦济启动');

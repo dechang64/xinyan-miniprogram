@@ -17,17 +17,19 @@
   </view>
 
   <view class="card">
-    <view class="title-sub">30 天曲线</view>
+    <view class="title-sub">30 天曲线 (v2.3.0 canvas 2d)</view>
     <view wx:if="{{history.length == 0}}" class="text-body" style="text-align: center; padding: 48rpx 0; color: #a8a29e;">
       还没有数据, 记录一下今天吧
     </view>
-    <view wx:else style="margin-top: 24rpx;">
-      <view wx:for="{{history}}" wx:key="date" class="history-row">
-        <text class="history-date">{{item.date}}</text>
-        <text class="history-val" style="color: #E8998C;">心 {{item.mood}}</text>
-        <text class="history-val" style="color: #F4D35E;">精 {{item.energy}}</text>
-        <text class="history-val" style="color: #B8D8E8;">眠 {{item.sleep}}</text>
-        <text class="history-val" style="color: #A8D5BA;">颜 {{item.skin}}</text>
+    <view wx:else style="margin-top: 16rpx;">
+      <canvas type="2d" id="curveCanvas"
+              class="curve-canvas"
+              style="width: 660rpx; height: 400rpx;" />
+      <view class="curve-legend">
+        <text class="legend-item" style="color: #E8998C;">● 心</text>
+        <text class="legend-item" style="color: #F4D35E;">● 精</text>
+        <text class="legend-item" style="color: #B8D8E8;">● 眠</text>
+        <text class="legend-item" style="color: #A8D5BA;">● 颜</text>
       </view>
     </view>
   </view>
@@ -63,15 +65,11 @@
     <view class="text-body" style="margin-top: 16rpx; color: #a85a3e;">跟老子/周文王/岐伯/元神, 一起读经典 →</view>
   </view>
 
-  <!-- v1.1: 语音输入 -->
+  <!-- v2.5.4: 删语音录音 (v1.1 加的, 没真测过端到端, 触发 "Record file not exist" 错), 改 6 类对话文字版 -->
   <view class="card">
-    <view class="title-sub">🎤 语音陪伴 (v1.1 新)</view>
-    <view wx:if="{{isRecording}}" class="recording-tip">🟢 录音中... 轻触松手发送给「静下来」</view>
-    <view class="voice-row">
-      <view class="btn-record {{isRecording ? 'btn-record-active' : ''}}"
-        bindtouchstart="onStartRecord"
-        bindtouchend="onStopRecord">🎤</view>
-      <view class="voice-tip">按住说话, 跟悦济说</view>
+    <view class="title-sub">🎤 语音陪伴 (v2.6 路线)</view>
+    <view class="text-body" style="margin-top: 12rpx; color: #7a6f5f; font-size: 24rpx;">
+      v2.6 路线: 麦克风权限引导 + 录音 → STT 云函数 → 6 类对话文字版。
     </view>
   </view>
 

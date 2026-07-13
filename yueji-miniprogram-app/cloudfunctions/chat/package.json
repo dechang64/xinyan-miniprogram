@@ -1,7 +1,7 @@
 {
   "name": "chat",
-  "version": "1.0.0",
-  "description": "悦济 v1.0 chat 云函数 - AMAX/CloudBase + 6 类对话 + 严守 + RAG",
+  "version": "2.7.2",
+  "description": "悦济 v2.7.2 chat 云函数 - 走 AMAX sk-xxx (严守 AI_API_KEY 环境变量), 跟 v2.5.5/v2.6.0 一致, 删 v2.7.1 加错的 @cloudbase/node-sdk",
   "main": "index.js",
   "dependencies": {
     "wx-server-sdk": "~2.6.3"

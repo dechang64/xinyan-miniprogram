@@ -1,0 +1,29 @@
+.tpl-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 16rpx;
+}
+.tpl-chip {
+  display: inline-block;
+  padding: 12rpx 28rpx;
+  margin: 8rpx 12rpx 8rpx 0;
+  border: 2rpx solid #e8dfc8;
+  border-radius: 99rpx;
+  font-size: 24rpx;
+  color: #6b6b6b;
+  background: #fff;
+}
+.tpl-chip-on {
+  background: #4a7c59;
+  color: #fff;
+  border-color: #4a7c59;
+}
+.poster-canvas {
+  width: 540rpx;
+  height: 960rpx;
+  margin: 16rpx auto;
+  background: #fff;
+  border: 2rpx solid #e8dfc8;
+  border-radius: 8rpx;
+  display: block;
+}

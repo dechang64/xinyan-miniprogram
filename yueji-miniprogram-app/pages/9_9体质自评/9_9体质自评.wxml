@@ -1,0 +1,57 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">9 体质自评</view>
+    <view class="title-sub">王琦 9 体质 · 主观自评 (仅供参考)</view>
+  </view>
+
+  <view class="card">
+    <view class="title-sub">您最近 1 个月的整体感觉</view>
+    <block wx:for="{{questions}}" wx:key="key" wx:for-item="q">
+      <view class="text-body" style="margin-top: 24rpx;">{{q.id + 1}}. {{q.text}}</view>
+      <slider
+        min="0" max="100" step="10" value="{{answers[q.key]}}"
+        show-value
+        block-size="20"
+        activeColor="#4a7c59"
+        backgroundColor="#e8dfc8"
+        data-key="{{q.key}}"
+        bindchange="onSlide"
+      />
+      <view class="text-body" style="font-size: 22rpx; color: #a8a29e;">
+        0 = 完全不 · 50 = 一般 · 100 = 很明显
+      </view>
+    </block>
+
+    <view class="btn-primary" style="margin-top: 32rpx;" bindtap="onSubmit">看结果</view>
+  </view>
+
+  <view wx:if="{{result}}">
+    <view class="card">
+      <view class="title-sub">您的体质倾向</view>
+      <view class="text-body" style="margin-top: 12rpx; color: #4a7c59; font-weight: 600;">
+        {{result.primary}}
+      </view>
+      <view class="text-body" style="margin-top: 12rpx; color: #6b6b6b;">
+        {{result.advice}}
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title-sub">推荐汤品 (3 款)</view>
+      <view class="text-body" wx:for="{{result.soups}}" wx:key="id" wx:for-item="s" style="margin-top: 12rpx;">
+        • {{s.name}} — {{s.desc}}
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title-sub">推荐经文 (3 篇)</view>
+      <view class="text-body" wx:for="{{result.jingwen}}" wx:key="id" wx:for-item="j" style="margin-top: 12rpx;">
+        • {{j.title}} — {{j.source}}
+      </view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 主观自评 ✅ · 客观识别 ❌ · 本测评仅供生活参考, 不构成医疗建议。
+  </view>
+</view>

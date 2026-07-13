@@ -39,6 +39,19 @@ _selfcheck.py
 _verify.py
 _*.log
 _*.err.log
+audit_v*.py
+gen_*.py
+merge_*.py
+replace_*.py
+verify_*.js
+compress_*.py
+fix_*.py
+# 数据源临时文件
+zhouyi_*.json
+data_jingwen.js.bak
+/data_jingwen.js
+# assets 备份目录
+assets_backup_*/
 
 # ── 环境变量 / Secret ──
 .env

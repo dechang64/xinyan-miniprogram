@@ -3,8 +3,69 @@
     <view class="title-main">我的</view>
   </view>
 
+  <!-- 镜像区 — 6 个自测 + 1 个海报入口 (v2.2.0 加, 老版本 v0.5-v0.7 全 9 套都做, v2.1 简化后补) -->
   <view class="card">
-    <view class="title-sub">数据</view>
+    <view class="title-sub">镜中</view>
+    <view class="list-row" bindtap="onTapJingzhong">
+      <view class="list-icon">🪞</view>
+      <view class="list-text">今日镜中</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapTizhi">
+      <view class="list-icon">🍵</view>
+      <view class="list-text">9 体质自评 (推汤)</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapMBTI">
+      <view class="list-icon">🧭</view>
+      <view class="list-text">MBTI 16 型快测 (推经)</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapBazi">
+      <view class="list-icon">🏮</view>
+      <view class="list-text">八字解读 (生辰 → 推经推汤)</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapXingpan">
+      <view class="list-icon">✨</view>
+      <view class="list-text">12 星座 (公历生日)</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapPoster">
+      <view class="list-icon">🎴</view>
+      <view class="list-text">海报分享 (镜中签)</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapSelfie">
+      <view class="list-icon">📷</view>
+      <view class="list-text">自拍 + 温润滤镜</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapLetter3">
+      <view class="list-icon">✉️</view>
+      <view class="list-text">给 3 个月后的自己</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapMonthly">
+      <view class="list-icon">📊</view>
+      <view class="list-text">月底报告 (AMAX 生成)</view>
+      <view class="list-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 数字人 — 4 经 4 调性 (v2.2.0 加) -->
+  <view class="card">
+    <view class="title-sub">数字人</view>
+    <view class="list-row" bindtap="onTapDigital">
+      <view class="list-icon">🪶</view>
+      <view class="list-text">4 经数字人</view>
+      <view class="list-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 设置 -->
+  <view class="card">
+    <view class="title-sub">设置</view>
     <view class="list-row" bindtap="onTapAbout">
       <view class="list-icon">ℹ️</view>
       <view class="list-text">关于悦济</view>
@@ -23,9 +84,8 @@
       {{compliance}}
     </view>
     <view class="text-body" style="margin-top: 16rpx; color: #7a6f5f; font-size: 24rpx;">
-      ✦ 8 禁用词 0 出现: 治疗/改善/缓解/治愈/祛斑/减肥/处方/医美<br/>
-      ✦ 营销词 0 出现: 美颜/美白/瘦脸<br/>
-      ✦ 主观自评 ✅ / 客观识别 ❌
+      ✦ 滋养陪伴, 不涉及医疗作用<br/>
+      ✦ 主观自评 ✅ · 客观识别 ❌
     </view>
   </view>
 

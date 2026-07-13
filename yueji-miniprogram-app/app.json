@@ -7,31 +7,41 @@
     "pages/4_镜中/4_镜中",
     "pages/5_我的/5_我的",
     "pages/6_人格画像/6_人格画像",
-    "pages/7_悦济之音/7_悦济之音"
+    "pages/7_悦济之音/7_悦济之音",
+    "pages/8_4经数字人/8_4经数字人",
+    "pages/8_4经数字人/chat/chat",
+    "pages/9_9体质自评/9_9体质自评",
+    "pages/10_MBTI快测/10_MBTI快测",
+    "pages/11_海报分享/11_海报分享",
+    "pages/12_八字/12_八字",
+    "pages/13_星盘/13_星盘",
+    "pages/12_自拍温润/12_自拍温润",
+    "pages/13_给3个月/13_给3个月",
+    "pages/14_月底报告/14_月底报告"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#fdfaf6",
+    "navigationBarBackgroundColor": "#faf6f0",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "悦济",
-    "backgroundColor": "#fdfaf6",
+    "backgroundColor": "#faf6f0",
     "backgroundTextStyle": "light",
     "enablePullDownRefresh": false
   },
   "tabBar": {
-    "color": "#a8a29e",
-    "selectedColor": "#a85a3e",
-    "backgroundColor": "#fdfaf6",
+    "color": "#6b6b6b",
+    "selectedColor": "#4a7c59",
+    "backgroundColor": "#faf6f0",
     "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/1_每日一经/1_每日一经",
-        "text": "经",
+        "text": "经文",
         "iconPath": "assets/tab_jing.png",
         "selectedIconPath": "assets/tab_jing_sel.png"
       },
       {
         "pagePath": "pages/2_每日一汤/2_每日一汤",
-        "text": "汤",
+        "text": "汤品",
         "iconPath": "assets/tab_tang.png",
         "selectedIconPath": "assets/tab_tang_sel.png"
       },
@@ -55,7 +65,7 @@
       }
     ]
   },
-  "style": "v2",
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "subPackages": []
 }

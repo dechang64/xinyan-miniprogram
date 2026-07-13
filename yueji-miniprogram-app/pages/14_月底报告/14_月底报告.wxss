@@ -1,0 +1,19 @@
+.stat-row {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 16rpx;
+}
+.stat-cell {
+  text-align: center;
+  flex: 1;
+}
+.stat-num {
+  font-size: 56rpx;
+  font-weight: 600;
+  color: #4a7c59;
+}
+.stat-label {
+  font-size: 24rpx;
+  color: #6b6b6b;
+  margin-top: 4rpx;
+}
