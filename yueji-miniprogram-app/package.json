@@ -1,0 +1,11 @@
+{
+  "name": "yueji-miniprogram-app",
+  "version": "1.1.0",
+  "description": "悦济 v1.1 微信小程序 - 滋养/涵养/共修/镜中 + 4 经数字人 + 语音 STT/TTS",
+  "main": "app.js",
+  "scripts": {
+    "start": "echo '微信小程序, 请用微信开发者工具导入'"
+  },
+  "author": "Dechang Yu + Mavis",
+  "license": "MIT"
+}
