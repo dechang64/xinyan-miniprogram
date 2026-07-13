@@ -57,6 +57,24 @@
     <view class="text-body" style="margin-top: 16rpx; color: #a85a3e;">轻触进入 {{hasLetter ? '· 已有信' : '→'}}</view>
   </view>
 
+  <!-- v1.1: 4 经数字人入口 -->
+  <view class="card" bindtap="onGotoDigitalHuman" style="background: linear-gradient(180deg, #fdfaf6 0%, #f5efe6 100%);">
+    <view class="title-sub">🪷 4 经数字人 (v1.1 新)</view>
+    <view class="text-body" style="margin-top: 16rpx; color: #a85a3e;">跟老子/周文王/岐伯/元神, 一起读经典 →</view>
+  </view>
+
+  <!-- v1.1: 语音输入 -->
+  <view class="card">
+    <view class="title-sub">🎤 语音陪伴 (v1.1 新)</view>
+    <view wx:if="{{isRecording}}" class="recording-tip">🟢 录音中... 轻触松手发送给「静下来」</view>
+    <view class="voice-row">
+      <view class="btn-record {{isRecording ? 'btn-record-active' : ''}}"
+        bindtouchstart="onStartRecord"
+        bindtouchend="onStopRecord">🎤</view>
+      <view class="voice-tip">按住说话, 跟悦济说</view>
+    </view>
+  </view>
+
   <view class="compliance-bar">
     ✦ 镜中只记录您的主观自评, 不识别情绪/皮肤状态。如有持续困扰, 请拨打 12356 全国心理援助热线。
     <view class="hotline-btn" bindtap="onTapCallHotline">📞 一键拨打 12356</view>

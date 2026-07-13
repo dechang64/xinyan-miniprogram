@@ -1,0 +1,46 @@
+<view class="page" style="background: {{human.bgGradient}}; min-height: 100vh;">
+  <view class="human-header">
+    <view class="human-emoji">{{human.emoji}}</view>
+    <view class="human-name">{{human.name}}</view>
+    <view class="human-book">{{human.book}} · {{human.era}}</view>
+  </view>
+
+  <scroll-view class="chat-scroll" scroll-y scroll-into-view="msg-{{messages.length - 1}}">
+    <view wx:for="{{messages}}" wx:key="time" wx:for-index="idx"
+      id="msg-{{idx}}"
+      class="chat-msg {{item.role == 'user' ? 'chat-msg-user' : 'chat-msg-assistant'}}">
+      <view class="chat-bubble {{item.role == 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}}">
+        <text>{{item.content}}</text>
+      </view>
+      <view wx:if="{{item.withAudio && item.role == 'assistant' && isPlaying}}" class="chat-audio">
+        🔊 播放中...
+      </view>
+    </view>
+    <view wx:if="{{isAiThinking}}" class="chat-msg chat-msg-assistant">
+      <view class="chat-bubble chat-bubble-assistant">
+        <text>...</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="input-bar">
+    <view wx:if="{{isRecording}}" class="recording-tip">🟢 录音中... 轻触松手发送</view>
+    <view class="input-row">
+      <textarea
+        class="input-text"
+        placeholder="说点什么... {{human.name}} 在听"
+        value="{{inputText}}"
+        bindinput="onInput"
+        auto-height
+      />
+      <view class="btn-record {{isRecording ? 'btn-record-active' : ''}}"
+        bindtouchstart="onStartRecord"
+        bindtouchend="onStopRecord">🎤</view>
+      <view class="btn-send" bindtap="onSend">发送</view>
+    </view>
+    <view class="action-row">
+      <view class="action-btn" bindtap="onStopTTS" wx:if="{{isPlaying}}">⏹ 停止</view>
+      <view class="action-btn" bindtap="onClearHistory">🗑 清空</view>
+    </view>
+  </view>
+</view>

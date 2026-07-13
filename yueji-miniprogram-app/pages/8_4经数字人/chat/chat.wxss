@@ -1,0 +1,130 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.human-header {
+  text-align: center;
+  padding: 48rpx 32rpx 32rpx;
+  color: #fff;
+}
+.human-emoji {
+  font-size: 100rpx;
+  margin-bottom: 16rpx;
+  text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+}
+.human-name {
+  font-size: 44rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+.human-book {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+.chat-scroll {
+  flex: 1;
+  padding: 24rpx 32rpx;
+}
+.chat-msg {
+  margin: 16rpx 0;
+  display: flex;
+  flex-direction: column;
+}
+.chat-msg-user {
+  align-items: flex-end;
+}
+.chat-msg-assistant {
+  align-items: flex-start;
+}
+.chat-bubble {
+  max-width: 80%;
+  padding: 24rpx 32rpx;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  word-break: break-word;
+}
+.chat-bubble-user {
+  background: rgba(255, 255, 255, 0.95);
+  color: #3d3a36;
+  border-bottom-right-radius: 8rpx;
+}
+.chat-bubble-assistant {
+  background: rgba(255, 255, 255, 0.85);
+  color: #3d3a36;
+  border-bottom-left-radius: 8rpx;
+}
+.chat-audio {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 8rpx;
+  padding-left: 16rpx;
+}
+.input-bar {
+  background: #fff;
+  border-top: 2rpx solid #f5efe6;
+  padding: 16rpx 24rpx 24rpx;
+}
+.recording-tip {
+  text-align: center;
+  font-size: 24rpx;
+  color: #a85a3e;
+  padding: 8rpx;
+  margin-bottom: 8rpx;
+}
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12rpx;
+}
+.input-text {
+  flex: 1;
+  min-height: 64rpx;
+  max-height: 200rpx;
+  padding: 12rpx 16rpx;
+  background: #faf6f0;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+.btn-record {
+  width: 80rpx;
+  height: 80rpx;
+  background: #faf6f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+.btn-record-active {
+  background: #a85a3e;
+  color: #fff;
+  transform: scale(1.1);
+}
+.btn-send {
+  padding: 0 24rpx;
+  height: 80rpx;
+  background: #a85a3e;
+  color: #fff;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+.action-row {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+  margin-top: 12rpx;
+}
+.action-btn {
+  font-size: 22rpx;
+  color: #7a6f5f;
+  padding: 8rpx 16rpx;
+}

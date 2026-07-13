@@ -135,6 +135,13 @@
     </view>
   </view>
 
+  <!-- 4 经数字人 (v1.1) -->
+  <view wx:if="{{activeTab == 'digital_human'}}" class="card">
+    <view class="title-sub">4 经数字人 (v1.1)</view>
+    <view class="text-body" style="margin: 16rpx 0;">跟老子/周文王/岐伯/元神, 一起读经典。</view>
+    <view class="btn-primary" bindtap="onGotoDigitalHuman">→ 进入 4 经数字人</view>
+  </view>
+
   <view class="compliance-bar">
     ✦ 量表仅作主观自评参考, 不作任何医学诊断。如有持续困扰, 请拨打 12356 全国心理援助热线。
   </view>

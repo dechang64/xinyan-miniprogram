@@ -12,6 +12,7 @@ const TABS = [
   { key: 'phq9', name: '心情' },
   { key: 'gad7', name: '焦虑' },
   { key: 'tizhi', name: '9 体质' },
+  { key: 'digital_human', name: '4 经数字人' },
 ];
 
 Page({
@@ -134,5 +135,9 @@ Page({
     const result = scoreTizhi(this.data.tizhiAnswers);
     wx.setStorageSync('yueji_tizhi_result', result);
     this.setData({ tizhiResult: result });
+  },
+
+  onGotoDigitalHuman() {
+    wx.navigateTo({ url: '/pages/8_4经数字人/8_4经数字人' });
   },
 });

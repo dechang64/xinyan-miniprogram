@@ -1,0 +1,23 @@
+<view class="page">
+  <view class="header">
+    <view class="title-main">4 经数字人</view>
+    <view class="title-sub">跟老子/文王/岐伯/元神 一起读经典</view>
+  </view>
+
+  <view class="human-grid">
+    <view wx:for="{{humans}}" wx:key="key"
+      class="human-card"
+      data-key="{{item.key}}" bindtap="onTapHuman"
+      style="background: {{item.bgGradient}};">
+      <view class="human-emoji">{{item.emoji}}</view>
+      <view class="human-name">{{item.name}}</view>
+      <view class="human-book">{{item.book}}</view>
+      <view class="human-era">{{item.era}}</view>
+      <view class="human-intro">{{item.intro}}</view>
+    </view>
+  </view>
+
+  <view class="compliance-bar">
+    ✦ 4 经数字人为悦济独立设计, 严守「滋养而非治疗」, 8 禁用词 0 出现。
+  </view>
+</view>
