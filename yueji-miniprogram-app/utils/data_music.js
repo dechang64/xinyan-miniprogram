@@ -25,7 +25,7 @@ const WUYUE_DESCRIPTIONS = {
 
 // 30 段 mp3 cloudPath (已上传到 cloud1-d1g4p3kaa481d1302 / yueji-music-v3.0.5/v3.5modes_v2/)
 // 微信云开发把 5 调式文件夹合并了, 30 段都在 v3.5modes_v2/ 下
-const CLOUD_PREFIX = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3.5modes_v2';
+const CLOUD_PREFIX = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes_v2';
 
 const WUYUE_30_FILEID = {
   gong: [

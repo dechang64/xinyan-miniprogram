@@ -48,10 +48,19 @@ Page({
     const track = recommendWuyueTrack(tizhiKey, latest4);
     // 4. fileID → 临时 URL (2 小时有效)
     let mp3Url = '';
+    console.log('[悦济 music] track.fileID =', track.fileID);
     if (track.fileID && track.fileID.startsWith('cloud://')) {
-      const res = await getTempUrls([track.fileID]);
-      if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
-        mp3Url = res.fileList[0].tempFileURL;
+      try {
+        const res = await getTempUrls([track.fileID]);
+        console.log('[悦济 music] getTempFileURL res =', JSON.stringify(res).slice(0, 200));
+        if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
+          mp3Url = res.fileList[0].tempFileURL;
+          console.log('[悦济 music] mp3Url 拿到 ✓');
+        } else {
+          console.warn('[悦济 music] fileList 空, 检查存储安全规则 / 路径是否对');
+        }
+      } catch (e) {
+        console.error('[悦济 music] getTempFileURL 抛错 =', e);
       }
     }
 
@@ -109,9 +118,9 @@ Page({
   },
 
   onPlay() {
+    console.log('[悦济 music] onPlay mp3Url =', this.data.mp3Url ? this.data.mp3Url.slice(0, 80) + '...' : '空');
     if (!this.data.mp3Url) {
-      console.warn('[悦济 music] mp3Url 空, fileID:', this.data.fileID || '无');
-      wx.showToast({ title: 'mp3 URL 空, fileID: ' + (this.data.fileID || '无').slice(-50), icon: 'none', duration: 3000 });
+      wx.showToast({ title: 'mp3 URL 空, 请看 console', icon: 'none', duration: 3000 });
       return;
     }
     const ctx = wx.createInnerAudioContext();
