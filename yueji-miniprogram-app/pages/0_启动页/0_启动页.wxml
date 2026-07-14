@@ -21,12 +21,14 @@
     <view class="source">今日一读 · {{todayJing.source}}</view>
     <view class="title">{{todayJing.title}}</view>
     <view class="content">{{todayJing.content}}</view>
+    <view class="ai-hint" wx:if="{{todayJing.aiHint}}">思友说 · {{todayJing.aiHint}}</view>
   </view>
 
   <view class="card-soup" bindtap="onTapTodaySoup">
     <view class="name">今日一汤 · {{todaySoup.name}}</view>
     <view class="badge">{{todaySoup.tizhi}}</view>
     <view class="ingredients">{{todaySoup.ingredients}}</view>
+    <view class="ai-hint" wx:if="{{todaySoup.aiHint}}">养友说 · {{todaySoup.aiHint}}</view>
   </view>
 
   <view class="card-jingwen" bindtap="onTapTodayHuman">

@@ -49,6 +49,54 @@ Page({
         ingredients: todaySoup.desc || '—',
       },
     });
+
+    // v3.0.5 阶段 1.4: 大模型润色 1 句 - 今经 1 句解读 + 今汤 1 句为什么
+    this.askAiJingHint(todayJing);
+    this.askAiSoupHint(todaySoup);
+  },
+
+  // 大模型 1 句解读 (今经)
+  askAiJingHint(todayJing) {
+    if (!wx.cloud) return;
+    const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
+    const TIZHI_NAMES = { pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质', tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质' };
+    const prompt =
+      '你是悦济的「思友」, 用户是 9 体质中的「' + TIZHI_NAMES[tizhiKey] + '」, ' +
+      '今日经文: 「' + todayJing.title + '」 出自 ' + todayJing.source + ', ' +
+      '原文 80 字: ' + todayJing.content + '. ' +
+      '请用 1 句 (≤40 字) 解读, 严守: 不评判 / 不医疗 / 不卖, 滋养调性. ' +
+      '3 层结构: 看到 1 句原文 (10 字) + 跟用户 9 体质 (15 字) + 慢慢读 (10 字).';
+    wx.cloud.callFunction({
+      name: 'chat',
+      data: { user_input: prompt, role: 'zhouwenwang', history: [] },
+    }).then((res) => {
+      if (res && res.result && res.result.ok && res.result.data && res.result.data.content) {
+        const j = this.data.todayJing;
+        if (j.id === todayJing.id) this.setData({ 'todayJing.aiHint': res.result.data.content });
+      }
+    }).catch((e) => console.warn('[悦济 jing ai]', e));
+  },
+
+  // 大模型 1 句为什么 (今汤)
+  askAiSoupHint(todaySoup) {
+    if (!wx.cloud) return;
+    const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
+    const TIZHI_NAMES = { pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质', tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质' };
+    const prompt =
+      '你是悦济的「养友」, 用户是 9 体质中的「' + TIZHI_NAMES[tizhiKey] + '」, ' +
+      '今日汤: 「' + todaySoup.name + '」 适合 ' + todaySoup.tizhi + ' 体质, ' +
+      '成分: ' + (todaySoup.desc || '—') + '. ' +
+      '请用 1 句 (≤40 字) 告诉用户"为什么选这个", 严守: 不评判 / 不医疗 / 不卖, 滋养调性. ' +
+      '3 层结构: 看到 9 体质 (10 字) + 为什么这个汤 (15 字) + 慢慢喝 (10 字).';
+    wx.cloud.callFunction({
+      name: 'chat',
+      data: { user_input: prompt, role: 'qibo', history: [] },
+    }).then((res) => {
+      if (res && res.result && res.result.ok && res.result.data && res.result.data.content) {
+        const s = this.data.todaySoup;
+        if (s.id === todaySoup.id) this.setData({ 'todaySoup.aiHint': res.result.data.content });
+      }
+    }).catch((e) => console.warn('[悦济 soup ai]', e));
   },
 
   onTapTodayJing() { wx.switchTab({ url: '/pages/1_每日一经/1_每日一经' }); },
