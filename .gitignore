@@ -56,6 +56,11 @@ data_jingwen.js.bak
 /data_jingwen.js
 # assets 备份目录
 assets_backup_*/
+# 30 段 mp3 走 微信云存储 (2 MB 主包限制, 不打包本地)
+assets/music/v3_5modes/
+assets/music/v3_5modes_v2/
+# 悦济 30 段 mp3 走 微信云存储, 临时下载目录
+assets/music/*/tmp/
 
 # ── 环境变量 / Secret ──
 .env

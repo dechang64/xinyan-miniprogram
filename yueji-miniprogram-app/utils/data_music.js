@@ -2,7 +2,7 @@
 // 5 调式: 宫/商/角/徵/羽 ↔ 5 元素 (土/金/木/火/水) ↔ 5 脏 (脾/肺/肝/心/肾)
 // 9 体质 + 镜中 4 维 → 1 调式 + 随机 1 段 (5 调式 × 6 变体 = 30 段)
 // 严守: 不出现"治疗/疗愈/缓解"等 14 禁用词
-// 30 段 mp3: 5 段 v1 (assets/music/v3_5modes/) + 25 段 v2 (assets/music/v3_5modes_v2/)
+// 30 段 mp3 走 微信云存储 cloud:// (2 MB 主包限制, 不打包 mp3)
 
 const WUYUE_NAMES = {
   gong: '宫', shang: '商', jiao: '角', zhi: '徵', yu: '羽',
@@ -22,49 +22,49 @@ const WUYUE_DESCRIPTIONS = {
   yu: '沉降水音, 滋肾藏精, 沉降调性',
 };
 
-// 30 段 mp3 路径 (5 调式 × 6 变体 = 30, v1 + v2)
-// 变体: v1 (01) + v2 5 变体 (06-10) = 6 段 / 调式
-// 编号 01 (v1 基础) / 06-10 (v2 5 变体)
-const WUYUE_30_MP3 = {
+// 30 段 mp3 cloudPath 模板 (需 user 上传 30 段到云存储, 然后把 fileID 填这里)
+// 路径: cloud://yueji-prod.xxx/music/<gong|shang|jiao|zhi|yu>/<编号>_<乐器>_<BPM>bpm.mp3
+// 上传后 fileID 由 wx.cloud.uploadFile 返回, 把 cloud:// 整串粘到下面
+const WUYUE_30_FILEID = {
   gong: [
-    'assets/music/v3_5modes/01_gong_v1_guzheng_60bpm.mp3',     // v1 基础 guzheng 60
-    'assets/music/v3_5modes_v2/06_gong_guqin_65bpm.mp3',       // v2 变体 guqin 65
-    'assets/music/v3_5modes_v2/07_gong_pipa_70bpm.mp3',        // v2 变体 pipa 70
-    'assets/music/v3_5modes_v2/08_gong_muyu_75bpm.mp3',        // v2 变体 muyu 75
-    'assets/music/v3_5modes_v2/09_gong_bell_80bpm.mp3',        // v2 变体 bell 80
-    'assets/music/v3_5modes_v2/10_gong_paigu_55bpm.mp3',       // v2 变体 paigu 55
+    'cloud://yueji-prod.xxx/music/gong/01_guzheng_60bpm.mp3',     // 需 user 手动上传后替换 fileID
+    'cloud://yueji-prod.xxx/music/gong/06_guqin_65bpm.mp3',
+    'cloud://yueji-prod.xxx/music/gong/07_pipa_70bpm.mp3',
+    'cloud://yueji-prod.xxx/music/gong/08_muyu_75bpm.mp3',
+    'cloud://yueji-prod.xxx/music/gong/09_bell_80bpm.mp3',
+    'cloud://yueji-prod.xxx/music/gong/10_paigu_55bpm.mp3',
   ],
   shang: [
-    'assets/music/v3_5modes/02_shang_v1_xiao_70bpm.mp3',       // v1 基础 xiao 70
-    'assets/music/v3_5modes_v2/06_shang_bamboo_60bpm.mp3',     // v2 变体 bamboo 60
-    'assets/music/v3_5modes_v2/07_shang_qing_65bpm.mp3',       // v2 变体 qing 65
-    'assets/music/v3_5modes_v2/08_shang_gong_75bpm.mp3',       // v2 变体 gong 75
-    'assets/music/v3_5modes_v2/09_shang_paixiao_80bpm.mp3',    // v2 变体 paixiao 80
-    'assets/music/v3_5modes_v2/10_shang_bronze_55bpm.mp3',     // v2 变体 bronze 55
+    'cloud://yueji-prod.xxx/music/shang/02_xiao_70bpm.mp3',
+    'cloud://yueji-prod.xxx/music/shang/06_bamboo_60bpm.mp3',
+    'cloud://yueji-prod.xxx/music/shang/07_qing_65bpm.mp3',
+    'cloud://yueji-prod.xxx/music/shang/08_gong_75bpm.mp3',
+    'cloud://yueji-prod.xxx/music/shang/09_paixiao_80bpm.mp3',
+    'cloud://yueji-prod.xxx/music/shang/10_bronze_55bpm.mp3',
   ],
   jiao: [
-    'assets/music/v3_5modes/03_jiao_v1_bamboo_65bpm.mp3',      // v1 基础 bamboo 65
-    'assets/music/v3_5modes_v2/06_jiao_hulusi_60bpm.mp3',      // v2 变体 hulusi 60
-    'assets/music/v3_5modes_v2/07_jiao_sheng_70bpm.mp3',       // v2 变体 sheng 70
-    'assets/music/v3_5modes_v2/08_jiao_huangguan_75bpm.mp3',   // v2 变体 huangguan 75
-    'assets/music/v3_5modes_v2/09_jiao_duanxiao_80bpm.mp3',    // v2 变体 duanxiao 80
-    'assets/music/v3_5modes_v2/10_jiao_bawu_55bpm.mp3',        // v2 变体 bawu 55
+    'cloud://yueji-prod.xxx/music/jiao/03_bamboo_65bpm.mp3',
+    'cloud://yueji-prod.xxx/music/jiao/06_hulusi_60bpm.mp3',
+    'cloud://yueji-prod.xxx/music/jiao/07_sheng_70bpm.mp3',
+    'cloud://yueji-prod.xxx/music/jiao/08_huangguan_75bpm.mp3',
+    'cloud://yueji-prod.xxx/music/jiao/09_duanxiao_80bpm.mp3',
+    'cloud://yueji-prod.xxx/music/jiao/10_bawu_55bpm.mp3',
   ],
   zhi: [
-    'assets/music/v3_5modes/04_zhi_v1_erhu_60bpm.mp3',         // v1 基础 erhu 60
-    'assets/music/v3_5modes_v2/06_zhi_guzheng_65bpm.mp3',      // v2 变体 guzheng 65
-    'assets/music/v3_5modes_v2/07_zhi_yueqin_70bpm.mp3',       // v2 变体 yueqin 70
-    'assets/music/v3_5modes_v2/08_zhi_ruan_75bpm.mp3',         // v2 变体 ruan 75
-    'assets/music/v3_5modes_v2/09_zhi_sanxian_80bpm.mp3',      // v2 变体 sanxian 80
-    'assets/music/v3_5modes_v2/10_zhi_banhu_55bpm.mp3',        // v2 变体 banhu 55
+    'cloud://yueji-prod.xxx/music/zhi/04_erhu_60bpm.mp3',
+    'cloud://yueji-prod.xxx/music/zhi/06_guzheng_65bpm.mp3',
+    'cloud://yueji-prod.xxx/music/zhi/07_yueqin_70bpm.mp3',
+    'cloud://yueji-prod.xxx/music/zhi/08_ruan_75bpm.mp3',
+    'cloud://yueji-prod.xxx/music/zhi/09_sanxian_80bpm.mp3',
+    'cloud://yueji-prod.xxx/music/zhi/10_banhu_55bpm.mp3',
   ],
   yu: [
-    'assets/music/v3_5modes/05_yu_v1_pipa_55bpm.mp3',          // v1 基础 pipa 55
-    'assets/music/v3_5modes_v2/06_yu_konghou_60bpm.mp3',       // v2 变体 konghou 60
-    'assets/music/v3_5modes_v2/07_yu_se_65bpm.mp3',            // v2 变体 se 65
-    'assets/music/v3_5modes_v2/08_yu_yangqin_70bpm.mp3',       // v2 变体 yangqin 70
-    'assets/music/v3_5modes_v2/09_yu_bianzhong_75bpm.mp3',     // v2 变体 bianzhong 75
-    'assets/music/v3_5modes_v2/10_yu_bianqing_80bpm.mp3',      // v2 变体 bianqing 80
+    'cloud://yueji-prod.xxx/music/yu/05_pipa_55bpm.mp3',
+    'cloud://yueji-prod.xxx/music/yu/06_konghou_60bpm.mp3',
+    'cloud://yueji-prod.xxx/music/yu/07_se_65bpm.mp3',
+    'cloud://yueji-prod.xxx/music/yu/08_yangqin_70bpm.mp3',
+    'cloud://yueji-prod.xxx/music/yu/09_bianzhong_75bpm.mp3',
+    'cloud://yueji-prod.xxx/music/yu/10_bianqing_80bpm.mp3',
   ],
 };
 
@@ -102,8 +102,8 @@ function recommendWuyue(tizhi, latest4) {
 // 推荐 1 调式 + 随机 1 段 (6 变体中选 1, 用日期 hash 保证每天不重复)
 function recommendWuyueTrack(tizhi, latest4) {
   const wuyue = recommendWuyue(tizhi, latest4);
-  const tracks = WUYUE_30_MP3[wuyue] || [];
-  if (tracks.length === 0) return { wuyue, mp3Url: '' };
+  const tracks = WUYUE_30_FILEID[wuyue] || [];
+  if (tracks.length === 0) return { wuyue, fileID: '' };
   // 用日期 (YYYY-MM-DD) hash 选 1 段, 每天不重复
   const dateStr = new Date().toISOString().slice(0, 10);
   let hash = 0;
@@ -112,7 +112,22 @@ function recommendWuyueTrack(tizhi, latest4) {
     hash = hash & hash; // 32-bit int
   }
   const idx = Math.abs(hash) % tracks.length;
-  return { wuyue, mp3Url: tracks[idx], trackIndex: idx };
+  return { wuyue, fileID: tracks[idx], trackIndex: idx };
+}
+
+// 把 30 个 fileID 批量转临时 URL (2 小时有效, 调用前取)
+function getTempUrls(fileIDs) {
+  return new Promise((resolve) => {
+    if (!wx.cloud || !fileIDs || fileIDs.length === 0) {
+      resolve({ fileList: [] });
+      return;
+    }
+    wx.cloud.getTempFileURL({
+      fileList: fileIDs,
+      success: (res) => resolve(res),
+      fail: (e) => { console.warn('[悦济 music getTempFileURL]', e); resolve({ fileList: [] }); },
+    });
+  });
 }
 
 // 9 体质 + 4 维 排名 (3 调式供大模型润色选 1)
@@ -123,6 +138,6 @@ function rankWuyueCandidates(tizhi, latest4) {
 }
 
 module.exports = {
-  WUYUE_NAMES, WUYUE_FULL, WUYUE_DESCRIPTIONS, WUYUE_30_MP3,
-  TIZHI_TO_WUYUE, recommendWuyue, recommendWuyueTrack, rankWuyueCandidates,
+  WUYUE_NAMES, WUYUE_FULL, WUYUE_DESCRIPTIONS, WUYUE_30_FILEID,
+  TIZHI_TO_WUYUE, recommendWuyue, recommendWuyueTrack, getTempUrls, rankWuyueCandidates,
 };
