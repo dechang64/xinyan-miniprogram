@@ -56,6 +56,7 @@
       </view>
       <scroll-view scroll-y class="modal-body">
         <view class="modal-content-text">{{detail.content}}</view>
+        <view class="modal-ai-hint" wx:if="{{detail.aiHint}}">思友说 · {{detail.aiHint}}</view>
       </scroll-view>
       <view class="modal-actions">
         <view class="btn-ghost" data-status="reading" data-id="{{detail.id}}" bindtap="onSetStatus">学习中</view>

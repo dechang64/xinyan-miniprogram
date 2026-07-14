@@ -22,3 +22,15 @@
   font-size: 24rpx;
   margin: 48rpx 0;
 }
+
+/* v3.0.5 阶段 1.4-2: 经文详情 大模型 1 句解读 */
+.modal-ai-hint {
+  margin-bottom: 24rpx;
+  padding: 16rpx 20rpx;
+  background: rgba(168, 200, 168, 0.18);
+  border-left: 6rpx solid #a8c8a8;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #5a6878;
+  line-height: 1.6;
+}
