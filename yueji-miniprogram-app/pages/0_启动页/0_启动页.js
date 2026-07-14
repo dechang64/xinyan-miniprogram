@@ -53,6 +53,8 @@ Page({
   onTapMotion() { wx.navigateTo({ url: '/pages/15_今日小动/15_今日小动' }); },
   // v3.0.5 阶段 1.5 扩展: 5 滋养曲风 (9 体质 + 镜中 4 维 → 1 调式)
   onTapMusic() { wx.navigateTo({ url: '/pages/16_今日一曲/16_今日一曲' }); },
+  // v3.0.5 阶段 1.2: 启动页"今日"屏 6 件事 - 今日一问 (复 用 4_镜中 4 维滑块 + 大模型润色)
+  onTapAsk() { wx.switchTab({ url: '/pages/4_镜中/4_镜中' }); },
   onTapJingwen() { wx.switchTab({ url: '/pages/1_每日一经/1_每日一经' }); },
   onTapSoup() { wx.switchTab({ url: '/pages/2_每日一汤/2_每日一汤' }); },
   onTapJingzhong() { wx.switchTab({ url: '/pages/4_镜中/4_镜中' }); },

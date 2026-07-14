@@ -49,6 +49,13 @@
     <view class="content">9 体质 + 镜中 4 维, 选 1 调陪你慢慢听</view>
   </view>
 
+  <!-- v3.0.5 阶段 1.2: 启动页"今日"屏 6 件事 - 今日一问 (镜中 4 维 1 滑 + 大模型润色 1 句) -->
+  <view class="card-jingwen" bindtap="onTapAsk" style="border-left: 8rpx solid #E8998C;">
+    <view class="source">今日一问 · 镜中 4 维</view>
+    <view class="title">心情 · 精力 · 睡眠 · 肌肤</view>
+    <view class="content">今天 1 滑, 看见自己, 大模型陪你 1 句</view>
+  </view>
+
   <!-- 3 入口按钮 -->
   <view class="entry-row">
     <view class="btn-primary" bindtap="onTapJingwen">经文库</view>
