@@ -1,8 +1,8 @@
-// 16_今日一曲.js — 悦济 v3.0.5 阶段 1.5 扩展
-// 5 滋养曲风 (宫/商/角/徵/羽) + 9 体质 + 镜中 4 维 → 1 调式 + 1 mp3
-// 严守: 不打卡 / 不卖装备 / 不超 5 分钟 / 不评判
-// 6 段 v1 mp3 在 assets/music/v3_5modes/ (本地)
-const { recommendWuyue, WUYUE_FULL, WUYUE_NAMES, WUYUE_DESCRIPTIONS, WUYUE_V1_MP3, rankWuyueCandidates } = require('../../utils/data_music.js');
+// 16_今日一曲.js — 悦济 v3.0.5 阶段 1.5 扩展 (30 段)
+// 5 滋养曲风 (宫/商/角/徵/羽) + 9 体质 + 镜中 4 维 → 1 调式 + 日期 hash 选 1 段 (6 变体)
+// 严守: 不打卡 / 不卖装备 / 不评判
+// 30 段 mp3 (5 段 v1 + 25 段 v2) 在 assets/music/v3_5modes*/ (本地)
+const { recommendWuyueTrack, WUYUE_FULL, WUYUE_NAMES, WUYUE_DESCRIPTIONS, rankWuyueCandidates } = require('../../utils/data_music.js');
 
 Page({
   data: {
@@ -14,6 +14,8 @@ Page({
     wuyueFull: '宫调 (土/脾)',
     wuyueDesc: '温润土音, 养脾胃, 中和调性',
     mp3Url: '',
+    trackIndex: 0,
+    trackTotal: 6,
     aiHint: '',
     aiPowered: false,
     isPlaying: false,
@@ -42,23 +44,25 @@ Page({
       skin: latestEntry.skin || 5,
     };
 
-    // 3. 静态映射 → 1 调式
-    const wuyue = recommendWuyue(tizhiKey, latest4);
+    // 3. 静态映射 + 日期 hash 选 1 段 (30 段中 1)
+    const track = recommendWuyueTrack(tizhiKey, latest4);
     this.setData({
       tizhiKey,
       tizhiName: TIZHI_NAMES[tizhiKey] || '平和质',
       latest4,
-      wuyue,
-      wuyueName: WUYUE_NAMES[wuyue],
-      wuyueFull: WUYUE_FULL[wuyue],
-      wuyueDesc: WUYUE_DESCRIPTIONS[wuyue],
-      mp3Url: WUYUE_V1_MP3[wuyue],
+      wuyue: track.wuyue,
+      wuyueName: WUYUE_NAMES[track.wuyue],
+      wuyueFull: WUYUE_FULL[track.wuyue],
+      wuyueDesc: WUYUE_DESCRIPTIONS[track.wuyue],
+      mp3Url: track.mp3Url,
+      trackIndex: (track.trackIndex || 0) + 1,
+      trackTotal: 6,
       loading: false,
       isPlaying: false,
     });
 
     // 4. 大模型润色 (走 chat 云函数, prompt: 1 句为什么不评判)
-    this.askAi(tizhiKey, latest4, wuyue);
+    this.askAi(tizhiKey, latest4, track.wuyue);
   },
 
   askAi(tizhiKey, latest4, wuyue) {
@@ -109,6 +113,27 @@ Page({
       wx.showToast({ title: '播放失败, 请检查 mp3', icon: 'none' });
     });
     this.audioCtx = ctx;
+  },
+
+  // 换 1 段: 同调式 6 变体中随机选 1
+  onShuffle() {
+    const { recommendWuyue, WUYUE_30_MP3 } = require('../../utils/data_music.js');
+    const tracks = WUYUE_30_MP3[this.data.wuyue] || [];
+    if (tracks.length <= 1) {
+      wx.showToast({ title: '该调式仅 1 段', icon: 'none' });
+      return;
+    }
+    if (this.audioCtx) { this.audioCtx.stop(); this.audioCtx = null; }
+    // 排除当前, 随机选 1
+    const current = this.data.trackIndex - 1;
+    const candidates = tracks.map((_, i) => i).filter(i => i !== current);
+    const next = candidates[Math.floor(Math.random() * candidates.length)];
+    this.setData({
+      mp3Url: tracks[next],
+      trackIndex: next + 1,
+      isPlaying: false,
+    });
+    setTimeout(() => this.onPlay(), 100);
   },
 
   onPause() {

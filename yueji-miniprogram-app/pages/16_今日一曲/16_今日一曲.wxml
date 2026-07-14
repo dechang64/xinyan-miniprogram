@@ -23,10 +23,12 @@
   </view>
 
   <view class="player">
-    <view class="player-title">5 段滋养曲风, 循环播放</view>
+    <view class="player-title">30 段滋养曲风 · 5 调式各 6 变体, 循环播放</view>
+    <view class="player-sub">今日第 {{trackIndex}} / {{trackTotal}} 段 (同调式可换)</view>
     <view class="player-row">
       <view class="btn-play" bindtap="onPlay" wx:if="{{!isPlaying}}">开始播放</view>
       <view class="btn-pause" bindtap="onPause" wx:else>暂停</view>
+      <view class="btn-shuffle" bindtap="onShuffle">换 1 段</view>
     </view>
     <view class="player-hint">音量建议 25-60 dB</view>
   </view>
