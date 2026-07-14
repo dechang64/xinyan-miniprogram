@@ -1,0 +1,67 @@
+/* 17_今日一测引导.wxss — 悦济 v3.0.5 阶段 2.2 */
+.page-guide {
+  min-height: 100vh;
+  background: #faf6f0;
+  padding: 32rpx 24rpx 120rpx;
+}
+
+.hero {
+  background: linear-gradient(180deg, #F4D35E33 0%, #F4D35E11 100%);
+  border-radius: 24rpx;
+  padding: 64rpx 32rpx;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+.hero-day { font-size: 36rpx; color: #a8b4be; margin-bottom: 16rpx; letter-spacing: 4rpx; }
+.hero-name { font-size: 64rpx; color: #5a534a; font-weight: 500; margin-bottom: 16rpx; }
+.hero-dur { font-size: 28rpx; color: #a8b4be; }
+
+.meta {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 32rpx;
+}
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12rpx 0;
+  font-size: 26rpx;
+  gap: 16rpx;
+}
+.meta-row + .meta-row { border-top: 1rpx solid #f0e8d8; }
+.meta-label { color: #a8b4be; flex-shrink: 0; }
+.meta-value { color: #5a6878; text-align: right; flex: 1; }
+
+.footer {
+  position: fixed;
+  bottom: 32rpx;
+  left: 24rpx;
+  right: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.btn-start {
+  background: #F4D35E;
+  color: #5a534a;
+  border-radius: 48rpx;
+  font-size: 30rpx;
+  padding: 24rpx 0;
+  border: none;
+}
+.btn-skip {
+  background: transparent;
+  color: #a8b4be;
+  font-size: 26rpx;
+  border: 1rpx solid #d8d0c8;
+  border-radius: 48rpx;
+  padding: 16rpx 0;
+}
+.btn-close {
+  background: transparent;
+  color: #a8b4be;
+  font-size: 24rpx;
+  border: none;
+}

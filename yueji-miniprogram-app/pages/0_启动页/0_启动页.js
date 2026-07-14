@@ -119,9 +119,9 @@ Page({
     const status = get5DayStatus();
     this.setData({ todayTest: t, todayTestCleared: cleared, test5Status: status });
   },
+  // v3.0.5 阶段 2.2: 跳 17_今日一测引导 (D1 引导弹窗), 引导页内点"开始"再跳自测 page
   onTapTodayTest() {
-    if (!this.data.todayTest || !this.data.todayTest.page) return;
-    wx.navigateTo({ url: this.data.todayTest.page });
+    wx.navigateTo({ url: '/pages/17_今日一测引导/17_今日一测引导' });
   },
   // 跳过今天测试 (5 天循环里也算完成, 严守: 不强迫)
   onSkipTodayTest() {

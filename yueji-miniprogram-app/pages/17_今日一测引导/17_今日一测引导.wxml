@@ -1,0 +1,29 @@
+<!-- 17_今日一测引导.wxml — 悦济 v3.0.5 阶段 2.2 -->
+<view class="page-guide">
+  <view class="hero">
+    <view class="hero-day">D{{test.day}} / 5</view>
+    <view class="hero-name">{{test.name}}</view>
+    <view class="hero-dur">{{test.dur}}</view>
+  </view>
+
+  <view class="meta">
+    <view class="meta-row">
+      <text class="meta-label">测什么</text>
+      <text class="meta-value">{{test.desc}}</text>
+    </view>
+    <view class="meta-row">
+      <text class="meta-label">多久</text>
+      <text class="meta-value">{{test.dur}}</text>
+    </view>
+    <view class="meta-row">
+      <text class="meta-label">严守</text>
+      <text class="meta-value">主观自评, 不诊断, 可跳过, 1 次 1 套</text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="btn-start" bindtap="onStart">开始 →</button>
+    <button class="btn-skip" bindtap="onSkip">今天跳过</button>
+    <button class="btn-close" bindtap="onClose">回到悦济</button>
+  </view>
+</view>
