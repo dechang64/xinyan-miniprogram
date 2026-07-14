@@ -1,11 +1,15 @@
 // 启动页 — 6 山水 CDN URL (从 cdn_urls.js; v2.2.0 修出界: 改 swiper 400rpx 顶部轮播)
 const GUOHUA = require('../../assets/cdn_urls.js').guohua;
+const { getTodayTest, isTodayCleared, get5DayStatus, markTodaySkipped } = require('../../utils/test_scheduler.js');
 
 Page({
   data: {
     bgImgs: [],
     todayJing: {},
     todaySoup: {},
+    todayTest: {},
+    todayTestCleared: false,
+    test5Status: [],
   },
 
   onLoad() {
@@ -16,6 +20,7 @@ Page({
 
   onShow() {
     this.setToday();
+    this.setTodayTest();
   },
 
   setToday() {
@@ -58,4 +63,24 @@ Page({
   onTapJingwen() { wx.switchTab({ url: '/pages/1_每日一经/1_每日一经' }); },
   onTapSoup() { wx.switchTab({ url: '/pages/2_每日一汤/2_每日一汤' }); },
   onTapJingzhong() { wx.switchTab({ url: '/pages/4_镜中/4_镜中' }); },
+
+  // v3.0.5 阶段 1.3: 5 自测分 5 天 (今天第 N 套) - 跳 5 自测
+  setTodayTest() {
+    const t = getTodayTest();
+    const cleared = isTodayCleared(t.key);
+    const status = get5DayStatus();
+    this.setData({ todayTest: t, todayTestCleared: cleared, test5Status: status });
+  },
+  onTapTodayTest() {
+    if (!this.data.todayTest || !this.data.todayTest.page) return;
+    wx.navigateTo({ url: this.data.todayTest.page });
+  },
+  // 跳过今天测试 (5 天循环里也算完成, 严守: 不强迫)
+  onSkipTodayTest() {
+    const t = this.data.todayTest;
+    if (!t || !t.key) return;
+    markTodaySkipped(t.key);
+    wx.showToast({ title: '今天跳过了, 明天见', icon: 'none', duration: 1500 });
+    this.setTodayTest();
+  },
 });
