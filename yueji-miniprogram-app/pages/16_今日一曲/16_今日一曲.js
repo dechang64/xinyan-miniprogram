@@ -109,7 +109,11 @@ Page({
   },
 
   onPlay() {
-    if (!this.data.mp3Url) return;
+    if (!this.data.mp3Url) {
+      console.warn('[悦济 music] mp3Url 空, fileID:', this.data.fileID || '无');
+      wx.showToast({ title: 'mp3 URL 空, fileID: ' + (this.data.fileID || '无').slice(-50), icon: 'none', duration: 3000 });
+      return;
+    }
     const ctx = wx.createInnerAudioContext();
     ctx.src = this.data.mp3Url;
     ctx.loop = true;

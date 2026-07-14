@@ -34,6 +34,7 @@
   </view>
 
   <view class="footer">
+    <navigator class="btn-home" url="/pages/0_启动页/0_启动页" open-type="switchTab">回到首页</navigator>
     <button class="btn-close" bindtap="onClose">回到悦济</button>
   </view>
 </view>

@@ -77,6 +77,17 @@
   left: 24rpx;
   right: 24rpx;
   display: flex;
+  gap: 16rpx;
+}
+.btn-home {
+  flex: 1;
+  background: #fff;
+  color: #a8b4be;
+  font-size: 26rpx;
+  border-radius: 16rpx;
+  padding: 20rpx 0;
+  text-align: center;
+  border: 1rpx solid #d8d0c8;
 }
 .btn-close {
   flex: 1;
