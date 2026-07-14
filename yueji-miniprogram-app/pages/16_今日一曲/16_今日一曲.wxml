@@ -1,0 +1,37 @@
+<!-- 16_今日一曲.wxml — 悦济 v3.0.5 阶段 1.5 扩展 -->
+<view class="page-music">
+  <view class="hero">
+    <view class="hero-wuyue">{{wuyueName}}</view>
+    <view class="hero-full">{{wuyueFull}}</view>
+    <view class="hero-desc">{{wuyueDesc}}</view>
+  </view>
+
+  <view class="meta">
+    <view class="meta-row">
+      <text class="meta-label">9 体质</text>
+      <text class="meta-value">{{tizhiName}}</text>
+    </view>
+    <view class="meta-row">
+      <text class="meta-label">镜中 4 维</text>
+      <text class="meta-value">心情 {{latest4.mood}} · 精力 {{latest4.energy}} · 睡眠 {{latest4.sleep}} · 肌肤 {{latest4.skin}}</text>
+    </view>
+  </view>
+
+  <view class="ai-hint" wx:if="{{aiHint}}">
+    <text class="ai-label">思友说</text>
+    <text class="ai-text">{{aiHint}}</text>
+  </view>
+
+  <view class="player">
+    <view class="player-title">5 段滋养曲风, 循环播放</view>
+    <view class="player-row">
+      <view class="btn-play" bindtap="onPlay" wx:if="{{!isPlaying}}">开始播放</view>
+      <view class="btn-pause" bindtap="onPause" wx:else>暂停</view>
+    </view>
+    <view class="player-hint">音量建议 25-60 dB</view>
+  </view>
+
+  <view class="footer">
+    <button class="btn-close" bindtap="onClose">回到悦济</button>
+  </view>
+</view>

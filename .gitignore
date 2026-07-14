@@ -41,11 +41,15 @@ _*.log
 _*.err.log
 audit_v*.py
 gen_*.py
+gen_*.ps1
 merge_*.py
 replace_*.py
 verify_*.js
 compress_*.py
 fix_*.py
+test_music_*.json
+# 打包产物
+*-yueji-*.zip
 # 数据源临时文件
 zhouyi_*.json
 data_jingwen.js.bak

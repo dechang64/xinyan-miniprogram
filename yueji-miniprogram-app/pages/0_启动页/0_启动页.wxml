@@ -42,6 +42,13 @@
     <view class="content">9 体质 + 镜中 4 维, 选 1 类陪你慢慢做</view>
   </view>
 
+  <!-- v3.0.5 阶段 1.5 扩展: 5 滋养曲风 (宫/商/角/徵/羽) -->
+  <view class="card-jingwen" bindtap="onTapMusic" style="border-left: 8rpx solid #d8d0c8;">
+    <view class="source">今日一曲 · 5 段滋养曲风</view>
+    <view class="title">宫 · 商 · 角 · 徵 · 羽</view>
+    <view class="content">9 体质 + 镜中 4 维, 选 1 调陪你慢慢听</view>
+  </view>
+
   <!-- 3 入口按钮 -->
   <view class="entry-row">
     <view class="btn-primary" bindtap="onTapJingwen">经文库</view>
