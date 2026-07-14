@@ -16,6 +16,14 @@ Page({
     // v2.2.0 修出界: 6 山水数组直接给 swiper, 30 秒 autoplay
     this.setData({ bgImgs: Object.values(GUOHUA) });
     this.setToday();
+    this.setTodayTest();
+    // v3.0.5 阶段 3.6: 延迟调 askAi 函 (让 Page 绑完事再走云函)
+    setTimeout(() => {
+      const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
+      const TIZHI_NAMES = { pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质', tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质' };
+      this.askAiJingHint(this.data.todayJing, tizhiKey, TIZHI_NAMES);
+      this.askAiSoupHint(this.data.todaySoup, tizhiKey, TIZHI_NAMES);
+    }, 200);
   },
 
   onShow() {
@@ -49,17 +57,13 @@ Page({
         ingredients: todaySoup.desc || '—',
       },
     });
-
-    // v3.0.5 阶段 1.4: 大模型润色 1 句 - 今经 1 句解读 + 今汤 1 句为什么
-    this.askAiJingHint(todayJing);
-    this.askAiSoupHint(todaySoup);
+    // v3.0.5 阶段 3.6: askAi 移 onLoad setTimeout 200ms 延后调, 不卡 Page 绑
   },
 
-  // 大模型 1 句解读 (今经)
-  askAiJingHint(todayJing) {
+  // 大模型 1 句解读 (今经) - 由 onLoad setTimeout 200ms 触发
+  askAiJingHint(todayJing, tizhiKey, TIZHI_NAMES) {
     if (!wx.cloud) return;
-    const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
-    const TIZHI_NAMES = { pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质', tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质' };
+    if (!todayJing || !todayJing.id) return;
     const prompt =
       '你是悦济的「思友」, 用户是 9 体质中的「' + TIZHI_NAMES[tizhiKey] + '」, ' +
       '今日经文: 「' + todayJing.title + '」 出自 ' + todayJing.source + ', ' +
@@ -77,11 +81,10 @@ Page({
     }).catch((e) => console.warn('[悦济 jing ai]', e));
   },
 
-  // 大模型 1 句为什么 (今汤)
-  askAiSoupHint(todaySoup) {
+  // 大模型 1 句为什么 (今汤) - 由 onLoad setTimeout 200ms 触发
+  askAiSoupHint(todaySoup, tizhiKey, TIZHI_NAMES) {
     if (!wx.cloud) return;
-    const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
-    const TIZHI_NAMES = { pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质', tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质' };
+    if (!todaySoup || !todaySoup.id) return;
     const prompt =
       '你是悦济的「养友」, 用户是 9 体质中的「' + TIZHI_NAMES[tizhiKey] + '」, ' +
       '今日汤: 「' + todaySoup.name + '」 适合 ' + todaySoup.tizhi + ' 体质, ' +
