@@ -1,4 +1,8 @@
 <view class="page">
+  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
+  <nav-bar title="自拍温润" showHome="{{true}}" />
+
+
   <view class="header">
     <view class="title-main">镜中自拍</view>
     <view class="title-sub">温润滤镜 · 5 滋养曲风</view>

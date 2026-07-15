@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "每日一经",
-  "usingComponents": {}
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/index"
+  }
 }

@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "4 经数字人", "usingComponents": {} }
+{
+  "navigationBarTitleText": "4 经数字人",
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/index"
+  }
+}

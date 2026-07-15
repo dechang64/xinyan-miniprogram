@@ -1,4 +1,8 @@
 <view class="page">
+  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
+  <nav-bar title="海报分享" showHome="{{true}}" />
+
+
   <view class="header">
     <view class="title-main">镜中签</view>
     <view class="title-sub">6 模板 · 1080×1920 海报 · 一键保存</view>

@@ -1,4 +1,8 @@
 <view class="page">
+  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
+  <nav-bar title="共修堂" showHome="{{false}}" />
+
+
   <view class="header">
     <view class="title-main">共修堂</view>
     <view class="title-sub">一群人, 慢慢变好</view>

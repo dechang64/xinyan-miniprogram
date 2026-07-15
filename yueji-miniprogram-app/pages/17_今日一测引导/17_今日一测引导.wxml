@@ -1,5 +1,9 @@
 <!-- 17_今日一测引导.wxml — 悦济 v3.0.5 阶段 2.2 -->
 <view class="page-guide">
+  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
+  <nav-bar title="今日一测引导" showHome="{{true}}" />
+
+
   <view class="hero">
     <view class="hero-day">D{{test.day}} / 5</view>
     <view class="hero-name">{{test.name}}</view>

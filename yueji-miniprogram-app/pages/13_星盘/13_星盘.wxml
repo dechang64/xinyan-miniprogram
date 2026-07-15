@@ -1,4 +1,8 @@
 <view class="page">
+  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
+  <nav-bar title="星盘" showHome="{{true}}" />
+
+
   <view class="header">
     <view class="title-main">星盘</view>
     <view class="title-sub">公历生日 → 12 星座 (不严守不卖)</view>

@@ -1,0 +1,6 @@
+<!-- components/nav-bar/index.wxml — 悦济 v3.0.5 阶段 3.9 -->
+<view class="nav-bar">
+  <view class="nav-back" bindtap="onBack">‹</view>
+  <view class="nav-title">{{title}}</view>
+  <view class="nav-home" bindtap="onHome" wx:if="{{showHome}}">⌂</view>
+</view>

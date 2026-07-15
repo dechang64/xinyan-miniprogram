@@ -1,4 +1,8 @@
 <view class="page">
+  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
+  <nav-bar title="八字" showHome="{{true}}" />
+
+
   <view class="header">
     <view class="title-main">八字解读</view>
     <view class="title-sub">生辰 → 推经文 + 汤品 (不严守不卖)</view>

@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "共修堂",
-  "usingComponents": {}
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/index"
+  }
 }

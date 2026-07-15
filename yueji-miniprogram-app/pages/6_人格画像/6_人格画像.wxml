@@ -1,4 +1,8 @@
 <view class="page">
+  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
+  <nav-bar title="人格画像" showHome="{{true}}" />
+
+
   <view class="header">
     <view class="title-main">人格画像</view>
     <view class="title-sub">了解自己, 滋养自己</view>

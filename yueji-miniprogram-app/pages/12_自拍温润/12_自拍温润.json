@@ -1,5 +1,8 @@
 {
   "navigationBarTitleText": "镜中自拍",
   "navigationBarBackgroundColor": "#faf6f0",
-  "navigationBarTextStyle": "black"
+  "navigationBarTextStyle": "black",
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/index"
+  }
 }
