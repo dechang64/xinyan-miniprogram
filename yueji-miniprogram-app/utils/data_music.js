@@ -23,32 +23,18 @@ const WUYUE_DESCRIPTIONS = {
   yu: '沉降水音, 滋肾藏精, 沉降调性',
 };
 
-// 30 段 mp3 cloudPath: 5 段 v1 (v3_5modes/) + 25 段 v2 (v3_5modes_v2/), 两个目录并存
-// v1 5 段: 冬生 v3.0.5 阶段 1.5 部署时手动传, 路径 v3_5modes/
-// v2 25 段: 2026-07-14 16:49 批量传 (dl_25_v2.ps1 下载 + 上传), 路径 v3_5modes_v2/
-const CLOUD_PREFIX_V1 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes';
-const CLOUD_PREFIX_V2 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes_v2';
+// 30 段 mp3 cloudPath: 5 段 v1 (v0_5modes/) + 25 段 v2 (v0_5modes_v2/), 两个目录并存
+// v1 5 段: 冬生 v3.0.5 阶段 1.5 部署时手动传, 路径 v0_5modes/ (云存储真实路径, code 之前写 v3_5modes 是笔误)
+// v2 25 段: 2026-07-14 16:49 批量传 (dl_25_v2.ps1 下载 + 上传), 路径 v0_5modes_v2/
+const CLOUD_PREFIX_V1 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v0_5modes';
+const CLOUD_PREFIX_V2 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v0_5modes_v2';
 
-// v3.1 阶段 9: v1 5 段 cloudPath 改名 (matrix-media-xxx 加密名, 冬生 v3.0.5 阶段 1.5 手动传时没指定 cloudPath)
-// 5 个 fileID 按云存储下文件大小排序:
-//  1) 781 KB  shang_v1 (2nd smallest)
-//  2) 797 KB  gong_v1
-//  3) 975 KB  zhi_v1
-//  4) 2.12 MB jiao_v1
-//  5) 3.16 MB yu_v1 (largest)
-// ⚠️ 调式对应 (gong/shang/jiao/zhi/yu) 是按文件大小顺序瞎猜, 30% 概率错配
-//    冬生 v3.0.5 阶段 1.5 手动传时心里有数, 真机跑听感后告诉我哪个调式错, 我再调换
-const V1_FILEID = {
-  gong:  `${CLOUD_PREFIX_V1}/matrix-media-1784000991194-b7b3b30d.mp3`,  // 797 KB
-  shang: `${CLOUD_PREFIX_V1}/matrix-media-1784010166077-7c880709.mp3`,  // 781 KB
-  jiao:  `${CLOUD_PREFIX_V1}/matrix-media-1784010186507-92a55a28.mp3`,  // 2.12 MB
-  zhi:   `${CLOUD_PREFIX_V1}/matrix-media-1784010186507-95c83a8.mp3`,   // 975 KB
-  yu:    `${CLOUD_PREFIX_V1}/matrix-media-1784010186507-ca8fe060.mp3`,  // 3.16 MB
-};
-
+// 30 段 mp3 路径 (5 调式 × 6 变体 = 30, v1 + v2)
+// 变体: v1 (01) + v2 5 变体 (06-10) = 6 段 / 调式
+// 编号 01 (v1 基础) / 06-10 (v2 5 变体)
 const WUYUE_30_FILEID = {
   gong: [
-    V1_FILEID.gong,
+    `${CLOUD_PREFIX_V1}/01_gong_v1_guzheng_60bpm.mp3`,
     `${CLOUD_PREFIX_V2}/06_gong_guqin_65bpm.mp3`,
     `${CLOUD_PREFIX_V2}/07_gong_pipa_70bpm.mp3`,
     `${CLOUD_PREFIX_V2}/08_gong_muyu_75bpm.mp3`,
@@ -56,7 +42,7 @@ const WUYUE_30_FILEID = {
     `${CLOUD_PREFIX_V2}/10_gong_paigu_55bpm.mp3`,
   ],
   shang: [
-    V1_FILEID.shang,
+    `${CLOUD_PREFIX_V1}/02_shang_v1_xiao_70bpm.mp3`,
     `${CLOUD_PREFIX_V2}/06_shang_bamboo_60bpm.mp3`,
     `${CLOUD_PREFIX_V2}/07_shang_qing_65bpm.mp3`,
     `${CLOUD_PREFIX_V2}/08_shang_gong_75bpm.mp3`,
@@ -64,7 +50,7 @@ const WUYUE_30_FILEID = {
     `${CLOUD_PREFIX_V2}/10_shang_bronze_55bpm.mp3`,
   ],
   jiao: [
-    V1_FILEID.jiao,
+    `${CLOUD_PREFIX_V1}/03_jiao_v1_bamboo_65bpm.mp3`,
     `${CLOUD_PREFIX_V2}/06_jiao_hulusi_60bpm.mp3`,
     `${CLOUD_PREFIX_V2}/07_jiao_sheng_70bpm.mp3`,
     `${CLOUD_PREFIX_V2}/08_jiao_huangguan_75bpm.mp3`,
@@ -72,7 +58,7 @@ const WUYUE_30_FILEID = {
     `${CLOUD_PREFIX_V2}/10_jiao_bawu_55bpm.mp3`,
   ],
   zhi: [
-    V1_FILEID.zhi,
+    `${CLOUD_PREFIX_V1}/04_zhi_v1_erhu_60bpm.mp3`,
     `${CLOUD_PREFIX_V2}/06_zhi_guzheng_65bpm.mp3`,
     `${CLOUD_PREFIX_V2}/07_zhi_yueqin_70bpm.mp3`,
     `${CLOUD_PREFIX_V2}/08_zhi_ruan_75bpm.mp3`,
@@ -80,7 +66,7 @@ const WUYUE_30_FILEID = {
     `${CLOUD_PREFIX_V2}/10_zhi_banhu_55bpm.mp3`,
   ],
   yu: [
-    V1_FILEID.yu,
+    `${CLOUD_PREFIX_V1}/05_yu_v1_pipa_55bpm.mp3`,
     `${CLOUD_PREFIX_V2}/06_yu_konghou_60bpm.mp3`,
     `${CLOUD_PREFIX_V2}/07_yu_se_65bpm.mp3`,
     `${CLOUD_PREFIX_V2}/08_yu_yangqin_70bpm.mp3`,
