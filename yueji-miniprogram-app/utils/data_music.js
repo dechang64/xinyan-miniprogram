@@ -40,12 +40,18 @@ const CLOUD_PREFIX_V2 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa4
 //  5) 3.16 MB yu_v1 (largest)
 // ⚠️ 调式对应 (gong/shang/jiao/zhi/yu) 是按文件大小顺序瞎猜, 30% 概率错配
 //    冬生 v3.0.5 阶段 1.5 手动传时心里有数, 真机跑听感后告诉我哪个调式错, 我再调换
+// v3.1 阶段 15: V1_FILEID 5 段 fileID 全错 (阶段 9 反推字面看错 + 阶段 11 没查真备份)
+// 真值来源 3 处对齐:
+//   (1) yueji-music-by-wuyue.zip (2026-07-14 4:48:10) 5 段 v1 mp3 实际文件名 = 冬生从云存储下载
+//   (2) gen_music_zip_wuyue.js L25-29 v1Map dict
+//   (3) gen_music_zip.js L10-14 v1 数组
+// 三处 fileID 一致, 不再瞎改. 修复 STORAGE_FILE_NONEXIST 真因
 const V1_FILEID = {
-  gong:  `${CLOUD_PREFIX_V1}/matrix-media-1784000991194-b7b3b30d.mp3`,  // 797 KB
-  shang: `${CLOUD_PREFIX_V1}/matrix-media-1784010166077-7c880709.mp3`,  // 781 KB
-  jiao:  `${CLOUD_PREFIX_V1}/matrix-media-1784010186507-92a55a28.mp3`,  // 2.12 MB
-  zhi:   `${CLOUD_PREFIX_V1}/matrix-media-1784010186507-95c83a8.mp3`,   // 975 KB
-  yu:    `${CLOUD_PREFIX_V1}/matrix-media-1784010186507-ca8fe060.mp3`,  // 3.16 MB
+  gong:  `${CLOUD_PREFIX_V1}/matrix-media-1784009991194-b7b3fd0d.mp3`,  // 806086 bytes (788 KB)
+  shang: `${CLOUD_PREFIX_V1}/matrix-media-1784010166072-7c890709.mp3`,  // 800326 bytes (782 KB)
+  jiao:  `${CLOUD_PREFIX_V1}/matrix-media-1784010166072-92a55a28.mp3`,  // 2227654 bytes (2.12 MB)
+  zhi:   `${CLOUD_PREFIX_V1}/matrix-media-1784010166072-ca8feb90.mp3`,  // 3315718 bytes (3.16 MB)
+  yu:    `${CLOUD_PREFIX_V1}/matrix-media-1784010166072-96df3bff.mp3`,  // 998470 bytes (975 KB)
 };
 
 const WUYUE_30_FILEID = {
