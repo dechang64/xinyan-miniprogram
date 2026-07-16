@@ -136,6 +136,20 @@ function recommendWuyueTrack(tizhi, latest4) {
   return { wuyue, fileID: tracks[idx], trackIndex: idx };
 }
 
+// v3.1 阶段 13: 按指定调式 + 日期 hash 选 1 段 (用户点 5 调式 tab 时用, 不依赖 9 体质)
+function recommendWuyueTrackByWuyue(wuyueKey) {
+  const tracks = WUYUE_30_FILEID[wuyueKey] || [];
+  if (tracks.length === 0) return { wuyue: wuyueKey, fileID: '', trackIndex: 0 };
+  const dateStr = new Date().toISOString().slice(0, 10);
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
+    hash = hash & hash;
+  }
+  const idx = Math.abs(hash) % tracks.length;
+  return { wuyue: wuyueKey, fileID: tracks[idx], trackIndex: idx };
+}
+
 // 把 30 个 fileID 批量转临时 URL (2 小时有效)
 function getTempUrls(fileIDs) {
   return new Promise((resolve) => {
@@ -160,5 +174,5 @@ function rankWuyueCandidates(tizhi, latest4) {
 module.exports = {
   WUYUE_NAMES, WUYUE_FULL, WUYUE_DESCRIPTIONS, WUYUE_30_FILEID,
   CLOUD_PREFIX_V1, CLOUD_PREFIX_V2,
-  TIZHI_TO_WUYUE, recommendWuyue, recommendWuyueTrack, getTempUrls, rankWuyueCandidates,
+  TIZHI_TO_WUYUE, recommendWuyue, recommendWuyueTrack, recommendWuyueTrackByWuyue, getTempUrls, rankWuyueCandidates,
 };

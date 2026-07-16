@@ -6,7 +6,7 @@
 //   F3. 调式反向映射 (曲风适合 X 体质) — 用户知道当前曲风适合谁
 // 严守: 不打卡 / 不卖装备 / 不评判
 // 30 段 mp3 走 微信云存储 cloud://, 调 wx.cloud.getTempFileURL 拿临时 URL
-const { recommendWuyueTrack, WUYUE_FULL, WUYUE_NAMES, WUYUE_DESCRIPTIONS, getTempUrls, WUYUE_30_FILEID } = require('../../utils/data_music.js');
+const { recommendWuyueTrack, recommendWuyueTrackByWuyue, WUYUE_FULL, WUYUE_NAMES, WUYUE_DESCRIPTIONS, getTempUrls, WUYUE_30_FILEID } = require('../../utils/data_music.js');
 
 // F3: 调式反向映射 (曲风适合 X 体质) — 基于 TIZHI_TO_WUYUE 反查
 const WUYUE_TO_TIZHI = {
@@ -63,7 +63,13 @@ Page({
     };
 
     // 3. 静态映射 + 日期 hash 选 1 段 (30 段中 1)
-    const track = recommendWuyueTrack(tizhiKey, latest4);
+    // v3.1 阶段 13 修: 优先用 currentWuyue (用户点 5 tab 的选择) 推 track
+    // 修前: 9 体质推默认 track.wuyue, onSelectWuyue 改 currentWuyue 但 compute() 又重置 wuyue → UI 不一致 (tab 角 / hero 宫)
+    // 修后: currentWuyue 已设时用 recommendWuyueTrackByWuyue(currentWuyue) 推 track, 跟 5 tab 同步
+    const wuyueKey = this.data.currentWuyue || recommendWuyue(tizhiKey, latest4);
+    const track = this.data.currentWuyue
+      ? recommendWuyueTrackByWuyue(this.data.currentWuyue)
+      : recommendWuyueTrack(tizhiKey, latest4);
     // 4. fileID → 临时 URL (2 小时有效)
     let mp3Url = '';
     // v3.1 阶段 7.2: 加详细 console.log, 真机跑时直接给调试信息
@@ -100,7 +106,7 @@ Page({
       tizhiDone,                                    // v3.1 F2
       latest4,
       wuyue: track.wuyue,
-      currentWuyue: this.data.currentWuyue || track.wuyue,  // v3.1 F1: 保留用户上次选择
+      currentWuyue: track.wuyue,  // v3.1 阶段 13: 跟 track.wuyue 同步, 避免 UI 不一致
       wuyueName: WUYUE_NAMES[track.wuyue],
       wuyueFull: WUYUE_FULL[track.wuyue],
       wuyueDesc: WUYUE_DESCRIPTIONS[track.wuyue],
@@ -117,35 +123,15 @@ Page({
   },
 
   // v3.1 阶段 12 F1: 5 调式 tab 点击 — 用户自由选调式
-  async onSelectWuyue(e) {
+  // v3.1 阶段 13 改: 只改 currentWuyue + 调 compute(), 让 compute() 推 track + setData 一致
+  onSelectWuyue(e) {
     const key = e.currentTarget.dataset.key;
-    if (!WUYUE_30_FILEID[key] || key === this.data.wuyue) return;
+    if (!WUYUE_30_FILEID[key]) return;
     // 停止当前播放
     if (this.audioCtx) { this.audioCtx.stop(); this.audioCtx = null; }
-    // 选 1 段 (同调式 6 变体随机换 1, 跟 onShuffle 逻辑一致)
-    const tracks = WUYUE_30_FILEID[key] || [];
-    const idx = Math.floor(Math.random() * tracks.length);
-    let mp3Url = '';
-    if (tracks[idx] && tracks[idx].startsWith('cloud://')) {
-      const res = await getTempUrls([tracks[idx]]);
-      if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
-        mp3Url = res.fileList[0].tempFileURL;
-      }
-    }
-    this.setData({
-      currentWuyue: key,
-      wuyue: key,
-      wuyueName: WUYUE_NAMES[key],
-      wuyueFull: WUYUE_FULL[key],
-      wuyueDesc: WUYUE_DESCRIPTIONS[key],
-      wuyueSuit: WUYUE_TO_TIZHI[key] || '',
-      trackIndex: idx + 1,
-      trackTotal: tracks.length,
-      mp3Url,
-      isPlaying: false,
-    });
-    // 重新 askAi (因为调式变了)
-    this.askAi(this.data.tizhiKey, this.data.latest4, key);
+    // 设 currentWuyue, compute() 推 track (用 recommendWuyueTrackByWuyue 推)
+    this.setData({ currentWuyue: key });
+    this.compute();
   },
 
   askAi(tizhiKey, latest4, wuyue) {
