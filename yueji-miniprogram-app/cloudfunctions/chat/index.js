@@ -490,6 +490,60 @@ ${content}
 }
 
 // ==============================
+// v3.1 阶段 5 P0 #4: 长期记忆 (user_profile collection)
+// 设计: 不调 AI 提取, 用关键词匹配 (用户输入里的常见主题)
+// 字段: openid + role, frequent_topics [最近 10 关键词], last_active ISO, total_chats 数字
+// 写入: 每次 chat 调用, append + 截断 10
+// 严守: 不存原始对话, 只存关键词, 减少隐私风险
+// ==============================
+const MEMORY_KEYWORDS = [
+  '心烦', '焦虑', '失眠', '睡不好', '难过', '迷茫', '紧张', '选择', '失败', '孤独',
+  '死亡', '累', '吃', '生气', '怕冷', '空虚', '无聊', '静不下来', '工作', '家庭',
+  '孩子', '老人', '父母', '爱人', '朋友', '通勤', '加班', '压力', '未来', '过去',
+  '早起', '晚睡', '运动', '饮食', '天气', '季节', '换季', '节气', '立春', '立秋',
+  '开心', '高兴', '平静', '舒服', '暖', '凉', '期待', '感恩', '记得', '想起',
+];
+function extractKeywords(text) {
+  if (!text) return [];
+  const found = [];
+  for (const kw of MEMORY_KEYWORDS) {
+    if (text.includes(kw)) found.push(kw);
+  }
+  return found;
+}
+async function getUserProfile(openid, role) {
+  try {
+    const db = cloud.database();
+    const res = await db.collection('yueji_user_profiles').where({ openid, role }).limit(1).get();
+    if (res.data && res.data[0]) return res.data[0];
+    return { openid, role, frequent_topics: [], last_active: '', total_chats: 0 };
+  } catch (e) {
+    console.warn('[memory read]', e.message);
+    return { openid, role, frequent_topics: [], last_active: '', total_chats: 0 };
+  }
+}
+async function saveUserProfile(openid, role, profile, newKeywords) {
+  try {
+    const db = cloud.database();
+    const merged = [...new Set([...(profile.frequent_topics || []), ...newKeywords])].slice(-10);
+    const update = {
+      frequent_topics: merged,
+      last_active: new Date().toISOString(),
+      total_chats: (profile.total_chats || 0) + 1,
+    };
+    if (profile._id) {
+      await db.collection('yueji_user_profiles').doc(profile._id).update({ data: update });
+    } else {
+      await db.collection('yueji_user_profiles').add({
+        data: { openid, role, ...update, created_at: new Date() },
+      });
+    }
+  } catch (e) {
+    console.warn('[memory write]', e.message);
+  }
+}
+
+// ==============================
 // 入口
 // ==============================
 exports.main = async (event, context) => {
@@ -585,13 +639,19 @@ exports.main = async (event, context) => {
   const topDocs = searchKB(user_input, docs, 2);
   const kbContext = topDocs.map(d => `## ${d.title}\n${d.content.slice(0, 500)}`).join("\n\n");
 
+  // v3.1 阶段 5: 长期记忆 (用户历史关键词 → 拼进 systemMsg)
+  const userProfile = await getUserProfile(OPENID, role);
+  const memoryStr = userProfile.frequent_topics && userProfile.frequent_topics.length > 0
+    ? `\n\n## 用户历史聊过的话题 (长期记忆)\n最近 10 个: ${userProfile.frequent_topics.join('、')}\n共聊 ${userProfile.total_chats} 次 · 上次: ${userProfile.last_active ? userProfile.last_active.slice(0, 10) : '首次'}\n请基于这些历史, 看到用户的成长, 但不评判不引用具体次数.`
+    : '';
+
   // 构建 messages (v2.7.0 加 meta: 月底报告数据拼进 systemMsg)
   const rolePrompt = ROLE_PROMPTS[role] || ROLE_PROMPTS.company;
   let metaStr = '';
   if (meta && meta.stats) {
     metaStr = `\n\n## 用户本月 4 维数据\n心情: ${meta.stats.avgMood}/10\n精力: ${meta.stats.avgEnergy}/10\n睡眠: ${meta.stats.avgSleep}/10\n肌肤: ${meta.stats.avgSkin}/10\n共 ${meta.stats.days} 天 · 趋势: ${meta.stats.trend}\n\n请基于这些数据, 写一份月末陪伴, 短 (≤150 字), 温暖不评判.`;
   }
-  const systemMsg = `${rolePrompt}${metaStr}\n\n## 悦济 KB 参考 (不直接引用, 化为语气)\n${kbContext || "（无）"}\n\n悦济严守: 14 禁用词 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美/美颜/美白/瘦脸/营销/广告/疗愈) 0 出现, 不提供医疗建议, 不识别情绪状态, 只陪伴 / 共修 / 涵养.`;
+  const systemMsg = `${rolePrompt}${metaStr}${memoryStr}\n\n## 悦济 KB 参考 (不直接引用, 化为语气)\n${kbContext || "（无）"}\n\n悦济严守: 14 禁用词 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美/美颜/美白/瘦脸/营销/广告/疗愈) 0 出现, 不提供医疗建议, 不识别情绪状态, 只陪伴 / 共修 / 涵养.`;
 
   const messages = [
     { role: "system", content: systemMsg },
@@ -611,6 +671,15 @@ exports.main = async (event, context) => {
     // 8 禁用词预审 AI 输出 (v2.5.5: 跟祺臻一致, FORBIDDEN_WORDS 19 个严守)
     if (!validateText(content)) {
       content = "悦济严守: 抱歉, 我重新组织一下语言。" + "深呼吸一次, 我们再继续。";
+    }
+
+    // v3.1 阶段 5: 写回长期记忆 (异步, 不阻塞返回)
+    const newKeywords = extractKeywords(user_input);
+    if (newKeywords.length > 0) {
+      saveUserProfile(OPENID, role, userProfile, newKeywords).catch(e => console.warn('[memory save]', e.message));
+    } else {
+      // 即便没新关键词, 也更新 last_active + total_chats
+      saveUserProfile(OPENID, role, userProfile, []).catch(e => console.warn('[memory save]', e.message));
     }
 
     // 写 messages 集合 (云端持久化)

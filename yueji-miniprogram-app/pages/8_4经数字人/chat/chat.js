@@ -1,6 +1,7 @@
 // chat.js — 单个数字人对话页 (老子/周文王/岐伯/元神)
 // v2.5.4: 删语音录音 (v1.1 加的, 没真测过端到端, 按住录音触发 "Record file not exist" 错)
-// v2.5.4 留: 文字输入 + TTS 播放 + 历史记录
+// v3.1 阶段 5: 接长期记忆 + 角色差异化显示 (avatar/调性)
+// 严守: 0 出现 14 严守词
 const { DIGITAL_HUMAN_AVATARS } = require('../../../utils/data_digital_human.js');
 const { detectCrisis, todayISO } = require('../../../utils/compliance.js');
 
@@ -9,10 +10,15 @@ const innerAudioContext = wx.createInnerAudioContext();
 Page({
   data: {
     human: null,           // 当前数字人
+    avatarUrl: '',         // v3.1 阶段 5: 头像
     messages: [],          // [{role, content, hasAudio}]
     inputText: '',
     isPlaying: false,
     isAiThinking: false,
+    // v3.1 阶段 5: 角色差异化
+    personaTag: '',
+    personaStyle: '',
+    showAvatar: true,
   },
 
   onLoad(query) {
@@ -24,7 +30,12 @@ Page({
       return;
     }
     this.humanKey = key;
-    this.setData({ human });
+    this.setData({
+      human,
+      avatarUrl: `/assets/digital_humans/${key}.png`,
+      personaTag: human.tag || '',
+      personaStyle: human.persona ? human.persona.style : '',
+    });
 
     // 加载历史
     this.loadHistory();

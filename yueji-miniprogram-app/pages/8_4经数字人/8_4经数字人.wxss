@@ -1,38 +1,128 @@
+/* v3.1 阶段 5 P0 #4: 4 经数字人 IP 立体化 */
 .human-grid {
   display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-  padding: 24rpx 32rpx;
+  flex-wrap: wrap;
+  margin: 24rpx 32rpx;
+  gap: 16rpx;
 }
 .human-card {
-  border-radius: 24rpx;
-  padding: 48rpx 32rpx;
+  width: calc((100% - 16rpx) / 2);
+  border-radius: 16rpx;
+  padding: 32rpx 24rpx;
+  color: #faf6f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  color: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.2s;
 }
-.human-emoji {
-  font-size: 80rpx;
+.human-card:active {
+  transform: scale(0.97);
+}
+
+/* 头像区 */
+.human-avatar-frame {
+  position: relative;
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
   margin-bottom: 16rpx;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
 }
+.human-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.human-emoji-badge {
+  position: absolute;
+  bottom: -4rpx;
+  right: -4rpx;
+  width: 44rpx;
+  height: 44rpx;
+  background: #faf6f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+}
+
 .human-name {
-  font-size: 44rpx;
+  font-size: 36rpx;
   font-weight: 600;
-  margin-bottom: 8rpx;
+  margin-bottom: 4rpx;
+  letter-spacing: 0.05em;
 }
 .human-book {
-  font-size: 28rpx;
-  opacity: 0.95;
-  margin-bottom: 8rpx;
+  font-size: 24rpx;
+  opacity: 0.85;
+  margin-bottom: 4rpx;
 }
 .human-era {
-  font-size: 22rpx;
+  font-size: 20rpx;
   opacity: 0.7;
-  margin-bottom: 24rpx;
+  margin-bottom: 12rpx;
+  letter-spacing: 0.1em;
 }
 .human-intro {
-  font-size: 26rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
   opacity: 0.95;
-  font-style: italic;
-  letter-spacing: 2rpx;
+  padding: 0 8rpx;
+}
+.human-tag {
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  padding: 4rpx 16rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12rpx;
+  letter-spacing: 0.05em;
+}
+
+/* 4 经调性说明 */
+.role-explain {
+  margin: 32rpx 48rpx 16rpx;
+  padding: 24rpx;
+  background: rgba(168, 200, 168, 0.12);
+  border-radius: 12rpx;
+  border: 2rpx solid #d8c898;
+}
+.explain-title {
+  font-size: 24rpx;
+  color: #6b6b6b;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+.explain-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+  font-size: 24rpx;
+}
+.explain-name {
+  width: 120rpx;
+  color: #4a7c59;
+  font-weight: 500;
+}
+.explain-text {
+  flex: 1;
+  color: #6b6b6b;
+  font-size: 22rpx;
+}
+
+/* 严守 */
+.compliance-bar {
+  text-align: center;
+  color: #a8a29e;
+  font-size: 22rpx;
+  margin: 48rpx 0 32rpx;
+  letter-spacing: 0.05em;
 }

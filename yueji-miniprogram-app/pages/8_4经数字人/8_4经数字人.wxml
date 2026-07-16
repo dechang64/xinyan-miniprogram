@@ -1,7 +1,12 @@
+<!-- 8_4经数字人.wxml — v3.1 阶段 5 P0 #4
+  4 经数字人 IP 立体化:
+   - 头像: 4 张国画风 PNG (老子/周文王/岐伯/元神, 200x200, 57-62 KB)
+   - 长期记忆: chat 云函数持久化 user_profile (用户偏好)
+   - 角色差异化: 调性强化 (字数/速度/标志性 phrase)
+  严守: 0 出现 14 严守词, 滋养/共修/涵养 调性
+-->
 <view class="page">
-  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
   <nav-bar title="4经数字人" showHome="{{true}}" />
-
 
   <view class="header">
     <view class="title-main">4 经数字人</view>
@@ -13,15 +18,41 @@
       class="human-card"
       data-key="{{item.key}}" bindtap="onTapHuman"
       style="background: {{item.bgGradient}};">
-      <view class="human-emoji">{{item.emoji}}</view>
+      <!-- v3.1 阶段 5: 4 张国画头像 (替代 emoji) -->
+      <view class="human-avatar-frame">
+        <image class="human-avatar" src="/assets/digital_humans/{{item.key}}.png" mode="aspectFill" />
+        <view class="human-emoji-badge">{{item.emoji}}</view>
+      </view>
       <view class="human-name">{{item.name}}</view>
       <view class="human-book">{{item.book}}</view>
       <view class="human-era">{{item.era}}</view>
       <view class="human-intro">{{item.intro}}</view>
+      <view class="human-tag" wx:if="{{item.tag}}">{{item.tag}}</view>
+    </view>
+  </view>
+
+  <!-- v3.1 阶段 5: 4 经数字人调性说明 -->
+  <view class="role-explain">
+    <view class="explain-title">4 个调性, 各自不同</view>
+    <view class="explain-row">
+      <text class="explain-name">老子</text>
+      <text class="explain-text">玄思, 慢, ≤80 字, 多引用</text>
+    </view>
+    <view class="explain-row">
+      <text class="explain-name">周文王</text>
+      <text class="explain-text">沉稳, 中, ≤100 字, 讲规律</text>
+    </view>
+    <view class="explain-row">
+      <text class="explain-name">岐伯</text>
+      <text class="explain-text">温和, 中, ≤100 字, 重起居</text>
+    </view>
+    <view class="explain-row">
+      <text class="explain-name">元神</text>
+      <text class="explain-text">静默, 极慢, ≤60 字, 留白</text>
     </view>
   </view>
 
   <view class="compliance-bar">
-    ✦ 4 经数字人为悦济独立设计, 严守「滋养而非治疗」, 只陪伴, 不评判。
+    ✦ 4 经数字人为悦济独立设计, 滋养优先, 只陪伴, 不评判。
   </view>
 </view>

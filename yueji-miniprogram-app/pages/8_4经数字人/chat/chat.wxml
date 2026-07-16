@@ -1,10 +1,31 @@
+<!-- chat.wxml — 悦济 v3.1 阶段 5 P0 #4
+  4 经数字人对话页:
+   - 头像: 4 张国画 PNG (laozi/zhouwenwang/qibo/yuanshen)
+   - 长期记忆: chat 云函数持久化 (用户聊过的话题)
+   - 角色差异化: personaTag + personaStyle 显示
+  严守: 0 出现 14 严守词, 滋养/共修/涵养 调性
+-->
 <view class="page" style="background: {{human.bgGradient}}; min-height: 100vh;">
+
+  <!-- 顶部: 头像 + 名字 + 调性 tag -->
   <view class="human-header">
-    <view class="human-emoji">{{human.emoji}}</view>
-    <view class="human-name">{{human.name}}</view>
-    <view class="human-book">{{human.book}} · {{human.era}}</view>
+    <view class="header-top">
+      <view class="human-avatar-frame">
+        <image class="human-avatar" src="{{avatarUrl}}" mode="aspectFill" />
+        <view class="human-emoji-badge">{{human.emoji}}</view>
+      </view>
+      <view class="human-info">
+        <view class="human-name">{{human.name}}</view>
+        <view class="human-book">{{human.book}} · {{human.era}}</view>
+        <view class="human-tag" wx:if="{{personaTag}}">{{personaTag}}</view>
+      </view>
+    </view>
+    <view class="human-style" wx:if="{{personaStyle}}">
+      {{personaStyle}}
+    </view>
   </view>
 
+  <!-- 消息区 -->
   <scroll-view class="chat-scroll" scroll-y scroll-into-view="msg-{{messages.length - 1}}">
     <view wx:for="{{messages}}" wx:key="time" wx:for-index="idx"
       id="msg-{{idx}}"
@@ -18,13 +39,13 @@
     </view>
     <view wx:if="{{isAiThinking}}" class="chat-msg chat-msg-assistant">
       <view class="chat-bubble chat-bubble-assistant">
-        <text>...</text>
+        <text>{{human.name}} 在想...</text>
       </view>
     </view>
   </scroll-view>
 
+  <!-- 输入区 -->
   <view class="input-bar">
-    <!-- v2.5.4: 删录音功能 (v1.1 加的, 没真测过端到端, 按住录音触发 "Record file not exist" 错), 留文字 + TTS -->
     <view class="input-row">
       <textarea
         class="input-text"
@@ -38,7 +59,6 @@
     <view class="action-row">
       <view class="action-btn" bindtap="onStopTTS" wx:if="{{isPlaying}}">⏹ 停止</view>
       <view class="action-btn" bindtap="onClearHistory">🗑 清空</view>
-      <view class="action-btn" style="color: #a8a29e; font-size: 22rpx;">🎤 录音 v2.6 路线</view>
     </view>
   </view>
 </view>
