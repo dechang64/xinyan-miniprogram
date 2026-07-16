@@ -48,21 +48,32 @@ Page({
     const track = recommendWuyueTrack(tizhiKey, latest4);
     // 4. fileID → 临时 URL (2 小时有效)
     let mp3Url = '';
-    console.log('[悦济 music] track.fileID =', track.fileID);
+    // v3.1 阶段 7.2: 加详细 console.log, 真机跑时直接给调试信息 (Q1 环境 ID + Q2 fileID + Q3 完整堆栈)
+    const fileIdPrefix = track.fileID ? track.fileID.split('/').slice(0, 4).join('/') : '(空)';
+    console.log('========== 悦济 music 调试信息 ==========');
+    console.log('[1/4] 当前选调式:', track.wuyue, '变体 idx:', track.trackIndex, 'fileID 前 4 段:', fileIdPrefix);
+    console.log('[2/4] CLOUD_PREFIX (在 data_music.js):', require('../../utils/data_music.js').CLOUD_PREFIX);
+    console.log('[3/4] track.fileID 完整:', track.fileID);
+    console.log('[4/4] wx.cloud 已初始化 (app.js onLaunch):', typeof wx !== 'undefined' && !!wx.cloud);
     if (track.fileID && track.fileID.startsWith('cloud://')) {
       try {
         const res = await getTempUrls([track.fileID]);
-        console.log('[悦济 music] getTempFileURL res =', JSON.stringify(res).slice(0, 200));
+        console.log('[悦济 music] getTempFileURL res 完整:', JSON.stringify(res));
         if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
           mp3Url = res.fileList[0].tempFileURL;
           console.log('[悦济 music] mp3Url 拿到 ✓');
         } else {
-          console.warn('[悦济 music] fileList 空, 检查存储安全规则 / 路径是否对');
+          console.warn('[悦济 music] fileList 空, 检查项:');
+          console.warn('  A) CLOUD_PREFIX cloudID 跟 user 当前云开发环境 ID 是否一致?');
+          console.warn('  B) 25 mp3 是否真在该环境的云存储, 路径是否对?');
+          console.warn('  C) app.js onLaunch wx.cloud.init 是否成功 (看 console [悦济] 云环境初始化完成)');
         }
       } catch (e) {
         console.error('[悦济 music] getTempFileURL 抛错 =', e);
+        console.error('  完整错误堆栈:', e.stack || '(无 stack)');
       }
     }
+    console.log('========== 调试信息结束 ==========');
 
     this.setData({
       tizhiKey,
