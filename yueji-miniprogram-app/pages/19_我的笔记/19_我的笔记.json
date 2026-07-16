@@ -3,6 +3,6 @@
   "navigationBarBackgroundColor": "#faf6f0",
   "navigationBarTextStyle": "black",
   "usingComponents": {
-    "nav-bar": "/components/nav-bar/nav-bar"
+    "nav-bar": "/components/nav-bar/index"
   }
 }
