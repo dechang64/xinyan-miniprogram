@@ -80,7 +80,7 @@
 }
 .chat-scroll {
   flex: 1;
-  padding: 24rpx 32rpx;
+  padding: 24rpx 32rpx calc(220rpx + env(safe-area-inset-bottom));  /* v3.1 阶段 7: 给 input-bar 留位 */
 }
 .chat-msg {
   margin: 16rpx 0;
@@ -117,10 +117,17 @@
   margin-top: 8rpx;
   padding-left: 16rpx;
 }
+/* v3.1 阶段 7: input-bar 固定底部 + safe-area, 不遮挡消息 */
 .input-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: #fff;
   border-top: 2rpx solid #f5efe6;
-  padding: 16rpx 24rpx 24rpx;
+  padding: 16rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+  z-index: 100;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.04);
 }
 .recording-tip {
   text-align: center;
