@@ -46,7 +46,7 @@ Page({
   onLoad() { this.compute(); },
   onShow() { this.compute(); },
 
-  async compute() {
+  async compute(forceWuyue) {
     // 1. 拿 9 体质 (v3.1 F2: 9 体质自评后才有真值, 之前永远 pinghe)
     const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
     const tizhiDone = !!wx.getStorageSync('yueji_tizhi');
@@ -63,12 +63,12 @@ Page({
     };
 
     // 3. 静态映射 + 日期 hash 选 1 段 (30 段中 1)
-    // v3.1 阶段 13 修: 优先用 currentWuyue (用户点 5 tab 的选择) 推 track
-    // 修前: 9 体质推默认 track.wuyue, onSelectWuyue 改 currentWuyue 但 compute() 又重置 wuyue → UI 不一致 (tab 角 / hero 宫)
-    // 修后: currentWuyue 已设时用 recommendWuyueTrackByWuyue(currentWuyue) 推 track, 跟 5 tab 同步
-    const wuyueKey = this.data.currentWuyue || recommendWuyue(tizhiKey, latest4);
-    const track = this.data.currentWuyue
-      ? recommendWuyueTrackByWuyue(this.data.currentWuyue)
+    // v3.1 阶段 14 修: 接受 forceWuyue 参数 (onSelectWuyue 同步传过来, 避免 setData 异步问题)
+    // 修前: this.data.currentWuyue 在 setData 后 compute() 跑时还没更新 → 老 bug 又回来
+    // 修后: forceWuyue 同步传入, compute() 立刻用 forceWuyue 推 track
+    const wuyueKey = forceWuyue || this.data.currentWuyue || recommendWuyue(tizhiKey, latest4);
+    const track = wuyueKey
+      ? recommendWuyueTrackByWuyue(wuyueKey)
       : recommendWuyueTrack(tizhiKey, latest4);
     // 4. fileID → 临时 URL (2 小时有效)
     let mp3Url = '';
@@ -123,15 +123,15 @@ Page({
   },
 
   // v3.1 阶段 12 F1: 5 调式 tab 点击 — 用户自由选调式
-  // v3.1 阶段 13 改: 只改 currentWuyue + 调 compute(), 让 compute() 推 track + setData 一致
+  // v3.1 阶段 14 改: 传 forceWuyue 给 compute() (修 setData 异步问题)
+  // 修前: this.setData({ currentWuyue: key }) + this.compute() — setData 异步, compute() 跑时 this.data.currentWuyue 还是旧值
+  // 修后: this.compute(key) — 同步传参, compute() 立刻用 key 推 track, UI 100% 同步
   onSelectWuyue(e) {
     const key = e.currentTarget.dataset.key;
     if (!WUYUE_30_FILEID[key]) return;
     // 停止当前播放
     if (this.audioCtx) { this.audioCtx.stop(); this.audioCtx = null; }
-    // 设 currentWuyue, compute() 推 track (用 recommendWuyueTrackByWuyue 推)
-    this.setData({ currentWuyue: key });
-    this.compute();
+    this.compute(key);
   },
 
   askAi(tizhiKey, latest4, wuyue) {
