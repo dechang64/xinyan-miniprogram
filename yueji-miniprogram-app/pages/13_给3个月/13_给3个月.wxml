@@ -44,6 +44,53 @@
     <view class="text-body" style="margin-top: 16rpx; font-size: 24rpx; color: #a8a29e;">
       写入日期: {{letterDate}}
     </view>
+
+    <!-- v3.1 阶段 3: 4 维对比 -->
+    <view class="compare-block" wx:if="{{beforeStats && afterStats}}">
+      <view class="compare-title">4 维对比 (写时 vs 现在)</view>
+      <view class="compare-row">
+        <view class="compare-label">心情</view>
+        <view class="compare-bar">
+          <view class="compare-cell-before">{{beforeStats.avgMood}}</view>
+          <view class="compare-arrow">→</view>
+          <view class="compare-cell-after">{{afterStats.avgMood}}</view>
+        </view>
+      </view>
+      <view class="compare-row">
+        <view class="compare-label">精力</view>
+        <view class="compare-bar">
+          <view class="compare-cell-before">{{beforeStats.avgEnergy}}</view>
+          <view class="compare-arrow">→</view>
+          <view class="compare-cell-after">{{afterStats.avgEnergy}}</view>
+        </view>
+      </view>
+      <view class="compare-row">
+        <view class="compare-label">睡眠</view>
+        <view class="compare-bar">
+          <view class="compare-cell-before">{{beforeStats.avgSleep}}</view>
+          <view class="compare-arrow">→</view>
+          <view class="compare-cell-after">{{afterStats.avgSleep}}</view>
+        </view>
+      </view>
+      <view class="compare-row">
+        <view class="compare-label">肌肤</view>
+        <view class="compare-bar">
+          <view class="compare-cell-before">{{beforeStats.avgSkin}}</view>
+          <view class="compare-arrow">→</view>
+          <view class="compare-cell-after">{{afterStats.avgSkin}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- v3.1 阶段 3: AI 3 个月陪伴 -->
+    <view class="ai-block">
+      <view class="ai-title">同舟 · 3 个月陪伴</view>
+      <view wx:if="{{!aiCompanion && !generating}}" class="btn-primary" bindtap="onReadLetter">✦ 请同舟陪你回顾 3 个月</view>
+      <view wx:if="{{generating}}" class="ai-loading">AMAX 正在写 3 个月陪伴...</view>
+      <view wx:if="{{aiCompanion}}" class="ai-text">{{aiCompanion}}</view>
+      <view wx:if="{{aiError}}" class="ai-error">{{aiError}}</view>
+    </view>
+
     <view class="btn-secondary" style="margin-top: 16rpx;" bindtap="onDelete">作废重写</view>
   </view>
 

@@ -55,6 +55,16 @@
       <view class="list-text">月底报告 (AMAX 生成)</view>
       <view class="list-arrow">→</view>
     </view>
+    <view class="list-row" bindtap="onTapMyNotes">
+      <view class="list-icon">📚</view>
+      <view class="list-text">我的笔记 (金句/收藏/笔记)</view>
+      <view class="list-arrow">→</view>
+    </view>
+    <view class="list-row" bindtap="onTapNightRitual">
+      <view class="list-icon">🌙</view>
+      <view class="list-text">晚 9:00 睡前一程</view>
+      <view class="list-arrow">→</view>
+    </view>
   </view>
 
   <!-- 数字人 — 4 经 4 调性 (v2.2.0 加) -->

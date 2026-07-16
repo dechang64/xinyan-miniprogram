@@ -50,4 +50,7 @@ Page({
   onTapSelfie() { wx.navigateTo({ url: '/pages/12_自拍温润/12_自拍温润' }); },
   onTapLetter3() { wx.navigateTo({ url: '/pages/13_给3个月/13_给3个月' }); },
   onTapMonthly() { wx.navigateTo({ url: '/pages/14_月底报告/14_月底报告' }); },
+  // v3.1 阶段 3 P0 #5
+  onTapMyNotes() { wx.navigateTo({ url: '/pages/19_我的笔记/19_我的笔记' }); },
+  onTapNightRitual() { wx.navigateTo({ url: '/pages/18_睡前一程/18_睡前一程' }); },
 });

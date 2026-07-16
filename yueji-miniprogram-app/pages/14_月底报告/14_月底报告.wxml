@@ -42,6 +42,34 @@
       </view>
     </view>
 
+    <!-- v3.1 阶段 3: 当月沉淀 (金句 / 收藏 / 阅读) -->
+    <view class="card">
+      <view class="title-sub">当月沉淀</view>
+      <view class="stat-row" style="margin-top: 16rpx;">
+        <view class="stat-cell">
+          <view class="stat-num" style="color: #4a7c59;">{{sentenceCount}}</view>
+          <view class="stat-label">金句</view>
+        </view>
+        <view class="stat-cell">
+          <view class="stat-num" style="color: #4a7c59;">{{jingwenFavCount}}</view>
+          <view class="stat-label">收藏</view>
+        </view>
+        <view class="stat-cell">
+          <view class="stat-num" style="color: #4a7c59;">{{jingwenReadCount}}</view>
+          <view class="stat-label">已读</view>
+        </view>
+      </view>
+
+      <!-- 最近 3 句金句示例 -->
+      <view wx:if="{{sampleSentences.length > 0}}" class="sample-block">
+        <view wx:for="{{sampleSentences}}" wx:key="idx" class="sample-sentence">
+          <text class="sample-quote">「</text>{{item.text}}<text class="sample-quote">」</text>
+        </view>
+      </view>
+
+      <view class="btn-secondary" style="margin-top: 16rpx;" bindtap="onGotoNotes">📚 看全部沉淀</view>
+    </view>
+
     <view class="card">
       <view class="title-sub">悦济陪伴</view>
       <view class="btn-primary" style="margin-top: 16rpx;" bindtap="onGenerate" disabled="{{generating}}">
@@ -57,6 +85,6 @@
   </view>
 
   <view class="compliance-bar">
-    ✦ 滋养而非治疗 · 悦济独立设计
+    ✦ 滋养独立设计 · 悦济镜中陪伴
   </view>
 </view>

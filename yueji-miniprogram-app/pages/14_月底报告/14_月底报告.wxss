@@ -17,3 +17,26 @@
   color: #6b6b6b;
   margin-top: 4rpx;
 }
+
+/* v3.1 阶段 3: 当月沉淀 + 3 句金句示例 */
+.sample-block {
+  margin-top: 24rpx;
+  padding: 16rpx 20rpx;
+  background: rgba(168, 200, 168, 0.12);
+  border-radius: 12rpx;
+}
+.sample-sentence {
+  font-size: 24rpx;
+  color: #2c2a4a;
+  line-height: 1.6;
+  padding: 8rpx 0;
+  border-bottom: 1rpx solid rgba(168, 200, 168, 0.3);
+}
+.sample-sentence:last-child {
+  border-bottom: none;
+}
+.sample-quote {
+  color: #4a7c59;
+  font-weight: 600;
+  margin: 0 4rpx;
+}

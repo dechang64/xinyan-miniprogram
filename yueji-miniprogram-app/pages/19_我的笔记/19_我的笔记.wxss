@@ -1,0 +1,173 @@
+/* 19_我的笔记.wxss — 悦济 v3.1 阶段 3 */
+.page {
+  padding: 32rpx 0 64rpx;
+}
+
+/* 顶部摘要 */
+.summary {
+  margin: 32rpx 48rpx 24rpx;
+  padding: 32rpx 24rpx;
+  background: linear-gradient(135deg, #f8f4e8 0%, #faf6f0 100%);
+  border-radius: 16rpx;
+  border: 2rpx solid #d8c898;
+}
+.summary-title {
+  font-size: 28rpx;
+  color: #6b6b6b;
+  letter-spacing: 0.1em;
+  margin-bottom: 16rpx;
+  text-align: center;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-around;
+}
+.summary-cell {
+  text-align: center;
+  flex: 1;
+}
+.summary-num {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #4a7c59;
+  line-height: 1.2;
+}
+.summary-label {
+  font-size: 22rpx;
+  color: #a8a29e;
+  margin-top: 4rpx;
+}
+
+/* tab 切换 */
+.tab-bar {
+  display: flex;
+  margin: 24rpx 48rpx 0;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12rpx;
+  padding: 6rpx;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 26rpx;
+  color: #6b6b6b;
+  border-radius: 8rpx;
+}
+.tab.active {
+  background: #4a7c59;
+  color: #faf6f0;
+}
+
+/* 空状态 */
+.empty {
+  text-align: center;
+  padding: 120rpx 48rpx;
+}
+.empty-icon {
+  font-size: 80rpx;
+  color: #d8c898;
+  margin-bottom: 24rpx;
+}
+.empty-text {
+  font-size: 32rpx;
+  color: #6b6b6b;
+  margin-bottom: 16rpx;
+}
+.empty-hint {
+  font-size: 24rpx;
+  color: #a8a29e;
+  line-height: 1.6;
+}
+
+/* 月份组 */
+.month-group {
+  margin: 32rpx 48rpx;
+}
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding: 0 8rpx;
+}
+.month-label {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2c2a4a;
+  letter-spacing: 0.05em;
+}
+.month-count {
+  font-size: 22rpx;
+  color: #a8a29e;
+}
+
+/* 内容卡 */
+.item-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-left: 6rpx solid #a8c8a8;
+  border-radius: 12rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+}
+.item-source {
+  font-size: 22rpx;
+  color: #6b6b6b;
+  margin-bottom: 12rpx;
+}
+.item-text {
+  font-size: 28rpx;
+  color: #2c2a4a;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+}
+.item-meta {
+  font-size: 22rpx;
+  color: #a8a29e;
+  margin-top: 8rpx;
+}
+.item-actions {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx solid #e8dfc8;
+}
+.item-action {
+  font-size: 24rpx;
+  color: #6b6b6b;
+  padding: 4rpx 0;
+}
+
+/* 入口按钮 */
+.entry-row {
+  display: flex;
+  gap: 24rpx;
+  margin: 32rpx 48rpx;
+}
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+}
+.btn-primary {
+  background: #4a7c59;
+  color: #faf6f0;
+}
+.btn-secondary {
+  background: rgba(74, 124, 89, 0.1);
+  color: #4a7c59;
+  border: 2rpx solid #4a7c59;
+}
+
+/* 严守 */
+.compliance-bar {
+  text-align: center;
+  color: #a8a29e;
+  font-size: 22rpx;
+  margin: 48rpx 0;
+  letter-spacing: 0.05em;
+}

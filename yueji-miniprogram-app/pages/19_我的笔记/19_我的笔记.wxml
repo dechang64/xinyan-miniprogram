@@ -1,0 +1,98 @@
+<!-- 19_我的笔记.wxml — 悦济 v3.1 阶段 3 P0 #5
+  聚合笔记 / 金句 / 收藏, 按月分组, 顶部摘要, 3 tab 切换
+  严守: 0 出现 14 严守词, 滋养调性
+-->
+<view class="page">
+  <nav-bar title="我的笔记" showHome="{{true}}" />
+
+  <!-- 顶部摘要 -->
+  <view class="summary">
+    <view class="summary-title">沉淀</view>
+    <view class="summary-row">
+      <view class="summary-cell">
+        <view class="summary-num">{{summary.notes}}</view>
+        <view class="summary-label">笔记</view>
+      </view>
+      <view class="summary-cell">
+        <view class="summary-num">{{summary.sentences}}</view>
+        <view class="summary-label">金句</view>
+      </view>
+      <view class="summary-cell">
+        <view class="summary-num">{{summary.jingwen}}</view>
+        <view class="summary-label">收藏</view>
+      </view>
+      <view class="summary-cell">
+        <view class="summary-num">{{summary.months}}</view>
+        <view class="summary-label">月份</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- tab 切换 -->
+  <view class="tab-bar">
+    <view class="tab {{tab == 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTabChange">全部</view>
+    <view class="tab {{tab == 'notes' ? 'active' : ''}}" data-tab="notes" bindtap="onTabChange">笔记</view>
+    <view class="tab {{tab == 'sentences' ? 'active' : ''}}" data-tab="sentences" bindtap="onTabChange">金句</view>
+    <view class="tab {{tab == 'jingwen' ? 'active' : ''}}" data-tab="jingwen" bindtap="onTabChange">收藏</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!hasContent}}">
+    <view class="empty-icon">✦</view>
+    <view class="empty-text">还没有内容</view>
+    <view class="empty-hint">在 1.1 经文详情 长按金句, 或写一笔笔记, 这里会慢慢攒起来。</view>
+  </view>
+
+  <!-- 内容: 按月分组 -->
+  <view wx:else class="groups">
+    <view wx:for="{{groups}}" wx:key="month" wx:for-item="g" class="month-group">
+      <view class="month-header">
+        <text class="month-label">{{g.month}}</text>
+        <text class="month-count">{{g.count}} 条</text>
+      </view>
+
+      <view wx:for="{{g.items}}" wx:key="id" wx:for-item="item" class="item-card">
+
+        <!-- 笔记 -->
+        <block wx:if="{{item.type == 'note'}}">
+          <view class="item-source" bindtap="onTapItem" data-id="{{item.id}}">
+            笔记 · 经文 #{{item.id}} →
+          </view>
+          <view class="item-text" bindtap="onCopy" data-text="{{item.text}}">{{item.text}}</view>
+        </block>
+
+        <!-- 金句 -->
+        <block wx:elif="{{item.type == 'sentence'}}">
+          <view class="item-source" bindtap="onTapItem" data-id="{{item.id}}">
+            ⭐ 金句 · {{item.source}} · {{item.title}} →
+          </view>
+          <view class="item-text">{{item.text}}</view>
+          <view class="item-actions">
+            <view class="item-action" catchtap="onCopy" data-text="{{item.text}}">📋 复制</view>
+            <view class="item-action" catchtap="onUnfav" data-id="{{item.id}}" data-idx="{{item.idx}}">✗ 移除</view>
+          </view>
+        </block>
+
+        <!-- 收藏经文 -->
+        <block wx:else>
+          <view class="item-source" bindtap="onTapItem" data-id="{{item.id}}">
+            {{item.source}} · {{item.title}} →
+          </view>
+          <view class="item-meta">{{item.savedAt}} 收藏</view>
+        </block>
+
+      </view>
+    </view>
+  </view>
+
+  <!-- 入口: 月底报告 + 3 个月胶囊 -->
+  <view class="entry-row">
+    <view class="btn-primary" bindtap="onGotoMonthly">📊 月底报告</view>
+    <view class="btn-secondary" bindtap="onGoto3Months">⏳ 3 个月胶囊</view>
+  </view>
+
+  <!-- 严守 -->
+  <view class="compliance-bar">
+    ✦ 滋养陪伴, 不涉及医疗作用 · 主观自评 ✅ · 客观识别 ❌
+  </view>
+</view>

@@ -354,6 +354,55 @@ function buildPinyinPrompt(jingwen) {
 6. 末尾加一句: "AI 自动生成, 可能有误"`;
 }
 
+// 月底陪伴 prompt (v3.1 阶段 3 P0 #5: 接 14_月底报告)
+// 严守: 不评判, 不医疗, 不卖, 滋养调性
+function buildMonthlyPrompt(stats, monthLabel, sentenceCount, jingwenCount) {
+  return `你是悦济的「悦己」, 用户 9 体质已知, 写 1 段 200 字月底陪伴。
+
+用户当月数据:
+- 心情: ${stats.avgMood || 0} / 10
+- 精力: ${stats.avgEnergy || 0} / 10
+- 睡眠: ${stats.avgSleep || 0} / 10
+- 肌肤: ${stats.avgSkin || 0} / 10
+- 共 ${stats.days} 天 · 趋势: ${stats.trend}
+- 收藏金句: ${sentenceCount} 句
+- 阅读经文: ${jingwenCount} 章
+- 月份: ${monthLabel}
+
+要求:
+1. 200 字左右 (180-220 字)
+2. 3 层结构: ①看见 4 维 (40-60 字, 不评判) ②看见金句/经文积累 (40-60 字, 滋养) ③收 1 句 4 经调性的话 (≤40 字)
+3. 严守: 14 严守词 0 出现, 不评判, 不医疗, 不卖
+4. 滋养/共修/涵养 调性
+5. 不显示具体分数值, 用"还好 / 不错 / 有起色"等程度词
+6. 末尾不出现"我"自称, 不输出"AI"标识`;
+}
+
+// 3 个月陪伴 prompt (v3.1 阶段 3 P0 #5: 接 13_给3个月)
+// 严守: 不评判, 不医疗, 不卖, 滋养调性
+function build3MonthsPrompt(beforeStats, afterStats, beforeLetterExcerpt) {
+  return `你是悦济的「同舟」, 写 1 段 250 字 3 个月陪伴, 给重新打开信的人。
+
+用户 3 个月前 4 维:
+- 心情: ${beforeStats.avgMood || 0} / 精力: ${beforeStats.avgEnergy || 0}
+- 睡眠: ${beforeStats.avgSleep || 0} / 肌肤: ${beforeStats.avgSkin || 0}
+
+用户现在 4 维:
+- 心情: ${afterStats.avgMood || 0} / 精力: ${afterStats.avgEnergy || 0}
+- 睡眠: ${afterStats.avgSleep || 0} / 肌肤: ${afterStats.avgSkin || 0}
+
+3 个月前自己写的信 (前 100 字):
+「${(beforeLetterExcerpt || '').slice(0, 100)}」
+
+要求:
+1. 250 字左右 (220-280 字)
+2. 3 层结构: ①看见 3 个月前的自己 (60-80 字, 不评判, 看到 4 维的变化) ②看见 3 个月前信里的心情 (60-80 字, 跟现在的自己说话) ③收 1 句 4 经调性的话 (≤60 字)
+3. 严守: 14 严守词 0 出现, 不评判, 不医疗, 不卖, 不预测
+4. 滋养/共修/涵养 调性
+5. 不显示具体分数值, 用"稳 / 静 / 暖"等调性词
+6. 末尾不出现"我"自称, 不输出"AI"标识`;
+}
+
 // 调 chat LLM 包装 (text 格式, 跟 v3.1 经文详情页 res.result.text 匹配)
 async function callLLMForText(systemPrompt, userPrompt) {
   const messages = [
@@ -445,7 +494,7 @@ ${content}
 // ==============================
 exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext();
-  const { user_input, role = "company", history = [], meta = null, type = "normal", jingwen = null, character = null } = event;
+  const { user_input, role = "company", history = [], meta = null, type = "normal", jingwen = null, character = null, monthly = null, three_months = null } = event;
 
   console.log(`[chat] OPENID=${OPENID}, type=${type}, role=${role}, user_input=${user_input?.slice(0, 30)}, has_meta=${!!meta}`);
   // v2.4.0: 全局传递 role 给 AMAX 选模型
@@ -473,6 +522,30 @@ exports.main = async (event, context) => {
       return { ok: true, text, type };
     } catch (e) {
       console.error(`[chat 经文 ${type} 异常] ${e.message}`);
+      return { ok: false, error: e.message, type };
+    }
+  }
+
+  // v3.1 阶段 3 P0 #5: 月底陪伴 + 3 个月陪伴 旁路路由
+  if (type === 'monthly_summary' || type === 'three_months_companion') {
+    try {
+      let text;
+      if (type === 'monthly_summary') {
+        if (!monthly) return { ok: false, error: 'monthly 缺失, 4 维数据为空', type };
+        text = await callLLMForText(
+          buildMonthlyPrompt(monthly.stats, monthly.monthLabel, monthly.sentenceCount || 0, monthly.jingwenCount || 0),
+          '请写 200 字月底陪伴。',
+        );
+      } else {
+        if (!three_months) return { ok: false, error: 'three_months 缺失, 前后 4 维数据为空', type };
+        text = await callLLMForText(
+          build3MonthsPrompt(three_months.beforeStats, three_months.afterStats, three_months.letterExcerpt || ''),
+          '请写 250 字 3 个月陪伴。',
+        );
+      }
+      return { ok: true, text, type };
+    } catch (e) {
+      console.error(`[chat ${type} 异常] ${e.message}`);
       return { ok: false, error: e.message, type };
     }
   }
