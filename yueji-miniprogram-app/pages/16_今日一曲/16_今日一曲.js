@@ -120,13 +120,9 @@ Page({
   onPlay() {
     console.log('[悦济 music] onPlay mp3Url =', this.data.mp3Url ? this.data.mp3Url.slice(0, 80) + '...' : '空');
     if (!this.data.mp3Url) {
-      // v3.1 阶段 7: 明确提示 — 25 mp3 必须部署到云存储才能播放
-      wx.showModal({
-        title: '未部署云存储',
-        content: '25 段曲风 mp3 需要部署到云开发存储才能播放。\n\n云存储路径: yueji-music-v3.0.5/v3_5modes_v2/\n\n请在微信开发者工具 → 云开发 → 存储 上传 25 个 mp3。',
-        showCancel: false,
-        confirmText: '我知道了',
-      });
+      // v3.0.5 原始行为: 25 mp3 走 v3.0.5 阶段 1.5 部署的 cloud:// 路径, 复用同套
+      // 拿不到 URL 时弹 toast 提示看 console (不假设未部署, 让用户自己调试)
+      wx.showToast({ title: 'mp3 URL 空, 请看 console', icon: 'none', duration: 3000 });
       return;
     }
     const ctx = wx.createInnerAudioContext();
@@ -163,12 +159,8 @@ Page({
       }
     }
     if (!mp3Url) {
-      wx.showModal({
-        title: '未部署云存储',
-        content: '换 1 段需要从云存储拿 25 个 mp3。\n\n请在微信开发者工具 → 云开发 → 存储 上传 25 个 mp3 到 yueji-music-v3.0.5/v3_5modes_v2/。',
-        showCancel: false,
-        confirmText: '我知道了',
-      });
+      // v3.0.5 原始行为: 复用 v3.0.5 阶段 1.5 部署的 cloud:// 路径
+      wx.showToast({ title: '换 1 段 mp3 拿不到, 请看 console', icon: 'none', duration: 3000 });
       return;
     }
     this.setData({
