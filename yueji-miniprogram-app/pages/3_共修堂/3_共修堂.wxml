@@ -1,46 +1,97 @@
+<!-- 3_共修堂.wxml — 悦济 v3.1 阶段 4 P0 #3
+  21 天经文 + 28 天汤品 + 我的进度
+  严守: 0 出现 14 严守词, 不打卡 / 不比较 / 不排名, 慢慢来
+-->
 <view class="page">
-  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
   <nav-bar title="共修堂" showHome="{{false}}" />
 
-
-  <view class="header">
-    <view class="title-main">共修堂</view>
-    <view class="title-sub">一群人, 慢慢变好</view>
+  <!-- 顶部场景 -->
+  <view class="hero">
+    <view class="hero-title">共修堂</view>
+    <view class="hero-sub">一群人, 慢慢变好</view>
   </view>
 
-  <!-- v2.2.0 修 3 链点不动 + 删"敬请期待": 3 任务真跳, 社群改成 v2.3 路线 -->
-  <view class="card">
-    <view class="title-sub">3 任务 (今天你做了几件?)</view>
-    <view class="list-row" bindtap="onTapJing">
-      <view class="list-icon">📖</view>
-      <view class="list-text">每日一经</view>
-      <view class="list-arrow">→</view>
+  <!-- 顶部摘要 -->
+  <view class="summary">
+    <view class="summary-cell">
+      <view class="summary-num">{{summary.jingwenDone}}<text class="summary-total"> / 21</text></view>
+      <view class="summary-label">经文</view>
     </view>
-    <view class="list-row" bindtap="onTapSoup">
-      <view class="list-icon">🍵</view>
-      <view class="list-text">每日一汤</view>
-      <view class="list-arrow">→</view>
+    <view class="summary-cell">
+      <view class="summary-num">{{summary.soupDone}}<text class="summary-total"> / 28</text></view>
+      <view class="summary-label">汤品</view>
     </view>
-    <view class="list-row" bindtap="onTapJingzhong">
-      <view class="list-icon">🪞</view>
-      <view class="list-text">镜中自评</view>
-      <view class="list-arrow">→</view>
+    <view class="summary-cell">
+      <view class="summary-num">{{summary.totalDays}}</view>
+      <view class="summary-label">已完成</view>
     </view>
   </view>
 
-  <view class="card">
-    <view class="title-sub">本周共修</view>
-    <view class="text-body" style="margin-top: 16rpx;">
-      社群 v2.3 路线 (待 v2.3 拍板):
+  <!-- tab 切换 -->
+  <view class="tab-bar">
+    <view class="tab {{tab == 'jingwen' ? 'active' : ''}}" data-tab="jingwen" bindtap="onTabChange">
+      21 天经文
     </view>
-    <view class="text-body" style="margin-top: 8rpx; color: #7a6f5f; font-size: 24rpx;">
-      • 同修圈: 9 体质 / 24 节气 / 4 经 / 6 类对话 4 大主题圈<br/>
-      • 慢共修: 不打卡, 30 天同一群人慢慢走<br/>
-      • 严守: 不比较 / 不排名 / 不焦虑
+    <view class="tab {{tab == 'soup' ? 'active' : ''}}" data-tab="soup" bindtap="onTabChange">
+      28 天汤品
+    </view>
+    <view class="tab {{tab == 'mine' ? 'active' : ''}}" data-tab="mine" bindtap="onTabChange">
+      我的进度
     </view>
   </view>
 
+  <!-- 21 天经文 grid -->
+  <view wx:if="{{tab == 'jingwen'}}" class="grid">
+    <view wx:for="{{ritualJingwen}}" wx:key="day" class="card-jing" style="border-left: 8rpx solid {{item.color}};">
+      <view class="card-day">D{{item.day}}</view>
+      <view class="card-source">{{item.source}}</view>
+      <view class="card-title" bindtap="onTapJing" data-id="{{item.jingwenId}}">{{item.title}} →</view>
+      <view class="card-text">{{item.short}}</view>
+      <view class="card-action {{item.done ? 'card-action-done' : ''}}" bindtap="onMarkJing" data-id="{{item.jingwenId}}" data-day="{{item.day}}">
+        {{item.done ? '✦ 已记录' : '○ 记录'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 28 天汤品 grid -->
+  <view wx:if="{{tab == 'soup'}}" class="grid">
+    <view wx:for="{{ritualSoups}}" wx:key="day" class="card-soup {{item.available ? '' : 'card-disabled'}}">
+      <view class="card-day">D{{item.day}}</view>
+      <view wx:if="{{item.available}}">
+        <view class="card-source">{{item.season}}季 · {{item.tizhi}}</view>
+        <view class="card-title" bindtap="onTapSoup" data-id="{{item.soupId}}" data-available="{{item.available}}">{{item.name}} →</view>
+        <view class="card-text">{{item.short}}</view>
+        <view class="card-action {{item.done ? 'card-action-done' : ''}}" bindtap="onMarkSoup" data-id="{{item.soupId}}" data-day="{{item.day}}" data-available="{{item.available}}">
+          {{item.done ? '✦ 已记录' : '○ 记录'}}
+        </view>
+      </view>
+      <view wx:else class="card-coming">
+        <view class="card-coming-text">敬请期待</view>
+        <view class="card-action card-action-disabled">整理中</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的进度 -->
+  <view wx:if="{{tab == 'mine'}}" class="my-list">
+    <view wx:if="{{summary.totalDays == 0}}" class="empty">
+      <view class="empty-icon">✦</view>
+      <view class="empty-text">还没有记录</view>
+      <view class="empty-hint">在 21 天经文 / 28 天汤品 tab 点"记录", 这里会慢慢攒起来。</view>
+    </view>
+    <view wx:for="{{myDone}}" wx:key="idx" wx:for-item="m" class="my-item">
+      <view class="my-day">{{m.type == 'jingwen' ? '经文' : '汤品'}}</view>
+      <view class="my-body">
+        <view class="my-title">{{m.type == 'jingwen' ? m.title : m.name}}</view>
+        <view class="my-meta">
+          D{{m.day}} · {{m.type == 'jingwen' ? m.source : m.tizhi}} · {{m.doneAt || '今天'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 严守 -->
   <view class="compliance-bar">
-    ✦ 共修不打卡, 慢慢来。
+    ✦ 共修不打卡, 不比较, 不排名, 慢慢来
   </view>
 </view>
