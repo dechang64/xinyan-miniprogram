@@ -52,7 +52,8 @@ Page({
     const fileIdPrefix = track.fileID ? track.fileID.split('/').slice(0, 4).join('/') : '(空)';
     console.log('========== 悦济 music 调试信息 ==========');
     console.log('[1/4] 当前选调式:', track.wuyue, '变体 idx:', track.trackIndex, 'fileID 前 4 段:', fileIdPrefix);
-    console.log('[2/4] CLOUD_PREFIX (在 data_music.js):', require('../../utils/data_music.js').CLOUD_PREFIX);
+    console.log('[2/4] CLOUD_PREFIX_V1 (v1 5 段) (在 data_music.js):', require('../../utils/data_music.js').CLOUD_PREFIX_V1);
+    console.log('[2/4] CLOUD_PREFIX_V2 (v2 25 段) (在 data_music.js):', require('../../utils/data_music.js').CLOUD_PREFIX_V2);
     console.log('[3/4] track.fileID 完整:', track.fileID);
     console.log('[4/4] wx.cloud 已初始化 (app.js onLaunch):', typeof wx !== 'undefined' && !!wx.cloud);
     if (track.fileID && track.fileID.startsWith('cloud://')) {

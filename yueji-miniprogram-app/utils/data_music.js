@@ -23,50 +23,52 @@ const WUYUE_DESCRIPTIONS = {
   yu: '沉降水音, 滋肾藏精, 沉降调性',
 };
 
-// 30 段 mp3 cloudPath (已上传到 cloud1-d1g4p3kaa481d1302 / yueji-music-v3.0.5/v3_5modes/)
-// 微信云开发把 5 调式文件夹合并了, 30 段都在 v3_5modes/ 下 (注: 路径是 v3_5modes, 不是 v3.5modes_v2)
-const CLOUD_PREFIX = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes';
+// 30 段 mp3 cloudPath: 5 段 v1 (v3_5modes/) + 25 段 v2 (v3_5modes_v2/), 两个目录并存
+// v1 5 段: 冬生 v3.0.5 阶段 1.5 部署时手动传, 路径 v3_5modes/
+// v2 25 段: 2026-07-14 16:49 批量传 (dl_25_v2.ps1 下载 + 上传), 路径 v3_5modes_v2/
+const CLOUD_PREFIX_V1 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes';
+const CLOUD_PREFIX_V2 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes_v2';
 
 const WUYUE_30_FILEID = {
   gong: [
-    `${CLOUD_PREFIX}/01_gong_v1_guzheng_60bpm.mp3`,
-    `${CLOUD_PREFIX}/06_gong_guqin_65bpm.mp3`,
-    `${CLOUD_PREFIX}/07_gong_pipa_70bpm.mp3`,
-    `${CLOUD_PREFIX}/08_gong_muyu_75bpm.mp3`,
-    `${CLOUD_PREFIX}/09_gong_bell_80bpm.mp3`,
-    `${CLOUD_PREFIX}/10_gong_paigu_55bpm.mp3`,
+    `${CLOUD_PREFIX_V1}/01_gong_v1_guzheng_60bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/06_gong_guqin_65bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/07_gong_pipa_70bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/08_gong_muyu_75bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/09_gong_bell_80bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/10_gong_paigu_55bpm.mp3`,
   ],
   shang: [
-    `${CLOUD_PREFIX}/02_shang_v1_xiao_70bpm.mp3`,
-    `${CLOUD_PREFIX}/06_shang_bamboo_60bpm.mp3`,
-    `${CLOUD_PREFIX}/07_shang_qing_65bpm.mp3`,
-    `${CLOUD_PREFIX}/08_shang_gong_75bpm.mp3`,
-    `${CLOUD_PREFIX}/09_shang_paixiao_80bpm.mp3`,
-    `${CLOUD_PREFIX}/10_shang_bronze_55bpm.mp3`,
+    `${CLOUD_PREFIX_V1}/02_shang_v1_xiao_70bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/06_shang_bamboo_60bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/07_shang_qing_65bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/08_shang_gong_75bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/09_shang_paixiao_80bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/10_shang_bronze_55bpm.mp3`,
   ],
   jiao: [
-    `${CLOUD_PREFIX}/03_jiao_v1_bamboo_65bpm.mp3`,
-    `${CLOUD_PREFIX}/06_jiao_hulusi_60bpm.mp3`,
-    `${CLOUD_PREFIX}/07_jiao_sheng_70bpm.mp3`,
-    `${CLOUD_PREFIX}/08_jiao_huangguan_75bpm.mp3`,
-    `${CLOUD_PREFIX}/09_jiao_duanxiao_80bpm.mp3`,
-    `${CLOUD_PREFIX}/10_jiao_bawu_55bpm.mp3`,
+    `${CLOUD_PREFIX_V1}/03_jiao_v1_bamboo_65bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/06_jiao_hulusi_60bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/07_jiao_sheng_70bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/08_jiao_huangguan_75bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/09_jiao_duanxiao_80bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/10_jiao_bawu_55bpm.mp3`,
   ],
   zhi: [
-    `${CLOUD_PREFIX}/04_zhi_v1_erhu_60bpm.mp3`,
-    `${CLOUD_PREFIX}/06_zhi_guzheng_65bpm.mp3`,
-    `${CLOUD_PREFIX}/07_zhi_yueqin_70bpm.mp3`,
-    `${CLOUD_PREFIX}/08_zhi_ruan_75bpm.mp3`,
-    `${CLOUD_PREFIX}/09_zhi_sanxian_80bpm.mp3`,
-    `${CLOUD_PREFIX}/10_zhi_banhu_55bpm.mp3`,
+    `${CLOUD_PREFIX_V1}/04_zhi_v1_erhu_60bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/06_zhi_guzheng_65bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/07_zhi_yueqin_70bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/08_zhi_ruan_75bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/09_zhi_sanxian_80bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/10_zhi_banhu_55bpm.mp3`,
   ],
   yu: [
-    `${CLOUD_PREFIX}/05_yu_v1_pipa_55bpm.mp3`,
-    `${CLOUD_PREFIX}/06_yu_konghou_60bpm.mp3`,
-    `${CLOUD_PREFIX}/07_yu_se_65bpm.mp3`,
-    `${CLOUD_PREFIX}/08_yu_yangqin_70bpm.mp3`,
-    `${CLOUD_PREFIX}/09_yu_bianzhong_75bpm.mp3`,
-    `${CLOUD_PREFIX}/10_yu_bianqing_80bpm.mp3`,
+    `${CLOUD_PREFIX_V1}/05_yu_v1_pipa_55bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/06_yu_konghou_60bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/07_yu_se_65bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/08_yu_yangqin_70bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/09_yu_bianzhong_75bpm.mp3`,
+    `${CLOUD_PREFIX_V2}/10_yu_bianqing_80bpm.mp3`,
   ],
 };
 
@@ -138,5 +140,6 @@ function rankWuyueCandidates(tizhi, latest4) {
 
 module.exports = {
   WUYUE_NAMES, WUYUE_FULL, WUYUE_DESCRIPTIONS, WUYUE_30_FILEID,
+  CLOUD_PREFIX_V1, CLOUD_PREFIX_V2,
   TIZHI_TO_WUYUE, recommendWuyue, recommendWuyueTrack, getTempUrls, rankWuyueCandidates,
 };
