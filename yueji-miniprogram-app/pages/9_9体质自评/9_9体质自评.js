@@ -99,6 +99,14 @@ Page({
         jingwen,
       },
     });
+
+    // v3.1 阶段 12 F2: 修 v3.0.5 时代 bug — 9 体质结果存到 storage
+    // 16_今日一曲 读 'yueji_tizhi' (短 key) 推默认调式
+    // 6_人格画像 读 'yueji_tizhi_result' (含 scores)
+    // 修前: 9 体质做完结果只在 UI 显示, storage 永远空, 16_今日一曲 默认 pinghe → 宫调
+    // 修后: 16_今日一曲 默认调式 = 9 体质自评结果 (不是默认 pinghe)
+    wx.setStorageSync('yueji_tizhi', maxKey);
+    wx.setStorageSync('yueji_tizhi_result', { primary, scores: a, winner: maxKey });
   },
 });
 

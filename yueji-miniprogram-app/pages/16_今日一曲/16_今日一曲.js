@@ -1,18 +1,39 @@
-// 16_今日一曲.js — 悦济 v3.0.5 阶段 1.5 扩展 (30 段 cloud://)
+// 16_今日一曲.js — 悦济 v3.1 阶段 12 PRD 完善
 // 5 滋养曲风 (宫/商/角/徵/羽) + 9 体质 + 镜中 4 维 → 1 调式 + 日期 hash 选 1 段 (6 变体)
+// v3.1 阶段 12:
+//   F1. 加 5 调式 tab — 用户自由点选 (按 PRD 第 73/156 行 "5 调式选 1" P0)
+//   F2. 9 体质自评 setStorage 修复 (在 9_9体质自评.js) — 16_今日一曲 默认调式不再总是 pinghe → 宫
+//   F3. 调式反向映射 (曲风适合 X 体质) — 用户知道当前曲风适合谁
 // 严守: 不打卡 / 不卖装备 / 不评判
 // 30 段 mp3 走 微信云存储 cloud://, 调 wx.cloud.getTempFileURL 拿临时 URL
 const { recommendWuyueTrack, WUYUE_FULL, WUYUE_NAMES, WUYUE_DESCRIPTIONS, getTempUrls, WUYUE_30_FILEID } = require('../../utils/data_music.js');
+
+// F3: 调式反向映射 (曲风适合 X 体质) — 基于 TIZHI_TO_WUYUE 反查
+const WUYUE_TO_TIZHI = {
+  gong:  '平和 / 气虚 / 特禀',
+  shang: '痰湿 / 湿热',
+  jiao:  '血瘀 / 气郁',
+  zhi:   '阳虚',
+  yu:    '阴虚',
+};
+
+const TIZHI_NAMES = {
+  pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质',
+  tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质',
+};
 
 Page({
   data: {
     tizhiName: '平和质',
     tizhiKey: 'pinghe',
+    tizhiDone: false,        // v3.1 F2: 9 体质是否已自评
     latest4: { mood: 5, energy: 5, sleep: 5, skin: 5 },
     wuyue: 'gong',
+    currentWuyue: 'gong',    // v3.1 F1: 用户当前选的调式 (默认 = 推荐)
     wuyueName: '宫',
     wuyueFull: '宫调 (土/脾)',
     wuyueDesc: '温润土音, 养脾胃, 中和调性',
+    wuyueSuit: '平和 / 气虚 / 特禀',  // v3.1 F3: 曲风适合 X 体质
     mp3Url: '',
     trackIndex: 0,
     trackTotal: 6,
@@ -26,12 +47,9 @@ Page({
   onShow() { this.compute(); },
 
   async compute() {
-    // 1. 拿 9 体质
+    // 1. 拿 9 体质 (v3.1 F2: 9 体质自评后才有真值, 之前永远 pinghe)
     const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
-    const TIZHI_NAMES = {
-      pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质',
-      tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质',
-    };
+    const tizhiDone = !!wx.getStorageSync('yueji_tizhi');
 
     // 2. 拿镜中 4 维
     const history = wx.getStorageSync('yueji_history') || [];
@@ -48,7 +66,7 @@ Page({
     const track = recommendWuyueTrack(tizhiKey, latest4);
     // 4. fileID → 临时 URL (2 小时有效)
     let mp3Url = '';
-    // v3.1 阶段 7.2: 加详细 console.log, 真机跑时直接给调试信息 (Q1 环境 ID + Q2 fileID + Q3 完整堆栈)
+    // v3.1 阶段 7.2: 加详细 console.log, 真机跑时直接给调试信息
     const fileIdPrefix = track.fileID ? track.fileID.split('/').slice(0, 4).join('/') : '(空)';
     console.log('========== 悦济 music 调试信息 ==========');
     console.log('[1/4] 当前选调式:', track.wuyue, '变体 idx:', track.trackIndex, 'fileID 前 4 段:', fileIdPrefix);
@@ -79,11 +97,14 @@ Page({
     this.setData({
       tizhiKey,
       tizhiName: TIZHI_NAMES[tizhiKey] || '平和质',
+      tizhiDone,                                    // v3.1 F2
       latest4,
       wuyue: track.wuyue,
+      currentWuyue: this.data.currentWuyue || track.wuyue,  // v3.1 F1: 保留用户上次选择
       wuyueName: WUYUE_NAMES[track.wuyue],
       wuyueFull: WUYUE_FULL[track.wuyue],
       wuyueDesc: WUYUE_DESCRIPTIONS[track.wuyue],
+      wuyueSuit: WUYUE_TO_TIZHI[track.wuyue] || '',  // v3.1 F3
       mp3Url,
       trackIndex: (track.trackIndex || 0) + 1,
       trackTotal: 6,
@@ -95,12 +116,40 @@ Page({
     this.askAi(tizhiKey, latest4, track.wuyue);
   },
 
+  // v3.1 阶段 12 F1: 5 调式 tab 点击 — 用户自由选调式
+  async onSelectWuyue(e) {
+    const key = e.currentTarget.dataset.key;
+    if (!WUYUE_30_FILEID[key] || key === this.data.wuyue) return;
+    // 停止当前播放
+    if (this.audioCtx) { this.audioCtx.stop(); this.audioCtx = null; }
+    // 选 1 段 (同调式 6 变体随机换 1, 跟 onShuffle 逻辑一致)
+    const tracks = WUYUE_30_FILEID[key] || [];
+    const idx = Math.floor(Math.random() * tracks.length);
+    let mp3Url = '';
+    if (tracks[idx] && tracks[idx].startsWith('cloud://')) {
+      const res = await getTempUrls([tracks[idx]]);
+      if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
+        mp3Url = res.fileList[0].tempFileURL;
+      }
+    }
+    this.setData({
+      currentWuyue: key,
+      wuyue: key,
+      wuyueName: WUYUE_NAMES[key],
+      wuyueFull: WUYUE_FULL[key],
+      wuyueDesc: WUYUE_DESCRIPTIONS[key],
+      wuyueSuit: WUYUE_TO_TIZHI[key] || '',
+      trackIndex: idx + 1,
+      trackTotal: tracks.length,
+      mp3Url,
+      isPlaying: false,
+    });
+    // 重新 askAi (因为调式变了)
+    this.askAi(this.data.tizhiKey, this.data.latest4, key);
+  },
+
   askAi(tizhiKey, latest4, wuyue) {
     if (!wx.cloud) return;
-    const TIZHI_NAMES = {
-      pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质',
-      tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质',
-    };
     const prompt =
       '你是悦济的「思友」, 用户是 9 体质中的「' + TIZHI_NAMES[tizhiKey] + '」, ' +
       '今天镜中 4 维 (心情/精力/睡眠/肌肤) = ' + latest4.mood + '/' + latest4.energy + '/' + latest4.sleep + '/' + latest4.skin + '. ' +
@@ -122,18 +171,12 @@ Page({
   },
 
   fallbackHint(tizhiKey, latest4, wuyue) {
-    const TIZHI_NAMES = {
-      pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质',
-      tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质',
-    };
     return '你今天 ' + TIZHI_NAMES[tizhiKey] + ', 试试 ' + WUYUE_NAMES[wuyue] + ' 调, 5 分钟, 慢慢听。';
   },
 
   onPlay() {
     console.log('[悦济 music] onPlay mp3Url =', this.data.mp3Url ? this.data.mp3Url.slice(0, 80) + '...' : '空');
     if (!this.data.mp3Url) {
-      // v3.0.5 原始行为: 25 mp3 走 v3.0.5 阶段 1.5 部署的 cloud:// 路径, 复用同套
-      // 拿不到 URL 时弹 toast 提示看 console (不假设未部署, 让用户自己调试)
       wx.showToast({ title: 'mp3 URL 空, 请看 console', icon: 'none', duration: 3000 });
       return;
     }
@@ -153,7 +196,6 @@ Page({
 
   // 换 1 段: 同调式 6 变体中随机选 1 (走 fileID + getTempFileURL)
   async onShuffle() {
-    const { WUYUE_30_FILEID, getTempUrls } = require('../../utils/data_music.js');
     const tracks = WUYUE_30_FILEID[this.data.wuyue] || [];
     if (tracks.length <= 1) {
       wx.showToast({ title: '该调式仅 1 段', icon: 'none' });
@@ -171,7 +213,6 @@ Page({
       }
     }
     if (!mp3Url) {
-      // v3.0.5 原始行为: 复用 v3.0.5 阶段 1.5 部署的 cloud:// 路径
       wx.showToast({ title: '换 1 段 mp3 拿不到, 请看 console', icon: 'none', duration: 3000 });
       return;
     }

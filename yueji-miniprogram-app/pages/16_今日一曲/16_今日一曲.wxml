@@ -1,4 +1,4 @@
-<!-- 16_今日一曲.wxml — 悦济 v3.0.5 阶段 1.5 扩展 -->
+<!-- 16_今日一曲.wxml — 悦济 v3.1 阶段 12 PRD 完善 (5 调式选 1) -->
 <view class="page-music">
   <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
   <nav-bar title="今日一曲" showHome="{{true}}" />
@@ -8,6 +8,29 @@
     <view class="hero-wuyue">{{wuyueName}}</view>
     <view class="hero-full">{{wuyueFull}}</view>
     <view class="hero-desc">{{wuyueDesc}}</view>
+    <!-- v3.1 阶段 12 F3: 调式反向映射 (曲风适合 X 体质) -->
+    <view class="hero-suit" wx:if="{{wuyueSuit}}">✦ 适合体质: {{wuyueSuit}}</view>
+  </view>
+
+  <!-- v3.1 阶段 12 F1: 5 调式 tab (按 PRD 第 73/156 行 "5 调式选 1") -->
+  <view class="wuyue-tabs">
+    <view class="wuyue-tab {{currentWuyue=='gong'?'wuyue-tab-on':''}}"
+      data-key="gong" bindtap="onSelectWuyue">宫</view>
+    <view class="wuyue-tab {{currentWuyue=='shang'?'wuyue-tab-on':''}}"
+      data-key="shang" bindtap="onSelectWuyue">商</view>
+    <view class="wuyue-tab {{currentWuyue=='jiao'?'wuyue-tab-on':''}}"
+      data-key="jiao" bindtap="onSelectWuyue">角</view>
+    <view class="wuyue-tab {{currentWuyue=='zhi'?'wuyue-tab-on':''}}"
+      data-key="zhi" bindtap="onSelectWuyue">徵</view>
+    <view class="wuyue-tab {{currentWuyue=='yu'?'wuyue-tab-on':''}}"
+      data-key="yu" bindtap="onSelectWuyue">羽</view>
+  </view>
+
+  <!-- v3.1 阶段 12 F2: 9 体质未自评时显示入口 -->
+  <view class="tizhi-prompt" wx:if="{{!tizhiDone}}">
+    <navigator url="/pages/9_9体质自评/9_9体质自评" class="tizhi-prompt-btn">
+      💡 9 体质自评后, 悦济会基于你体质智能推荐默认调式 →
+    </navigator>
   </view>
 
   <view class="meta">

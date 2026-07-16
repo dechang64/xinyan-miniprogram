@@ -21,6 +21,41 @@
 }
 .hero-full { font-size: 32rpx; color: #fff; opacity: 0.9; margin-bottom: 12rpx; }
 .hero-desc { font-size: 24rpx; color: #fff; opacity: 0.7; }
+/* v3.1 阶段 12 F3: 调式反向映射 (曲风适合 X 体质) */
+.hero-suit { font-size: 24rpx; color: #fff; opacity: 0.85; margin-top: 16rpx; padding: 8rpx 20rpx; background: rgba(255,255,255,0.18); border-radius: 16rpx; display: inline-block; }
+
+/* v3.1 阶段 12 F1: 5 调式 tab (按 PRD "5 调式选 1") */
+.wuyue-tabs { display: flex; gap: 12rpx; margin-bottom: 24rpx; }
+.wuyue-tab {
+  flex: 1;
+  text-align: center;
+  background: #fff;
+  color: #a8b4be;
+  border: 1rpx solid #d8d0c8;
+  border-radius: 16rpx;
+  padding: 18rpx 0;
+  font-size: 30rpx;
+  font-weight: 500;
+  letter-spacing: 2rpx;
+}
+.wuyue-tab-on {
+  background: #a8c8a8;
+  color: #fff;
+  border-color: #a8c8a8;
+}
+
+/* v3.1 阶段 12 F2: 9 体质未自评时入口 */
+.tizhi-prompt { margin-bottom: 24rpx; }
+.tizhi-prompt-btn {
+  display: block;
+  background: #fff8e8;
+  color: #a88c5a;
+  border: 1rpx dashed #d8c8a8;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 26rpx;
+  text-align: center;
+}
 
 .meta {
   background: #fff;
