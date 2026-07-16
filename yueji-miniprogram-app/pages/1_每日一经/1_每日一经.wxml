@@ -50,23 +50,4 @@
       </view>
     </view>
   </scroll-view>
-
-  <!-- 详情弹层 (点击经文后) -->
-  <view class="modal-mask" wx:if="{{showDetail}}" bindtap="onCloseDetail">
-    <view class="modal-content" catchtap="">
-      <view class="modal-header">
-        <view class="modal-title">{{detail.title}}</view>
-        <view class="modal-source">{{detail.source}}</view>
-      </view>
-      <scroll-view scroll-y class="modal-body">
-        <view class="modal-content-text">{{detail.content}}</view>
-        <view class="modal-ai-hint" wx:if="{{detail.aiHint}}">思友说 · {{detail.aiHint}}</view>
-      </scroll-view>
-      <view class="modal-actions">
-        <view class="btn-ghost" data-status="reading" data-id="{{detail.id}}" bindtap="onSetStatus">学习中</view>
-        <view class="btn-ghost" data-status="done" data-id="{{detail.id}}" bindtap="onSetStatus">已读</view>
-        <view class="btn-primary" data-id="{{detail.id}}" bindtap="onToggleFavorite">{{detail.favorite ? '★ 已收藏' : '☆ 收藏'}}</view>
-      </view>
-    </view>
-  </view>
 </view>

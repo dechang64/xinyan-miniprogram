@@ -18,10 +18,7 @@ Page({
     // 进度
     progressText: '0 / 868',
     progressPercent: 0,
-    // 详情
-    showDetail: false,
-    detail: {},
-    // 各经数量
+    // 各经数量 (经文详情由 1.1_经文详情 独立页承载, v3.1 阶段 1)
     totalCount: 868,
     daodejingCount: 0,
     zhouyiCount: 0,
@@ -151,51 +148,20 @@ Page({
     this.applyFilter();
   },
 
-  // 点击经文
+  // 点击经文 → 1.1_经文详情 (v3.1 阶段 1: 弹窗升级为独立详情页)
+  // 弹窗历史包袱: v3.0.5 阶段 1.4-2 走 chat 云函数 1 句解读 (依赖 zhouwenwang 思友),
+  //   1.1_经文详情 已经把"问 4 经 / 白话 / 解读"都做进 4 个 tab, 体验更好
+  // 删除: showDetail / detail / onCloseDetail / askAiJingDetail 全部废弃
+  // 保留: 列表上的"学习中 / 已读 / 收藏"状态 tag (在卡片底部, 不动)
   onTapItem(e) {
     const id = e.currentTarget.dataset.id;
-    const item = JINGWEN_868.find(j => j.id === id);
-    if (!item) return;
-    const user = this.data.userStatus[id] || {};
-    this.setData({
-      showDetail: true,
-      detail: { ...item, status: user.status || 'unread', favorite: user.favorite || false },
-    });
-    // v3.0.5 阶段 1.4-2: 详情弹窗 大模型 1 句解读 (走 chat 云函数 amax-router)
-    this.askAiJingDetail(item);
-  },
-
-  // 大模型 1 句解读 (经文详情) - 走 zhouwenwang 思友
-  askAiJingDetail(item) {
-    if (!wx.cloud) return;
-    const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
-    const TIZHI_NAMES = { pinghe: '平和质', qixu: '气虚质', yangxu: '阳虚质', yinxu: '阴虚质', tanshi: '痰湿质', shire: '湿热质', xueyu: '血瘀质', qiyu: '气郁质', tebing: '特禀质' };
-    const prompt =
-      '你是悦济的「思友」, 用户是 9 体质中的「' + TIZHI_NAMES[tizhiKey] + '」, ' +
-      '经文: 「' + item.title + '」 出自 ' + item.source + ', ' +
-      '原文: ' + (item.content || '').slice(0, 100) + '. ' +
-      '请用 1 句 (≤40 字) 给用户 1 句当下解读, 严守: 不评判 / 不医疗 / 不卖, 滋养调性. ' +
-      '3 层结构: 看到 1 句原文 (10 字) + 跟用户 9 体质 (15 字) + 慢慢读 (10 字).';
-    this.setData({ 'detail.aiHint': '... 思友说' });
-    wx.cloud.callFunction({
-      name: 'chat',
-      data: { user_input: prompt, role: 'zhouwenwang', history: [] },
-    }).then((res) => {
-      if (res && res.result && res.result.ok && res.result.data && res.result.data.content) {
-        if (this.data.detail.id === item.id) this.setData({ 'detail.aiHint': res.result.data.content });
-      }
-    }).catch((e) => {
-      console.warn('[悦济 jing detail ai]', e);
-      this.setData({ 'detail.aiHint': '... 思友说 (润色暂不可用, 请检查云函数部署)' });
+    if (!id) return;
+    wx.navigateTo({
+      url: `/pages/1.1_经文详情/1.1_经文详情?id=${id}`,
     });
   },
 
-  // 关闭详情
-  onCloseDetail() {
-    this.setData({ showDetail: false });
-  },
-
-  // 设置状态
+  // 设置状态 (列表卡片状态 tag, 保留)
   onSetStatus(e) {
     const id = e.currentTarget.dataset.id;
     const status = e.currentTarget.dataset.status;
@@ -204,13 +170,9 @@ Page({
     this.setData({ userStatus });
     this.saveUserStatus();
     this.applyFilter();
-    // 同步更新详情
-    if (this.data.showDetail && this.data.detail.id === id) {
-      this.setData({ 'detail.status': status });
-    }
   },
 
-  // 切换收藏
+  // 切换收藏 (列表卡片 ★, 保留)
   onToggleFavorite(e) {
     const id = e.currentTarget.dataset.id;
     const userStatus = { ...this.data.userStatus };
@@ -219,8 +181,5 @@ Page({
     this.setData({ userStatus });
     this.saveUserStatus();
     this.applyFilter();
-    if (this.data.showDetail && this.data.detail.id === id) {
-      this.setData({ 'detail.favorite': !current.favorite });
-    }
   },
 });

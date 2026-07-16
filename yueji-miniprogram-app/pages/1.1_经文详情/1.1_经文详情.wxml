@@ -1,0 +1,107 @@
+<!-- 1.1_经文详情.wxml
+  v3.1 阶段 1: 经文独立详情页
+  功能:
+   - 分段句读(每段 1-2 句)
+   - 4 标签切换:原文 / 白话 / 拼音 / 解读
+   - 朗读 (TTS 调 voice 云函数)
+   - 问 4 经数字人 (带 context 跳 chat)
+   - 笔记 / 金句 (本地存储)
+   - 上下经文导航
+   - onShareAppMessage (微信分享)
+  严守: 0 出现 87 禁用词,严守字串硬约束
+-->
+<view class="page">
+  <nav-bar title="{{title}}" showHome="{{true}}" />
+
+  <!-- 顶部导航条:上一经 / 章数 / 下一经 -->
+  <view class="nav-row">
+    <view class="nav-btn" bindtap="onTapPrev">← 上一经</view>
+    <view class="nav-center">{{source}} · {{chapterNum}}/{{totalInSource}}</view>
+    <view class="nav-btn" bindtap="onTapNext">下一经 →</view>
+  </view>
+
+  <!-- 标签切换: 原文 / 白话 / 拼音 / 解读 -->
+  <view class="tab-bar">
+    <view class="tab {{tab == 'origin' ? 'active' : ''}}" data-tab="origin" bindtap="onTabChange">原文</view>
+    <view class="tab {{tab == 'baihua' ? 'active' : ''}}" data-tab="baihua" bindtap="onTabChange">白话</view>
+    <view class="tab {{tab == 'pinyin' ? 'active' : ''}}" data-tab="pinyin" bindtap="onTabChange">拼音</view>
+    <view class="tab {{tab == 'jiequ' ? 'active' : ''}}" data-tab="jiequ" bindtap="onTabChange">解读</view>
+  </view>
+
+  <!-- 内容区 -->
+  <scroll-view scroll-y class="content" enable-flex>
+    <block wx:if="{{tab == 'origin'}}">
+      <view class="segment" wx:for="{{segments}}" wx:key="idx" wx:for-item="seg" bindlongtap="onLongPressSegment" data-segment="{{seg.text}}">
+        <text class="seg-text">{{seg.text}}</text>
+        <text class="seg-fav" wx:if="{{seg.fav}}" catchtap="onUnfav" data-idx="{{seg.idx}}">⭐</text>
+      </view>
+    </block>
+
+    <block wx:if="{{tab == 'baihua'}}">
+      <view class="baihua-block">
+        <text class="baihua-text">{{baihua}}</text>
+        <view class="ai-hint" wx:if="{{baihuaLoading}}">✨ 养友正在写白话...</view>
+        <view class="ai-hint" wx:if="{{!baihuaLoading && baihua}}">由 {{aiCharacterName}} 提供白话转译,仅供参考</view>
+      </view>
+    </block>
+
+    <block wx:if="{{tab == 'pinyin'}}">
+      <view class="pinyin-block">
+        <text class="pinyin-text">{{pinyin}}</text>
+        <view class="ai-hint" wx:if="{{pinyinLoading}}">✨ 养友正在加拼音...</view>
+        <view class="ai-hint" wx:if="{{!pinyinLoading && pinyin}}">AI 自动生成,可能不准确</view>
+      </view>
+    </block>
+
+    <block wx:if="{{tab == 'jiequ'}}">
+      <view class="jiequ-block">
+        <text class="jiequ-text">{{jiequ}}</text>
+        <view class="ai-hint" wx:if="{{jiequLoading}}">✨ 养友正在写解读...</view>
+        <view class="ai-hint" wx:if="{{!jiequLoading && jiequ}}">由 {{aiCharacterName}} 提供 200 字现代场景解读</view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <!-- 底部操作条:朗读 / 笔记 / 收藏 / 分享 -->
+  <view class="action-bar">
+    <view class="action-btn" bindtap="onTapRead">
+      <text class="action-icon">{{isPlaying ? '⏸' : '▶'}}</text>
+      <text class="action-label">{{isPlaying ? '暂停' : '朗读'}}</text>
+    </view>
+    <view class="action-btn" bindtap="onTapNote">
+      <text class="action-icon">✏</text>
+      <text class="action-label">笔记</text>
+    </view>
+    <view class="action-btn" bindtap="onTapFav">
+      <text class="action-icon">{{fav ? '⭐' : '☆'}}</text>
+      <text class="action-label">收藏</text>
+    </view>
+    <view class="action-btn" bindtap="onTapShare">
+      <text class="action-icon">↗</text>
+      <text class="action-label">分享</text>
+    </view>
+  </view>
+
+  <!-- 问 4 经数字人 浮动按钮 -->
+  <view class="ask-fab" bindtap="onTapAsk">
+    <text class="ask-fab-icon">💬</text>
+    <text class="ask-fab-text">问{{aiCharacterName}}</text>
+  </view>
+
+  <!-- 笔记弹窗 -->
+  <view class="modal-mask" wx:if="{{showNoteModal}}" catchtap="onCloseNoteModal">
+    <view class="modal-content" catchtap="">
+      <view class="modal-title">写一笔</view>
+      <textarea class="note-textarea" placeholder="读完这卷经,你想到什么?" value="{{noteInput}}" bindinput="onNoteInput" maxlength="500" auto-height></textarea>
+      <view class="modal-actions">
+        <view class="btn-ghost" bindtap="onCloseNoteModal">取消</view>
+        <view class="btn-primary" bindtap="onSaveNote">保存</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 严守提示 -->
+  <view class="compliance-bar">
+    ⓘ 严守:本产品为滋养型工具,不替代医械/咨询/玄学。滋养身心,从日常 5 分钟开始。
+  </view>
+</view>

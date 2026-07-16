@@ -287,11 +287,93 @@ async function callLLM(messages) {
   throw new Error("STATIC_MODE: 不调 LLM, 走 utils/data_digital_human.js + utils/dialog.js 本地兜底");
 }
 
-// ========================================================================
-// v2.5.5 Self-Critique 守门员 (跟祺臻 v6.1 一致, 严守 0 出现 + 防幻觉)
-// 依据: 祺臻 qi_wechat/cloudfunctions/chat/index.js callLLMWithGuard
-// 默认开, GUARD_ENABLED=false 可关
-// ========================================================================
+// ==============================
+// v3.1 阶段 1: 1.1_经文详情 type=baihua/pinyin/jiequ 路由
+// 不动 user_input + role + history 主路由, 新增旁路处理 AI 解读/白话/拼音
+// ==============================
+
+// 经文解读 prompt (通用, 滋养调性, 严守: 8 禁用词 0 出现)
+function buildJiequPrompt(jingwen, character) {
+  const source = jingwen.source || '经文';
+  const title = jingwen.title || '';
+  const content = jingwen.content || '';
+  const charName = {
+    laozi: '老子',
+    zhouwenwang: '周文王',
+    qibo: '岐伯',
+    yuanshen: '元神',
+  }[character] || '养友';
+  return `你是悦济的「${charName}」, 负责给现代女性做经文 200 字现代场景解读。
+
+经文出处: ${source}
+经文标题: ${title}
+经文原文: ${content}
+
+要求:
+1. 写 200 字左右 (180-220 字)
+2. 3 层结构: ①讲 1 段原文意境 (40-60 字) ②引申到现代女性日常场景: 通勤 / 工作 / 家庭 / 自我 (80-100 字) ③收 1 句 4 经调性的话 (≤40 字)
+3. 严守: 8 禁用词 0 出现 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美/美颜/美白/瘦脸/营销/广告/疗愈)
+4. 不开药方, 不诊断, 不卖命理, 不预测吉凶
+5. 滋养 / 共修 / 涵养 调性, 不评判, 不命令
+6. 末尾不出现"我"自称, 不输出"AI"标识`;
+}
+
+// 白话文 prompt (用养友语气转译古文, 不引申不解读)
+function buildBaihuaPrompt(jingwen, character) {
+  const charName = {
+    laozi: '老子',
+    zhouwenwang: '周文王',
+    qibo: '岐伯',
+    yuanshen: '元神',
+  }[character] || '养友';
+  return `你是悦济的「${charName}」, 把这段经文转译成现代白话文。
+
+经文: ${jingwen.content || ''}
+出处: ${jingwen.source || ''} · ${jingwen.title || ''}
+
+要求:
+1. 200-280 字白话文
+2. 逐段对应原文, 不丢原文信息
+3. 用现代汉语 (普通话), 不用文言
+4. 严守: 不评判, 不引申, 不夹杂解读, 严守 14 词 0 出现
+5. 滋养/共修 调性, 语气像「长辈讲故事」, 不说教`;
+}
+
+// 拼音 prompt (AI 注音, 允许标注"AI 自动生成, 可能不准确")
+function buildPinyinPrompt(jingwen) {
+  return `你是悦济的注音助手, 给这段经文逐字加拼音。
+
+经文: ${jingwen.content || ''}
+
+要求:
+1. 输出格式: 每个汉字后跟空格 + 拼音 (例: 道 dào)
+2. 多音字选常用读音, 不确定的字标 (? 号)
+3. 标点符号 (。！？；) 不加拼音
+4. 严守: 0 出现严守词
+5. 不引申不解读, 纯注音
+6. 末尾加一句: "AI 自动生成, 可能有误"`;
+}
+
+// 调 chat LLM 包装 (text 格式, 跟 v3.1 经文详情页 res.result.text 匹配)
+async function callLLMForText(systemPrompt, userPrompt) {
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt },
+  ];
+  const data = await callLLMWithGuard(messages);
+  let text = '';
+  if (data && Array.isArray(data.choices) && data.choices[0]) {
+    text = data.choices[0].message?.content || '';
+  }
+  if (!text) throw new Error('AI 返回内容为空');
+  if (!validateText(text)) {
+    console.warn('[悦济 经文 严守 拦截]');
+    return '悦济严守: 抱歉, 我重新组织一下语言。深呼吸一次, 我们再继续。';
+  }
+  return text;
+}
+
+
 
 async function callLLMWithGuard(messages) {
   const guardEnabled = (process.env.GUARD_ENABLED || "true").toLowerCase() !== "false";
@@ -363,11 +445,37 @@ ${content}
 // ==============================
 exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext();
-  const { user_input, role = "company", history = [], meta = null } = event;
+  const { user_input, role = "company", history = [], meta = null, type = "normal", jingwen = null, character = null } = event;
 
-  console.log(`[chat] OPENID=${OPENID}, role=${role}, user_input=${user_input?.slice(0, 30)}, has_meta=${!!meta}`);
+  console.log(`[chat] OPENID=${OPENID}, type=${type}, role=${role}, user_input=${user_input?.slice(0, 30)}, has_meta=${!!meta}`);
   // v2.4.0: 全局传递 role 给 AMAX 选模型
   globalThis._currentRole = role;
+
+  // v3.1 阶段 1: 经文白话/拼音/解读 旁路路由
+  // type=baihua/pinyin/jiequ 走专用 prompt, 返 {ok, text} 跟 1.1_经文详情 res.result.text 对齐
+  // 不走主 user_input + role 路线, 不动原 chat 流程
+  if (type === 'baihua' || type === 'pinyin' || type === 'jiequ') {
+    if (!jingwen || !jingwen.content) {
+      return { ok: false, error: 'jingwen 缺失, 经文内容为空' };
+    }
+    try {
+      let text;
+      if (type === 'baihua') {
+        text = await callLLMForText(buildBaihuaPrompt(jingwen, character || 'laozi'),
+          '请把这段经文转译成现代白话文。');
+      } else if (type === 'pinyin') {
+        text = await callLLMForText(buildPinyinPrompt(jingwen),
+          '请给这段经文逐字加拼音。');
+      } else {
+        text = await callLLMForText(buildJiequPrompt(jingwen, character || 'laozi'),
+          '请写 200 字现代场景解读。');
+      }
+      return { ok: true, text, type };
+    } catch (e) {
+      console.error(`[chat 经文 ${type} 异常] ${e.message}`);
+      return { ok: false, error: e.message, type };
+    }
+  }
 
   // 危机检测 (云函数层)
   const crisisKw = detectCrisis(user_input);

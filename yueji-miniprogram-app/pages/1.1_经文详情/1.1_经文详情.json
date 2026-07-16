@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "经文详情",
+  "navigationBarBackgroundColor": "#faf6f0",
+  "navigationBarTextStyle": "black",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/index"
+  }
+}

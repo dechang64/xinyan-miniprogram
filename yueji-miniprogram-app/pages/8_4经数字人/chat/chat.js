@@ -33,6 +33,27 @@ Page({
     if (this.data.messages.length === 0) {
       this.pushMessage('assistant', `${human.fullIntro}\n\n${human.question}`, true);
     }
+
+    // v3.1 阶段 1: 1.1_经文详情 / 1.1_经文详情?context=...&question=... 跳过来
+    // 跟 askAI 一样的处理: 自动填入 inputText + 自动发送, 跳经后立刻开聊
+    // 严守: 危机词前端先过一遍, 跟 askAI 内层一致
+    if (query.context || query.question) {
+      const context = decodeURIComponent(query.context || '');
+      const question = decodeURIComponent(query.question || '');
+      if (question) {
+        if (detectCrisis(question)) {
+          this.pushMessage('user', question, false);
+          this.pushMessage('assistant', '我们注意到您可能正在经历困难时期。悦济是生活陪伴, 无法替代专业支持。请拨打 12356 全国心理援助热线, 我们陪着您。', true);
+          return;
+        }
+        // 上下文塞进 history (assistant 先讲一句"看到经文了" + user 问)
+        if (context) {
+          this.pushMessage('assistant', `看到这卷经了：「${context.slice(0, 60)}${context.length > 60 ? '...' : ''}」`, false);
+        }
+        this.setData({ inputText: question });
+        this.askAI(question);
+      }
+    }
   },
 
   onUnload() {
