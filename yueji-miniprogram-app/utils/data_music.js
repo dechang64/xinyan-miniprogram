@@ -23,11 +23,17 @@ const WUYUE_DESCRIPTIONS = {
   yu: '沉降水音, 滋肾藏精, 沉降调性',
 };
 
-// 30 段 mp3 cloudPath: 5 段 v1 (v0_5modes/) + 25 段 v2 (v0_5modes_v2/), 两个目录并存
-// v1 5 段: 冬生 v3.0.5 阶段 1.5 部署时手动传, 路径 v0_5modes/ (云存储真实路径, 01:23 截图证实子目录名前缀是 v0)
-// v2 25 段: 2026-07-14 16:49 批量传 (dl_25_v2.ps1 下载 + 上传), 路径 v0_5modes_v2/
-const CLOUD_PREFIX_V1 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v0_5modes';
-const CLOUD_PREFIX_V2 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v0_5modes_v2';
+// 30 段 mp3 cloudPath: 5 段 v1 (v3_5modes/) + 25 段 v2 (v3_5modes_v2/), 两个目录并存
+// v3.1 阶段 16: CLOUD_PREFIX_V1/V2 末尾 v0 → v3 修回 (冬生 02:44 真 fileID 证实)
+// 真因: 之前 v3.1 阶段 7-11 看 01:23 截图 3 个子目录名 v0_legacy/v0_5modes/v0_5modes_v2
+//       误以为 fileID cloudPath 段也该是 v0_xxx, 实际 **目录名 ≠ fileID cloudPath 段**
+//       冬生 v3.0.5 阶段 1.5 部署时 5 段 v1 + 25 段 v2 上传的 cloudPath 是 v3_5modes/v3_5modes_v2
+//       (跟部署指南悦济-music云存储部署指南-v3.1.md L7 一致, 那文档一直没动过)
+//       01:23 截图看到的 v0_5modes/ 目录 = 冬生后来手动 rename 的"展示名", 跟 fileID cloudPath 段无关
+// v1 5 段: 冬生 v3.0.5 阶段 1.5 部署时手动传, fileID cloudPath 实际是 v3_5modes/
+// v2 25 段: 2026-07-14 16:49 批量传 (dl_25_v2.ps1 下载 + 上传), fileID cloudPath 实际是 v3_5modes_v2/
+const CLOUD_PREFIX_V1 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes';
+const CLOUD_PREFIX_V2 = 'cloud://cloud1-d1g4p3kaa481d1302.636c-cloud1-d1g4p3kaa481d1302-1453283852/yueji-music-v3.0.5/v3_5modes_v2';
 
 // v3.1 阶段 9: v1 5 段 cloudPath 改名 (matrix-media-xxx 加密名, 冬生 v3.0.5 阶段 1.5 手动传时没指定 cloudPath, 微信云存储自动生成)
 // 23:08 + 01:14 + 01:25 三张截图证实: v0_5modes/ 目录下 5 个文件全是 matrix-media-xxx 加密名 (不是 01_gong_v1_...mp3 本地源命名)
