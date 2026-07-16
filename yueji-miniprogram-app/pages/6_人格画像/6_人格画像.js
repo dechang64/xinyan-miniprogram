@@ -1,14 +1,34 @@
-// 6_人格画像.js — 悦济人格画像 (v1.0 完整版)
-// 6 tab: MBTI / 八字 / 星盘 / PHQ-9 / GAD-7 / TIZHI
-// 严守: 量表不诊断, 仅作主观自评参考
+// 6_人格画像.js — 悦济人格画像 (v3.1 严守修订)
+// 7 tab: MBTI / 5 元素 / 月令 / PHQ-9 / GAD-7 / TIZHI / 4 经数字人
+// 严守: 量表不诊断, 仅作主观自评参考; 八字/星盘 tab 已改 5 元素/月令 (不算命不算星)
 const { MBTI_8_QUESTIONS, scoreMBTI } = require('../../utils/data_mbti.js');
-const { getBazi, getZodiac, scorePHQ9, scoreGAD7, TIZHI_9_QUESTIONS, scoreTizhi, TIZHI_NAMES,
+const { scorePHQ9, scoreGAD7, TIZHI_9_QUESTIONS, scoreTizhi, TIZHI_NAMES,
         PHQ9_QUESTIONS, PHQ9_OPTIONS, GAD7_QUESTIONS, GAD7_OPTIONS } = require('../../utils/data_assess.js');
+
+// 5 元素 + 月令 (跟 12_八字 / 13_星盘 一致, 中医 5 脏 5 月对应, 不算命不算星)
+const MONTH_WUXING = {
+  1: '水', 2: '水', 3: '木', 4: '木', 5: '木',
+  6: '火', 7: '火', 8: '火', 9: '土', 10: '金', 11: '金', 12: '金',
+};
+const MONTH_YUELING = {
+  1: '冬主藏, 养肾藏精, 早睡晚起',
+  2: '春初养肾仍重要',
+  3: '春主生, 养肝疏泄, 早起散步',
+  4: '春旺养肝, 多食绿叶',
+  5: '春末转夏, 养肝兼清心火',
+  6: '夏主长, 养心安神, 避免大汗',
+  7: '夏旺养心',
+  8: '夏末转秋, 养心兼润肺',
+  9: '长夏主化, 养脾胃, 少食生冷',
+  10: '秋主收, 养肺润燥',
+  11: '秋旺养肺, 多食白色食物',
+  12: '冬初养肺仍重要, 转养肾',
+};
 
 const TABS = [
   { key: 'mbti', name: 'MBTI' },
-  { key: 'bazi', name: '八字' },
-  { key: 'zodiac', name: '星盘' },
+  { key: 'bazi', name: '5 元素' },
+  { key: 'zodiac', name: '月令' },
   { key: 'phq9', name: '心情' },
   { key: 'gad7', name: '焦虑' },
   { key: 'tizhi', name: '9 体质' },
@@ -80,18 +100,19 @@ Page({
     this.setData({ mbtiResult: result });
   },
 
-  // 八字 / 星盘
+  // 5 元素 / 月令 (v3.1 严守修订, 原八字/星盘)
   onBirthChange(e) {
     const { field } = e.currentTarget.dataset;
     this.setData({ [field]: parseInt(e.detail.value) || 1990 });
   },
   onCalcBazi() {
-    const { birthYear, birthMonth, birthDay } = this.data;
-    const baziResult = getBazi(birthYear, birthMonth, birthDay);
-    const zodiacResult = getZodiac(birthYear, birthMonth, birthDay);
-    wx.setStorageSync('yueji_bazi_result', baziResult);
+    const { birthMonth } = this.data;
+    const m = Math.max(1, Math.min(12, parseInt(birthMonth) || 1));
+    const wuxingResult = { wuxing: MONTH_WUXING[m], yueling: MONTH_YUELING[m], month: m };
+    const zodiacResult = { wuxing: MONTH_WUXING[m], yueling: MONTH_YUELING[m], month: m };
+    wx.setStorageSync('yueji_bazi_result', wuxingResult);
     wx.setStorageSync('yueji_zodiac_result', zodiacResult);
-    this.setData({ baziResult, zodiacResult });
+    this.setData({ baziResult: wuxingResult, zodiacResult });
   },
 
   // PHQ-9

@@ -38,35 +38,25 @@
     </view>
   </view>
 
-  <!-- 八字 + 星盘 -->
+  <!-- 5 元素 + 月令 (v3.1 严守修订, 原八字/星盘) -->
   <view wx:if="{{activeTab == 'bazi' || activeTab == 'zodiac'}}" class="card">
-    <view class="title-sub">出生日期</view>
+    <view class="title-sub">出生月份 (中医 5 元素对应)</view>
     <view class="birth-row">
-      <view class="birth-input">
-        <text>年</text>
-        <input type="number" value="{{birthYear}}" data-field="birthYear" bindinput="onBirthChange" />
-      </view>
       <view class="birth-input">
         <text>月</text>
         <input type="number" value="{{birthMonth}}" data-field="birthMonth" bindinput="onBirthChange" />
       </view>
-      <view class="birth-input">
-        <text>日</text>
-        <input type="number" value="{{birthDay}}" data-field="birthDay" bindinput="onBirthChange" />
-      </view>
     </view>
-    <view class="btn-primary" bindtap="onCalcBazi">推算</view>
+    <view class="btn-primary" bindtap="onCalcBazi">看 5 元素</view>
     <view wx:if="{{baziResult}}" class="result-card">
-      <view class="result-sub">八字 (年/月/日 柱)</view>
-      <view class="result-line">年柱: {{baziResult.year_pillar[0]}}{{baziResult.year_pillar[1]}}</view>
-      <view class="result-line">月柱: {{baziResult.month_pillar[0]}}{{baziResult.month_pillar[1]}}</view>
-      <view class="result-line">日柱: {{baziResult.day_pillar[0]}}{{baziResult.day_pillar[1]}}</view>
+      <view class="result-sub">5 元素 (春木/夏火/长夏土/秋金/冬水)</view>
+      <view class="result-line">主元素: {{baziResult.wuxing}}</view>
+      <view class="result-line">月令: {{baziResult.yueling}}</view>
     </view>
     <view wx:if="{{zodiacResult}}" class="result-card">
-      <view class="result-sub">星盘 (太阳/月/升)</view>
-      <view class="result-line">太阳: {{zodiacResult.sun_sign}}</view>
-      <view class="result-line">月亮: {{zodiacResult.moon_sign}}</view>
-      <view class="result-line">上升: {{zodiacResult.rising_sign}}</view>
+      <view class="result-sub">月令 (春养肝/夏养心/长夏养脾/秋养肺/冬养肾)</view>
+      <view class="result-line">主元素: {{zodiacResult.wuxing}}</view>
+      <view class="result-line">月令: {{zodiacResult.yueling}}</view>
     </view>
   </view>
 

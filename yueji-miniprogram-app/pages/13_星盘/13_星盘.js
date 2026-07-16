@@ -1,38 +1,34 @@
-// 13_星盘.js — 悦济 v2.3.0 12 星座 (公历生日 → 星座 → 推经 + 推汤)
-// 严守: 命理类不严守, 不卖不收费
+// 13_5元素月令.js — 悦济 v3.1 严守修订 (原 v2.3 星盘 → 5 元素月令)
+// 5 元素 (木火土金水) + 出生月份 → 主元素 + 月令养生小贴士
+// 严守: 不算星座 / 不算命 — 月令养生是中医常识 (春养肝/夏养心/长夏养脾/秋养肺/冬养肾)
 const JINGWEN = require('../../utils/data_jingwen.js');
 const SOUPS = require('../../utils/data_soups.js');
 
-const ZODIACS = [
-  { name: '摩羯座', start: '12-22', end: '01-19', element: '土', trait: '务实坚韧', reading: '摩羯的沉稳如山, 适合读周易的"潜龙勿用"。', book: '周易' },
-  { name: '水瓶座', start: '01-20', end: '02-18', element: '风', trait: '独立创新', reading: '水瓶的天马行空, 适合读道德经的"道法自然"。', book: '道德经' },
-  { name: '双鱼座', start: '02-19', end: '03-20', element: '水', trait: '浪漫直觉', reading: '双鱼的柔与深, 适合读清静经的"清静无为"。', book: '清静经' },
-  { name: '白羊座', start: '03-21', end: '04-19', element: '火', trait: '热情勇敢', reading: '白羊的烈, 适合读黄帝内经养心安神。', book: '黄帝内经' },
-  { name: '金牛座', start: '04-20', end: '05-20', element: '土', trait: '稳重执着', reading: '金牛的踏实, 适合读周易的"厚德载物"。', book: '周易' },
-  { name: '双子座', start: '05-21', end: '06-21', element: '风', trait: '机敏多变', reading: '双子的灵, 适合读道德经的"上善若水"。', book: '道德经' },
-  { name: '巨蟹座', start: '06-22', end: '07-22', element: '水', trait: '温暖细腻', reading: '巨蟹的柔, 适合读清静经的"心无挂碍"。', book: '清静经' },
-  { name: '狮子座', start: '07-23', end: '08-22', element: '火', trait: '自信温暖', reading: '狮子的光, 适合读黄帝内经养气。', book: '黄帝内经' },
-  { name: '处女座', start: '08-23', end: '09-22', element: '土', trait: '细致完美', reading: '处女的精, 适合读周易的"各正性命"。', book: '周易' },
-  { name: '天秤座', start: '09-23', end: '10-23', element: '风', trait: '优雅和谐', reading: '天秤的衡, 适合读道德经的"万物负阴而抱阳"。', book: '道德经' },
-  { name: '天蝎座', start: '10-24', end: '11-22', element: '水', trait: '深刻专注', reading: '天蝎的深, 适合读清静经的"常应常静"。', book: '清静经' },
-  { name: '射手座', start: '11-23', end: '12-21', element: '火', trait: '自由乐观', reading: '射手的远, 适合读黄帝内经的"形与神俱"。', book: '黄帝内经' },
+// 出生月份 → 主元素 + 月令养生 (中医 5 脏 5 月对应)
+const MONTH_YUELING = [
+  null, // 0 占位
+  { wuxing: '水', yueling: '冬主藏, 养肾藏精, 早睡晚起', book: '周易' },     // 1 月
+  { wuxing: '水', yueling: '春初养肾仍重要, 推荐周易', book: '周易' },        // 2 月
+  { wuxing: '木', yueling: '春主生, 养肝疏泄, 早起散步', book: '黄帝内经' },   // 3 月
+  { wuxing: '木', yueling: '春旺养肝, 多食绿叶, 推荐黄帝内经', book: '黄帝内经' }, // 4 月
+  { wuxing: '木', yueling: '春末转夏, 养肝兼清心火', book: '黄帝内经' },        // 5 月
+  { wuxing: '火', yueling: '夏主长, 养心安神, 避免大汗', book: '黄帝内经' },   // 6 月
+  { wuxing: '火', yueling: '夏旺养心, 推荐黄帝内经', book: '黄帝内经' },        // 7 月
+  { wuxing: '火', yueling: '夏末转秋, 养心兼润肺', book: '黄帝内经' },         // 8 月
+  { wuxing: '土', yueling: '长夏主化, 养脾胃, 少食生冷', book: '清静经' },    // 9 月
+  { wuxing: '金', yueling: '秋主收, 养肺润燥, 推荐道德经', book: '道德经' },   // 10 月
+  { wuxing: '金', yueling: '秋旺养肺, 多食白色食物', book: '道德经' },         // 11 月
+  { wuxing: '金', yueling: '冬初养肺仍重要, 转养肾', book: '道德经' },         // 12 月
 ];
 
-const ELEMENT_TIZHI = { '火': '阳虚', '土': '气虚', '风': '气郁', '水': '阴虚' };
-
-function getZodiac(dateStr) {
-  const [, m, d] = dateStr.split('-').map(Number);
-  const md = `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-  for (const z of ZODIACS) {
-    if (z.start <= z.end) {
-      if (md >= z.start && md <= z.end) return z;
-    } else {
-      // 跨年 (摩羯)
-      if (md >= z.start || md <= z.end) return z;
-    }
-  }
-  return ZODIACS[0];
-}
+// 5 元素 → 9 体质映射
+const WUXING_TIZHI = {
+  '木': '气郁',
+  '火': '阴虚',
+  '土': '气虚',
+  '金': '痰湿',
+  '水': '平和',
+};
 
 Page({
   data: {
@@ -47,24 +43,27 @@ Page({
       wx.showToast({ title: '请选日期', icon: 'none' });
       return;
     }
-    const z = getZodiac(this.data.birthDate);
+    const date = new Date(this.data.birthDate + 'T12:00');
+    const month = date.getMonth() + 1;
+    const yueling = MONTH_YUELING[month] || MONTH_YUELING[9];
+    const wuxing = yueling.wuxing;
+    const book = yueling.book;
 
-    const jingwen = JINGWEN.filter((j) => j.source.includes(z.book)).slice(0, 3).map((j) => ({
+    // 推 3 经
+    const jingwen = JINGWEN.filter((j) => j.source.includes(book)).slice(0, 3).map((j) => ({
       id: j.id, source: j.source, title: j.title.slice(0, 20),
     }));
 
-    const tizhi = ELEMENT_TIZHI[z.element] || '平和';
-    const soups = SOUPS.filter((s) => s.tizhi && s.tizhi.includes(tizhi)).slice(0, 3).map((s) => ({
+    // 推 3 汤
+    const tizhi = WUXING_TIZHI[wuxing] || '平和';
+    const tizhiSoups = SOUPS.filter((s) => s.tizhi && s.tizhi.includes(tizhi)).slice(0, 3).map((s) => ({
       id: s.id, name: s.name, desc: (s.desc || '').slice(0, 30),
     }));
 
     this.setData({
       result: {
-        zodiac: {
-          ...z,
-          dateRange: z.start + ' ~ ' + z.end,
-        },
-        jingwen, soups,
+        wuxing, yueling: yueling.yueling, book, month, birthDate: this.data.birthDate,
+        jingwen, soups: tizhiSoups,
       },
     });
   },

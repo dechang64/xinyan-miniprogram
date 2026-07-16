@@ -26,13 +26,13 @@
       <view class="list-arrow">→</view>
     </view>
     <view class="list-row" bindtap="onTapBazi">
-      <view class="list-icon">🏮</view>
-      <view class="list-text">八字解读 (生辰 → 推经推汤)</view>
+      <view class="list-icon">🍃</view>
+      <view class="list-text">5 元素速测 (生辰 → 推经推汤)</view>
       <view class="list-arrow">→</view>
     </view>
     <view class="list-row" bindtap="onTapXingpan">
-      <view class="list-icon">✨</view>
-      <view class="list-text">12 星座 (公历生日)</view>
+      <view class="list-icon">🌿</view>
+      <view class="list-text">5 元素月令 (月令养生)</view>
       <view class="list-arrow">→</view>
     </view>
     <view class="list-row" bindtap="onTapPoster">

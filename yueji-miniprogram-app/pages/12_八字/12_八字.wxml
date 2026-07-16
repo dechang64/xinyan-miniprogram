@@ -1,54 +1,25 @@
 <view class="page">
   <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
-  <nav-bar title="八字" showHome="{{true}}" />
+  <nav-bar title="5 元素速测" showHome="{{true}}" />
 
 
   <view class="header">
-    <view class="title-main">八字解读</view>
-    <view class="title-sub">生辰 → 推经文 + 汤品 (不严守不卖)</view>
+    <view class="title-main">5 元素速测</view>
+    <view class="title-sub">公历生日 → 5 元素 (滋养对应, 不算命)</view>
   </view>
 
   <view class="card">
-    <view class="title-sub">您的生辰</view>
+    <view class="title-sub">您的公历生日</view>
     <picker mode="date" value="{{birthDate}}" bindchange="onPickDate" start="1940-01-01" end="2026-12-31">
       <view class="picker-view">公历生日 · {{birthDate || '轻触选择'}}</view>
     </picker>
-    <picker mode="time" value="{{birthTime}}" bindchange="onPickTime">
-      <view class="picker-view">出生时辰 · {{birthTime || '轻触选择'}}</view>
-    </picker>
-    <view class="btn-primary" style="margin-top: 24rpx;" bindtap="onSubmit">看八字</view>
+    <view class="btn-primary" style="margin-top: 24rpx;" bindtap="onSubmit">看 5 元素</view>
   </view>
 
   <view wx:if="{{result}}">
     <view class="card">
-      <view class="title-sub">四柱八字</view>
-      <view class="bazi-row">
-        <view class="bazi-cell">
-          <view class="bazi-label">年柱</view>
-          <view class="bazi-gan">{{result.year.gan}}</view>
-          <view class="bazi-zhi">{{result.year.zhi}}</view>
-        </view>
-        <view class="bazi-cell">
-          <view class="bazi-label">月柱</view>
-          <view class="bazi-gan">{{result.month.gan}}</view>
-          <view class="bazi-zhi">{{result.month.zhi}}</view>
-        </view>
-        <view class="bazi-cell">
-          <view class="bazi-label">日柱</view>
-          <view class="bazi-gan">{{result.day.gan}}</view>
-          <view class="bazi-zhi">{{result.day.zhi}}</view>
-        </view>
-        <view class="bazi-cell">
-          <view class="bazi-label">时柱</view>
-          <view class="bazi-gan">{{result.hour.gan}}</view>
-          <view class="bazi-zhi">{{result.hour.zhi}}</view>
-        </view>
-      </view>
-    </view>
-
-    <view class="card">
-      <view class="title-sub">日主五行</view>
-      <view class="text-body" style="margin-top: 12rpx; color: #4a7c59; font-weight: 600;">
+      <view class="title-sub">您的主元素</view>
+      <view class="text-body" style="margin-top: 12rpx; color: #4a7c59; font-weight: 600; font-size: 36rpx;">
         {{result.wuxing}}
       </view>
       <view class="text-body" style="margin-top: 12rpx; color: #6b6b6b;">
@@ -72,6 +43,6 @@
   </view>
 
   <view class="compliance-bar">
-    ✦ 八字为传统命理文化, 仅供参考, 不构成人生指引。悦济不卖命理服务, 不收费。
+    ✦ 5 元素是中医体质框架 (春木/夏火/长夏土/秋金/冬水), 不是命理。悦济不卖命理服务, 不收费。
   </view>
 </view>

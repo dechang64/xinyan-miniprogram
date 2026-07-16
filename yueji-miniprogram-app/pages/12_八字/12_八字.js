@@ -1,89 +1,61 @@
-// 12_八字.js — 悦济 v2.3.0 八字解读 (v0.7 Streamlit 移植)
-// 4 柱 (年月日时) → 8 字 (天干地支) → 日主五行 → 推经 + 推汤
-// 严守: 命理类不严守, 不卖不收费, 仅作传统文化参考
+// 12_5元素速测.js — 悦济 v3.1 严守修订 (原 v2.3 八字 → 5 元素速测)
+// 5 元素 (木火土金水) + 出生月份 → 1 主元素 → 推经 + 推汤
+// 严守: 不算命 / 不算四柱 / 不推日主 — 5 元素是中医体质框架, 不是命理
 const JINGWEN = require('../../utils/data_jingwen.js');
 const SOUPS = require('../../utils/data_soups.js');
 
-const TIANGAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-const DIZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-const WUXING_OF_GAN = { '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土', '己': '土', '庚': '金', '辛': '金', '壬': '水', '癸': '水' };
-
-// 推月柱 (简化: 每月固定地支, 天干按年干推)
-function getMonthGanZhi(yearGan, month) {
-  const monthZhi = ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'];
-  // 甲己之年丙作首: 甲己 → 1月丙寅, 乙庚 → 戊寅, 丙辛 → 庚寅, 丁壬 → 壬寅, 戊癸 → 甲寅
-  const yearGanIdx = TIANGAN.indexOf(yearGan);
-  const startGanIdx = [2, 4, 6, 8, 0][yearGanIdx % 5];  // 丙戊庚壬甲
-  const ganIdx = (startGanIdx + month - 1) % 10;
-  return { gan: TIANGAN[ganIdx], zhi: monthZhi[month - 1] };
-}
-
-// 推日柱 (简化: 用日期到基准日的差 mod 60, 不准, 仅 v0.7 demo)
-function getDayGanZhi(date) {
-  // 2000-01-01 甲子, 简化计算
-  const base = new Date('2000-01-01');
-  const days = Math.floor((date - base) / (1000 * 60 * 60 * 24));
-  const idx = (days % 60 + 60) % 60;
-  return { gan: TIANGAN[idx % 10], zhi: DIZHI[idx % 12] };
-}
-
-// 推时柱
-function getHourGanZhi(dayGan, hour) {
-  const hourZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-  const zhi = hourZhi[Math.floor(hour / 2) % 12];
-  // 五鼠遁: 甲己日子时起甲子
-  const dayGanIdx = TIANGAN.indexOf(dayGan);
-  const startGanIdx = [0, 2, 4, 6, 8][dayGanIdx % 5];
-  const hourIdx = Math.floor(hour / 2) % 12;
-  const ganIdx = (startGanIdx + hourIdx) % 10;
-  return { gan: TIANGAN[ganIdx], zhi };
-}
-
-// 推年柱 (用立春, 简化用公历年)
-function getYearGanZhi(year) {
-  // 1984 甲子
-  const idx = (year - 1984) % 60;
-  return { gan: TIANGAN[(idx % 10 + 10) % 10], zhi: DIZHI[(idx % 12 + 12) % 12] };
-}
-
-const WUXING_DESC = {
-  '木': '木主仁, 性直情和, 适合滋养肝胆, 推荐黄帝内经。',
-  '火': '火主礼, 性急热情, 适合滋养心血管, 推荐黄帝内经。',
-  '土': '土主信, 性稳厚重, 适合滋养脾胃, 推荐清静经。',
-  '金': '金主义, 性刚果断, 适合滋养肺大肠, 推荐道德经。',
-  '水': '水主智, 性灵善变, 适合滋养肾膀胱, 推荐周易。',
+// 5 元素 (中医体质) — 出生月份 → 主元素 (春木/夏火/长夏土/秋金/冬水)
+// 注: 这是 9 体质自评的简化版, 仅用月份 (粗筛), 9 体质自评更精细
+const MONTH_WUXING = {
+  1: '水', 2: '水',      // 冬
+  3: '木', 4: '木', 5: '木',  // 春
+  6: '火', 7: '火', 8: '火',  // 夏
+  9: '土',                  // 长夏
+  10: '金', 11: '金', 12: '金', // 秋
 };
 
+// 5 元素 → 推荐经书 (跟 9 体质映射对齐, 跟 5 滋养曲风/5 元素一致)
 const WUXING_JING = {
-  '木': '黄帝内经', '火': '黄帝内经', '土': '清静经', '金': '道德经', '水': '周易',
+  '木': '黄帝内经',  // 肝
+  '火': '黄帝内经',  // 心
+  '土': '清静经',    // 脾
+  '金': '道德经',    // 肺
+  '水': '周易',      // 肾
+};
+
+// 5 元素 → 9 体质映射 (跟 9_9体质自评 体系一致)
+const WUXING_TIZHI = {
+  '木': '气郁',  // 肝木易郁
+  '火': '阴虚',  // 心火易伤阴
+  '土': '气虚',  // 脾土易虚
+  '金': '痰湿',  // 肺金易生痰
+  '水': '平和',  // 肾水主藏, 平和
+};
+
+const WUXING_DESC = {
+  '木': '木生发, 主肝, 春季生人, 推荐黄帝内经疏肝养木。',
+  '火': '火温通, 主心, 夏季生人, 推荐黄帝内经养心安神。',
+  '土': '土中和, 主脾, 长夏生人, 推荐清静经滋养脾胃。',
+  '金': '金收敛, 主肺, 秋季生人, 推荐道德经润肺理气。',
+  '水': '水沉降, 主肾, 冬季生人, 推荐周易滋肾藏精。',
 };
 
 Page({
   data: {
     birthDate: '',
-    birthTime: '12:00',
     result: null,
   },
 
   onPickDate(e) { this.setData({ birthDate: e.detail.value }); },
-  onPickTime(e) { this.setData({ birthTime: e.detail.value }); },
 
   onSubmit() {
     if (!this.data.birthDate) {
       wx.showToast({ title: '请选日期', icon: 'none' });
       return;
     }
-    const date = new Date(this.data.birthDate + 'T' + this.data.birthTime);
-    const year = date.getFullYear();
+    const date = new Date(this.data.birthDate + 'T12:00');
     const month = date.getMonth() + 1;
-    const hour = date.getHours();
-
-    const yearP = getYearGanZhi(year);
-    const monthP = getMonthGanZhi(yearP.gan, month);
-    const dayP = getDayGanZhi(date);
-    const hourP = getHourGanZhi(dayP.gan, hour);
-
-    const wuxing = WUXING_OF_GAN[dayP.gan] || '木';
+    const wuxing = MONTH_WUXING[month] || '土';
     const book = WUXING_JING[wuxing] || '黄帝内经';
 
     // 推 3 经
@@ -91,17 +63,16 @@ Page({
       id: j.id, source: j.source, title: j.title.slice(0, 20),
     }));
 
-    // 推 3 汤 (按五行对应 5 款)
-    const wuxingToTizhi = { '木': '阳虚', '火': '阴虚', '土': '气虚', '金': '痰湿', '水': '平和' };
-    const tizhi = wuxingToTizhi[wuxing] || '平和';
+    // 推 3 汤
+    const tizhi = WUXING_TIZHI[wuxing] || '平和';
     const tizhiSoups = SOUPS.filter((s) => s.tizhi && s.tizhi.includes(tizhi)).slice(0, 3).map((s) => ({
       id: s.id, name: s.name, desc: (s.desc || '').slice(0, 30),
     }));
 
     this.setData({
       result: {
-        year: yearP, month: monthP, day: dayP, hour: hourP,
         wuxing, wuxingDesc: WUXING_DESC[wuxing] || '',
+        month, birthDate: this.data.birthDate,
         jingwen, soups: tizhiSoups,
       },
     });

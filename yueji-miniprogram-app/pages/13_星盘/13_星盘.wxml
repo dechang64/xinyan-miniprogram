@@ -1,11 +1,11 @@
 <view class="page">
   <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
-  <nav-bar title="星盘" showHome="{{true}}" />
+  <nav-bar title="5 元素月令" showHome="{{true}}" />
 
 
   <view class="header">
-    <view class="title-main">星盘</view>
-    <view class="title-sub">公历生日 → 12 星座 (不严守不卖)</view>
+    <view class="title-main">5 元素月令</view>
+    <view class="title-sub">公历生日 → 月令养生 (春养肝/夏养心/长夏养脾/秋养肺/冬养肾)</view>
   </view>
 
   <view class="card">
@@ -13,21 +13,17 @@
     <picker mode="date" value="{{birthDate}}" bindchange="onPickDate" start="1940-01-01" end="2026-12-31">
       <view class="picker-view">公历生日 · {{birthDate || '轻触选择'}}</view>
     </picker>
-    <view class="btn-primary" style="margin-top: 24rpx;" bindtap="onSubmit">看星盘</view>
+    <view class="btn-primary" style="margin-top: 24rpx;" bindtap="onSubmit">看月令</view>
   </view>
 
   <view wx:if="{{result}}">
     <view class="card">
-      <view class="title-sub">{{result.zodiac.name}}</view>
-      <view class="text-body" style="margin-top: 12rpx; font-size: 24rpx; color: #a8a29e;">
-        {{result.zodiac.dateRange}} · {{result.zodiac.element}} · {{result.zodiac.trait}}
+      <view class="title-sub">您的主元素</view>
+      <view class="text-body" style="margin-top: 12rpx; color: #4a7c59; font-weight: 600; font-size: 36rpx;">
+        {{result.wuxing}}
       </view>
-    </view>
-
-    <view class="card">
-      <view class="title-sub">调性解读</view>
-      <view class="text-body" style="margin-top: 12rpx; color: #4a7c59;">
-        {{result.zodiac.reading}}
+      <view class="text-body" style="margin-top: 12rpx; color: #6b6b6b;">
+        {{result.yueling}}
       </view>
     </view>
 
@@ -47,6 +43,6 @@
   </view>
 
   <view class="compliance-bar">
-    ✦ 星盘为西方占星文化, 仅供参考, 不构成人生指引。悦济不卖占星服务。
+    ✦ 5 元素月令是中医养生常识 (春养肝/夏养心/长夏养脾/秋养肺/冬养肾), 不是西方占星。悦济不卖占星服务。
   </view>
 </view>
