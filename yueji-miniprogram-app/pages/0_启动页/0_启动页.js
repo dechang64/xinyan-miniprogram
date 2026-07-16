@@ -109,6 +109,8 @@ Page({
   onTapMotion() { wx.navigateTo({ url: '/pages/15_今日小动/15_今日小动' }); },
   // v3.0.5 阶段 1.5 扩展: 5 滋养曲风 (9 体质 + 镜中 4 维 → 1 调式)
   onTapMusic() { wx.navigateTo({ url: '/pages/16_今日一曲/16_今日一曲' }); },
+  // v3.1 阶段 2 链路 2: 晚 9:00 睡前一程 4 件事联动
+  onTapNightRitual() { wx.navigateTo({ url: '/pages/18_睡前一程/18_睡前一程' }); },
   // v3.0.5 阶段 1.2: 启动页"今日"屏 6 件事 - 今日一问 (复 用 4_镜中 4 维滑块 + 大模型润色)
   onTapAsk() { wx.switchTab({ url: '/pages/4_镜中/4_镜中' }); },
   onTapJingwen() { wx.switchTab({ url: '/pages/1_每日一经/1_每日一经' }); },
@@ -133,5 +135,24 @@ Page({
     markTodaySkipped(t.key);
     wx.showToast({ title: '今天跳过了, 明天见', icon: 'none', duration: 1500 });
     this.setTodayTest();
+  },
+
+  // v3.1 阶段 2 链路 5: 朋友推荐 — 微信原生分享 (好友 / 朋友圈)
+  // 严守: 标题不含医疗/营销词, 滋养调性
+  onShareAppMessage() {
+    const j = this.data.todayJing;
+    const s = this.data.todaySoup;
+    return {
+      title: `悦济 · ${j ? j.source : '共修同行'} · ${s ? s.name : '滋养一程'}`,
+      path: '/pages/0_启动页/0_启动页',
+      imageUrl: '',
+    };
+  },
+  onShareTimeline() {
+    const j = this.data.todayJing;
+    return {
+      title: `悦济 · ${j ? j.title : '共修同行'} · 镜中是正在成为自己的你`,
+      query: '',
+    };
   },
 });

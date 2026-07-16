@@ -176,4 +176,26 @@ Page({
 
   // v2.5.4: 删语音录音 (v1.1 加的, 没真测过端到端, 触发 "Record file not exist" 错)
   // v2.6 路线再实现 (需要: 麦克风权限引导 + 录音 → STT 云函数 → 文字)
+
+  // v3.1 阶段 2 链路 5: 朋友推荐 — 镜中 4 维 / 30 天曲线 / 6 类对话 分享
+  // 严守: 不显示分数具体值, 标题用"滋养"调性
+  onShareAppMessage() {
+    const h = this.data.history;
+    return {
+      title: h && h.length > 0
+        ? `悦济 · 镜中 4 维 · ${h.length} 天滋养自己`
+        : '悦济 · 镜中, 是正在成为自己的你',
+      path: '/pages/4_镜中/4_镜中',
+      imageUrl: '',
+    };
+  },
+  onShareTimeline() {
+    const h = this.data.history;
+    return {
+      title: h && h.length >= 7
+        ? `悦济 · 镜中 30 天曲线, 滋养自己 ${h.length} 天`
+        : '悦济 · 共修同行 · 镜中是正在成为自己的你',
+      query: '',
+    };
+  },
 });

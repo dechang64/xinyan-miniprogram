@@ -1,0 +1,69 @@
+<!-- 18_睡前一程.wxml — 悦济 v3.1 阶段 2
+  晚 9:00 睡前场景联动:
+   1. 经文 1 句 → 1.1_经文详情 (周末深度)
+   2. 汤品 1 句 → 2_每日一汤 (tabBar)
+   3. 滋养曲 1 调 → 16_今日一曲
+   4. 5 分钟小动 → 15_今日小动
+  严守: 0 出现 14 严守词, 不评判 / 不卖 / 不超 5 分钟
+-->
+<view class="page">
+  <nav-bar title="睡前一程" showHome="{{true}}" />
+
+  <!-- 顶部场景卡 -->
+  <view class="scene-hero">
+    <view class="scene-time">晚 9:00 · 睡前一程</view>
+    <view class="scene-title">{{tizhiName}}的睡前</view>
+    <view class="scene-intro">{{sceneIntro}}</view>
+  </view>
+
+  <!-- 4 件事联动展示, 每件事一个 card -->
+  <view class="flow-card" bindtap="onTapJing">
+    <view class="flow-num">壹</view>
+    <view class="flow-body">
+      <view class="flow-label">一卷经 · 30 字</view>
+      <view class="flow-source">{{jing.source}} · {{jing.title}}</view>
+      <view class="flow-text">{{jing.short}}</view>
+    </view>
+    <view class="flow-arrow">→</view>
+  </view>
+
+  <view class="flow-card" bindtap="onTapSoup">
+    <view class="flow-num">贰</view>
+    <view class="flow-body">
+      <view class="flow-label">一汤 · 30 字</view>
+      <view class="flow-source">{{soup.name}} · {{soup.tizhi}}</view>
+      <view class="flow-text">{{soup.short}}</view>
+    </view>
+    <view class="flow-arrow">→</view>
+  </view>
+
+  <view class="flow-card" style="border-left: 8rpx solid {{music.wuyue === 'gong' ? '#F4D35E' : music.wuyue === 'shang' ? '#D8B0A0' : music.wuyue === 'jiao' ? '#A8D5BA' : music.wuyue === 'zhi' ? '#E8998C' : '#B8D8E8'}};" bindtap="onTapMusic">
+    <view class="flow-num">叁</view>
+    <view class="flow-body">
+      <view class="flow-label">一曲 · {{music.wuyueFull}}</view>
+      <view class="flow-source">{{music.wuyueName}}调 · 滋养 5 分钟</view>
+      <view class="flow-text">{{music.wuyueDesc}}</view>
+    </view>
+    <view class="flow-arrow">→</view>
+  </view>
+
+  <view class="flow-card" style="border-left: 8rpx solid {{motion.color}};" bindtap="onTapMotion">
+    <view class="flow-num">肆</view>
+    <view class="flow-body">
+      <view class="flow-label">一动 · 5 分钟</view>
+      <view class="flow-source">{{motion.icon}} {{motion.name}} · {{motion.duration}}</view>
+      <view class="flow-text">{{motion.desc}}</view>
+    </view>
+    <view class="flow-arrow">→</view>
+  </view>
+
+  <!-- 收尾: 4 件事顺序 -->
+  <view class="flow-summary">
+    4 件事, 1 晚, 慢慢来。
+  </view>
+
+  <!-- 严守 -->
+  <view class="compliance-bar">
+    ✦ 滋养陪伴, 不涉及医疗作用 · 主观自评 ✅ · 客观识别 ❌
+  </view>
+</view>
