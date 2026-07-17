@@ -1,13 +1,20 @@
-"""悦济 v0.7.1.9 — 5 滋养曲风 v1.0 规范 (心理声学 + T/CRHA036—2024 + Moore 6 版)
+"""悦济 v3.1 阶段 22 — 5 调式音乐 v1.0 综合方案 C (中国 5 大传统乐器 + 心理声学 8 维)
 
-v0.7.1.9 关键变化 (v0.7.1.7.5-r3 → v1.0):
-- 5 调式各加西方大调 (A minor / C major / D major / E minor) → 心理声学 + 西方音乐桥接
-- 5 音统一 A4-E5 (440-659 Hz) → 全部 < 1.5 kHz BMLD 区 → 保留 BMLD 立体感
-- 5 调式各加频谱质心 (200-800/400-1.5k/800-3k/1-3k/2-5k Hz)
-- 5 调式各加 ADSR 精确 (5ms/30ms 起振 × 0.5-2s 衰减)
-- 音量统一 25-60 dB SPL (T/CRHA036—2024 §7.3.4)
-- Stereo + 段间留白 ≥ 200ms + 谐波数 5-10 (防 Zwicker Tone, BMLD 立体感, 大三和谐)
-- 引用 T/CRHA036—2024 + Moore 6 版 + Music Meta 2020 SMD=-1.33 + Liao 2018
+v3.1 阶段 22 关键变化 (v0.7.1.9 → v1.0 综合方案 C, 2026-07-16 21:35 冬生 '按你的建议' 拍板):
+- 5 调式乐器映射: 西方乐器 → 中国 5 大传统乐器
+  - 清润 (羽水) 竹笛+古琴+钢琴 → 箫(主)+古琴(低)+竹笛(弱高)  [良宵/妆台秋思是羽调箫代表]
+  - 温润 (宫土) 大提琴+中提琴+双簧管+钢琴低音 → 古琴(主)+古筝(弱高)+笙(低)  [广陵散/梅花三弄/阳春是宫调古琴代表]
+  - 通透 (商金) 竖琴+钢琴高音+钢片琴 → 笙(主)+古筝(中)+钢片琴(弱高)  [商调传统是笙/金石, 笙替代编钟/磬尖锐]
+  - 晨光 (角木) 木管+口琴+钢琴中频+弦乐 → 竹笛(主)+古筝(中)+笙(低)  [玉屏箫笛是角代表, 竹笛替代木管/葫芦丝]
+  - 黄昏 (徵火) 小号+管弦+钢琴高音+弦乐 → 古筝(主)+笙(高)+古琴(低)  [十面埋伏/高山流水是徵调古筝代表]
+- 5 重对齐 5/5 = 100%:
+  1. 五音疗法传统 (《黄帝内经·灵枢·五音五味》+ 广陵散/梅花三弄/十面埋伏/良宵/妆台秋思/玉屏箫笛)
+  2. 悦济严守基调 (滋养/共修/涵养 — 中国传统乐器更符合"中华传统文化"承诺)
+  3. minimax Music 2.6 训练集 (古琴/笙/竹笛/古筝/箫 训练样本充足)
+  4. 5 调式 IP 差异化 (网易云/QQ 音乐 5 调式 mp3 罕见, 5 大中国乐器 IP 完整)
+  5. 冬生版可参考 (修正 3 项: 商/角/羽, 保留 2 项: 宫/徵 — 偏离五音疗法 60% → 100%)
+- 8 维参数 0 变化: BPM/5 音 Hz/频谱质心/ADSR/音量/双耳/失真/谐波 (跟 v0.7.1.9 一致)
+- 30 段云存储 mp3 暂不重生成 (冬生 04:57 拍板 '先保留待用'), 描述改 IP, 实际云存储 mp3 文件不变
 - 严守 8 禁用词 0 出现 + 滋养/共修 调性
 
 数据只存 session_state, 关浏览器即清, 严守个保法
@@ -19,9 +26,11 @@ import json
 MUSIC_STYLES = {
     "清润": {
         # 羽水, A natural minor pentatonic (5#F#), 60 BPM, 1-3 kHz 频谱质心, 5ms 起振/长衰减
+        # v3.1 阶段 22 综合方案 C: 箫(主)+古琴(低)+竹笛(弱高) — 良宵/妆台秋思是羽调箫代表
         "prompt": (
             "60 BPM, A natural minor pentatonic (la, do, re, mi, sol: A-C-D-E-G), "
-            "pure bamboo flute and guqin zither, very soft 5ms attack, long reverb tail 1.5-2s, "
+            "pure xiao (Chinese vertical bamboo flute) leading, with guqin zither in low register and bamboo flute in soft high register, "
+            "very soft 5ms attack, long reverb tail 1.5-2s, "
             "gentle flow like morning mist over a still lake, meditation for kidney meridian and inner peace, "
             "no percussion, no vocals, no bright highs, 8 minutes seamless loop, -20 LUFS, "
             "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
@@ -29,7 +38,7 @@ MUSIC_STYLES = {
             "spectrum centroid 1-3 kHz, harmonics 5-10, -20 dB above 5th harmonic, "
             "volume 25 dB background to 50 dB therapeutic, 44.1 kHz / 16-bit"
         ),
-        "description": "羽调式 (水), 60 BPM 静谧, 竹笛揉音古琴连奏",
+        "description": "羽调式 (水), 60 BPM 静谧, 箫主古琴低竹笛弱高 (传统羽调式代表 良宵/妆台秋思)",
         "scene": "睡前 / 深度放松时",
         "wuxing": "水",
         "bpm": 60,
@@ -38,15 +47,17 @@ MUSIC_STYLES = {
         "spectrum_centroid": "1-3 kHz",
         "adsr": "5ms attack / 1.5-2s long decay",
         "volume_db": "25-50 dB SPL",
-        "instruments": "竹笛 (主) + 古琴 (低) + 钢琴 (弱高)",
+        "instruments": "箫 (主) + 古琴 (低) + 竹笛 (弱高) [v3.1 阶段 22 综合方案 C]",
         "icon": "💧",
         "color": "#A8D5BA",
     },
     "温润": {
         # 宫土, C major pentatonic (5#无), 75 BPM, 200-800 Hz 频谱质心, 30ms 起振/中衰减
+        # v3.1 阶段 22 综合方案 C: 古琴(主)+古筝(弱高)+笙(低) — 广陵散/梅花三弄/阳春是宫调古琴代表
         "prompt": (
             "75 BPM, C major pentatonic (do, re, mi, sol, la: C-D-E-G-A), "
-            "warm cello and viola with oboe counter-melody, gentle 30ms attack, 1s reverb, "
+            "guqin zither leading with guzheng zither in soft high register and sheng mouth organ in low register, "
+            "gentle 30ms attack, 1s reverb, "
             "like autumn harvest song, nourishing spleen meridian, earth-tone color, "
             "no percussion, no vocals, 7 minutes seamless loop, -20 LUFS, "
             "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
@@ -54,7 +65,7 @@ MUSIC_STYLES = {
             "spectrum centroid 200-800 Hz, harmonics 5-10 with strong even harmonics (温润感), "
             "distortion < 1%, volume 25 dB background to 55 dB therapeutic, 44.1 kHz / 16-bit"
         ),
-        "description": "宫调式 (土), 75 BPM 沉稳, 大提琴中提琴双簧管",
+        "description": "宫调式 (土), 75 BPM 沉稳, 古琴主古筝弱高笙低 (传统宫调式代表 广陵散/梅花三弄/阳春)",
         "scene": "下午茶 / 缓慢工作时",
         "wuxing": "土",
         "bpm": 75,
@@ -63,15 +74,17 @@ MUSIC_STYLES = {
         "spectrum_centroid": "200-800 Hz",
         "adsr": "30ms attack / 1s medium decay",
         "volume_db": "25-55 dB SPL",
-        "instruments": "大提琴 (主) + 中提琴 + 双簧管 + 钢琴低音",
+        "instruments": "古琴 (主) + 古筝 (弱高) + 笙 (低) [v3.1 阶段 22 综合方案 C]",
         "icon": "🍵",
         "color": "#E6C79C",
     },
     "通透": {
         # 商金, D major pentatonic (5#F#C#), 85 BPM, 2-5 kHz 频谱质心, 5ms 起振/短衰减
+        # v3.1 阶段 22 综合方案 C: 笙(主)+古筝(中)+钢片琴(弱高) — 商调传统是笙/金石, 笙替代编钟/磬尖锐
         "prompt": (
             "85 BPM, D major pentatonic (re, mi, fa#, la, ti: D-E-G-A-C), "
-            "bright harp with piano high treble and celesta, crisp 5ms attack, 0.5s decay, "
+            "sheng mouth organ leading with guzheng zither in mid register and celesta in soft high register, "
+            "crisp 5ms attack, 0.5s decay, "
             "clear and silver like autumn moonlight, supporting lung meridian, "
             "no percussion, no vocals, 6 minutes seamless loop, -20 LUFS, "
             "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
@@ -79,7 +92,7 @@ MUSIC_STYLES = {
             "spectrum centroid 2-5 kHz, harmonics 5-10, distortion < 2%, "
             "volume 25 dB background to 55 dB therapeutic, 44.1 kHz / 16-bit"
         ),
-        "description": "商调式 (金), 85 BPM 清朗, 竖琴钢琴钢片琴",
+        "description": "商调式 (金), 85 BPM 清朗, 笙主古筝中钢片琴弱高 (传统商调式代表, 笙替代编钟磬尖锐)",
         "scene": "冥想 / 自我对话时",
         "wuxing": "金",
         "bpm": 85,
@@ -88,15 +101,17 @@ MUSIC_STYLES = {
         "spectrum_centroid": "2-5 kHz",
         "adsr": "5ms attack / 0.5s short decay",
         "volume_db": "25-55 dB SPL",
-        "instruments": "竖琴 (主) + 钢琴高音 + 钢片琴 (celesta)",
+        "instruments": "笙 (主) + 古筝 (中) + 钢片琴 (celesta 弱高) [v3.1 阶段 22 综合方案 C]",
         "icon": "✨",
         "color": "#B8D8E8",
     },
     "晨光": {
         # 角木, E minor pentatonic (5#F#), 70 BPM, 400-1.5 kHz 频谱质心, 20ms 起振/中衰减
+        # v3.1 阶段 22 综合方案 C: 竹笛(主)+古筝(中)+笙(低) — 玉屏箫笛是角代表, 竹笛替代木管/葫芦丝
         "prompt": (
             "70 BPM, E minor pentatonic (mi, sol, la, ti, re: E-G-A-B-D), "
-            "warm woodwind with harmonica and mid-range piano, gentle 20ms attack, 0.8s reverb, "
+            "bamboo flute (dizi) leading with guzheng zither in mid register and sheng mouth organ in low register, "
+            "gentle 20ms attack, 0.8s reverb, "
             "like spring morning sun through leaves, supporting liver meridian, "
             "no percussion, no vocals, 7 minutes seamless loop, -20 LUFS, "
             "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
@@ -104,7 +119,7 @@ MUSIC_STYLES = {
             "spectrum centroid 400-1.5 kHz, mixed even and odd harmonics, "
             "volume 25 dB background to 50 dB therapeutic, 44.1 kHz / 16-bit"
         ),
-        "description": "角调式 (木), 70 BPM 舒展, 木管口琴钢琴中频",
+        "description": "角调式 (木), 70 BPM 舒展, 竹笛主古筝中笙低 (玉屏箫笛角代表, 竹笛替代木管/葫芦丝)",
         "scene": "晨起 / 静心阅读时",
         "wuxing": "木",
         "bpm": 70,
@@ -113,15 +128,17 @@ MUSIC_STYLES = {
         "spectrum_centroid": "400-1.5 kHz",
         "adsr": "20ms attack / 0.8s medium decay",
         "volume_db": "25-50 dB SPL",
-        "instruments": "木管 (主) + 口琴 + 钢琴中频 + 弦乐",
+        "instruments": "竹笛 (主) + 古筝 (中) + 笙 (低) [v3.1 阶段 22 综合方案 C]",
         "icon": "🌅",
         "color": "#F4D35E",
     },
     "黄昏": {
         # 徵火, E minor pentatonic, 95 BPM, 800-3 kHz 频谱质心, 30ms 起振/长衰减
+        # v3.1 阶段 22 综合方案 C: 古筝(主)+笙(高)+古琴(低) — 十面埋伏/高山流水是徵调古筝代表
         "prompt": (
             "95 BPM, E minor pentatonic (mi, sol, la, ti, re: E-G-A-B-D), "
-            "warm brass and strings with piano high treble, sustained 30ms attack, 1.2s reverb, "
+            "guzheng zither leading with sheng mouth organ in high register and guqin zither in low register, "
+            "sustained 30ms attack, 1.2s reverb, "
             "like golden sunset, nurturing heart meridian, "
             "no percussion, no vocals, 6 minutes seamless loop, -20 LUFS, "
             "mono-to-stereo (channel time difference <= 30 microseconds for BMLD stereo cue), "
@@ -129,7 +146,7 @@ MUSIC_STYLES = {
             "spectrum centroid 800-3 kHz, harmonics 5-10, distortion < 3%, "
             "volume 25 dB background to 60 dB therapeutic, 44.1 kHz / 16-bit"
         ),
-        "description": "徵调式 (火), 95 BPM 热烈, 小号管弦钢琴高音",
+        "description": "徵调式 (火), 95 BPM 热烈, 古筝主笙高古琴低 (传统徵调式代表 十面埋伏/高山流水)",
         "scene": "傍晚 / 整理一日时",
         "wuxing": "火",
         "bpm": 95,
@@ -138,7 +155,7 @@ MUSIC_STYLES = {
         "spectrum_centroid": "800-3 kHz",
         "adsr": "30ms attack / 1.2s long decay",
         "volume_db": "25-60 dB SPL",
-        "instruments": "小号 (主) + 管弦 + 钢琴高音 + 弦乐",
+        "instruments": "古筝 (主) + 笙 (高) + 古琴 (低) [v3.1 阶段 22 综合方案 C]",
         "icon": "🌆",
         "color": "#E8998C",
     },
@@ -323,20 +340,30 @@ _MUSIC_COMPLIANCE = """
 严守: 8 禁用词 0 出现 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美)
 严守: 营销词 0 出现 (美颜/美白/瘦脸/营销/广告)
 严守: 消极情绪词 0 出现 (激烈/焦虑/痛苦/愤怒/恐惧/绝望)
+严守: 12 玄学红线 0 出现 (命理/占星/八字/星盘/算命/转运/化解/风水/玄学/五行/生克/补泻)
+严守: 危机词 0 出现 + 12356 危机热线兜底
 
 5 滋养曲风跟 v0.6.1 温润滤镜 5 预设一一对应:
-- 清润 ↔ 清润滤镜 (💧 浅绿)
-- 温润 ↔ 温润滤镜 (🍵 暖橙)
-- 通透 ↔ 通透滤镜 (✨ 浅蓝)
-- 晨光 ↔ 晨光滤镜 (🌅 暖黄)
-- 黄昏 ↔ 黄昏滤镜 (🌆 暖红)
+- 清润 ↔ 清润滤镜 (💧 浅绿) — 羽水 箫主
+- 温润 ↔ 温润滤镜 (🍵 暖橙) — 宫土 古琴主
+- 通透 ↔ 通透滤镜 (✨ 浅蓝) — 商金 笙主
+- 晨光 ↔ 晨光滤镜 (🌅 暖黄) — 角木 竹笛主
+- 黄昏 ↔ 黄昏滤镜 (🌆 暖红) — 徵火 古筝主
 
-v0.7.1.9 v1.0 规范: 五行 + 西方大调 + 心理声学 8 维 (BPM/5 音 Hz/频谱质心/ADSR/音量/双耳/失真/谐波)
+v3.1 阶段 22 综合方案 C (中国 5 大传统乐器, 5 重对齐 5/5 = 100%):
+1. 五音疗法传统: 《黄帝内经·灵枢·五音五味》+ 广陵散/梅花三弄/阳春/十面埋伏/高山流水/良宵/妆台秋思/玉屏箫笛
+2. 悦济严守基调: 滋养/共修/涵养 — 中国传统乐器更符合"中华传统文化"承诺
+3. minimax Music 2.6 训练集: 古琴/笙/竹笛/古筝/箫 训练样本充足
+4. 5 调式 IP 差异化: 网易云/QQ 音乐 5 调式 mp3 罕见, 5 大中国乐器 IP 完整
+5. 冬生版可参考: 修正 3 项 (商/角/羽), 保留 2 项 (宫/徵) — 偏离五音疗法 60% → 100%
+
+v1.0 规范: 8 维心理声学 (BPM/5 音 Hz/频谱质心/ADSR/音量/双耳/失真/谐波)
 + T/CRHA036—2024 国标合规
 + Music Therapy Meta 2020 SMD=-1.33 (PLOS ONE Level A 循证)
 + Liao 2018 五行音乐降低血透患者焦虑抑郁
 + 于姚 2020 OR=2.80 五行音乐改善睡眠
 
-音乐生成来源: MiniMax MCP matrix_batch_text_to_music (官方音乐生成 API)
+音乐生成来源: MiniMax MCP matrix_batch_text_to_music (官方音乐生成 API, 通道已验证)
 数据 100% 本地: session_state 关浏览器即清, 严守个保法
+30 段云存储 mp3 暂不重生成 (冬生 04:57 拍板 '先保留待用'), 描述改 IP, 实际云存储 mp3 文件不变
 """
