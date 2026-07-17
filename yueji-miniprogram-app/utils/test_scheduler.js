@@ -1,6 +1,6 @@
 // 悦济 v3.0.5 — 5 自测分 5 天调度 (阶段 1.3)
-// 5 自测: 9 体质 / MBTI / 人格画像 / 八字 / 星盘
-// 5 天每天 1 套, 循环 (D1 9 体质 / D2 MBTI / D3 人格 / D4 八字 / D5 星盘)
+// 5 自测: 9 体质 / MBTI / 人格画像 / 5 元素 / 月令
+// 5 天每天 1 套, 循环 (D1 9 体质 / D2 MBTI / D3 人格 / D4 5 元素 / D5 月令)
 // 严守: 主观自评 ✅, 不做客观识别, 可跳过 (不强迫)
 // storage key: yueji_test_done_<key>_<YYYY-MM-DD> = true
 // 跳过 key: yueji_test_skip_<key> = true (用户主动跳过, 5 天循环里也算完成)
@@ -9,8 +9,8 @@ const TESTS_5 = [
   { day: 1, key: 'tizhi',   name: '9 体质自评', page: '/pages/9_9体质自评/9_9体质自评', dur: '90 秒 9 题', desc: '王琦 9 体质, 平和/气虚/阳虚/阴虚/痰湿/湿热/血瘀/气郁/特禀' },
   { day: 2, key: 'mbti',    name: 'MBTI 快测',  page: '/pages/10_MBTI快测/10_MBTI快测', dur: '4 题滑块', desc: 'E/I S/N T/F J/P 4 对, 16 型 → 4 经数字人' },
   { day: 3, key: 'renge',   name: '人格画像',   page: '/pages/6_人格画像/6_人格画像', dur: '4 经阅读', desc: '看 4 经数字人, 自动生成 9 维人格画像' },
-  { day: 4, key: 'bazi',    name: '八字',       page: '/pages/12_八字/12_八字', dur: '60 秒 60 甲子', desc: '年柱/月柱/日柱, 文化参考不诊断' },
-  { day: 5, key: 'xingpan', name: '星盘',       page: '/pages/13_星盘/13_星盘', dur: '60 秒 3 星座', desc: '太阳/月亮/上升, 文化参考不诊断' },
+  { day: 4, key: 'wuxing',  name: '5 元素',     page: '/pages/12_5元素/12_5元素', dur: '60 秒 5 元素', desc: '5 元素月令, 文化参考不诊断' },
+  { day: 5, key: 'yueling', name: '月令',       page: '/pages/13_月令/13_月令', dur: '60 秒 月令', desc: '5 元素月令, 文化参考不诊断' },
 ];
 
 // 今天是哪天 (1-5, 循环: D6=D1, D7=D2, ...)

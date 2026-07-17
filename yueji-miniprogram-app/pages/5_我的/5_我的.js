@@ -38,12 +38,12 @@ Page({
     });
   },
 
-  // v2.2.0 镜像区 4 入口 + v2.3.0 加 2 (八字/星盘) + v2.7.0 加 3 (自拍/给3月/月报)
+  // v2.2.0 镜像区 4 入口 + v2.3.0 加 2 (5 元素/月令) + v2.7.0 加 3 (自拍/给3月/月报) [v3.1 阶段 22.2 改名]
   onTapJingzhong() { wx.switchTab({ url: '/pages/4_镜中/4_镜中' }); },
   onTapTizhi() { wx.navigateTo({ url: '/pages/9_9体质自评/9_9体质自评' }); },
   onTapMBTI() { wx.navigateTo({ url: '/pages/10_MBTI快测/10_MBTI快测' }); },
-  onTapBazi() { wx.navigateTo({ url: '/pages/12_八字/12_八字' }); },
-  onTapXingpan() { wx.navigateTo({ url: '/pages/13_星盘/13_星盘' }); },
+  onTapWuxing() { wx.navigateTo({ url: '/pages/12_5元素/12_5元素' }); },
+  onTapYueling() { wx.navigateTo({ url: '/pages/13_月令/13_月令' }); },
   onTapPoster() { wx.navigateTo({ url: '/pages/11_海报分享/11_海报分享' }); },
   onTapDigital() { wx.navigateTo({ url: '/pages/8_4经数字人/8_4经数字人' }); },
   // v2.7.0 加

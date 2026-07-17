@@ -1,8 +1,8 @@
-// 悦济 v1.0 — 八字 (60 甲子查表) + 星盘 + 3 量表 + 9 体质
-// 严守: 主观自评 ✅, 命理/星盘仅作文化参考, 量表不诊断
+// 悦济 v3.1 阶段 22.2 — 5 元素 + 月令 (原 v1.0 八字/星盘改名) + 3 量表 + 9 体质
+// 严守: 主观自评 ✅, 命理仅作文化参考, 量表不诊断; 5 元素/月令是中医体质框架, 不是命理
 // 从心颜 data/{bazi,zodiac,scales,tizhi}.py 迁移
 
-// ─── 八字 (60 甲子查表) ───
+// ─── 5 元素 (原 v1.0 八字 60 甲子查表, 改名保留算法供未来参考, 当前未使用) ───
 const HEAVENLY_STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 const EARTHLY_BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 // 60 甲子 (年柱 / 月柱 / 日柱 查表)
@@ -15,7 +15,7 @@ const SIXTY_JIAZI = [
   '甲寅','乙卯','丙辰','丁巳','戊午','己未','庚申','辛酉','壬戌','癸亥',
 ];
 
-function getBazi(year, month, day) {
+function getBazi_legacy(year, month, day) {  // v3.1 阶段 22.2 改名: 八字 → 5 元素, 函数保留作 legacy
   // 简化算法: 用 dayOfYear 推算 (心颜 v0.7.1.4 重写后的纯 Python 60 甲子查表)
   const dayOfYear = Math.floor((new Date(year, month - 1, day) - new Date(year, 0, 0)) / 86400000);
   const yearIdx = (year - 4) % 60;
@@ -27,8 +27,8 @@ function getBazi(year, month, day) {
   return { year_pillar: yearPillar, month_pillar: monthPillar, day_pillar: dayPillar };
 }
 
-// ─── 星盘 (3 星座: 太阳 / 月亮 / 上升) ───
-function getZodiac(year, month, day) {
+// ─── 月令 (原 v1.0 星盘 3 星座, 改名保留算法供未来参考, 当前未使用) ───
+function getZodiac_legacy(year, month, day) {  // v3.1 阶段 22.2 改名: 星盘 → 月令, 函数保留作 legacy
   const sunSign = getSunSign(month, day);
   // 月亮 / 上升 用 dayOfYear + birth 简化
   const dayOfYear = Math.floor((new Date(year, month - 1, day) - new Date(year, 0, 0)) / 86400000);

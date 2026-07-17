@@ -1,0 +1,33 @@
+.picker-view {
+  padding: 24rpx;
+  margin: 16rpx 0;
+  background: #faf6f0;
+  border: 2rpx solid #e8dfc8;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #2d3a2e;
+}
+.bazi-row {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 16rpx;
+}
+.bazi-cell {
+  text-align: center;
+  flex: 1;
+  padding: 16rpx 0;
+}
+.bazi-label {
+  font-size: 22rpx;
+  color: #a8a29e;
+  margin-bottom: 8rpx;
+}
+.bazi-gan, .bazi-zhi {
+  font-size: 36rpx;
+  color: #4a7c59;
+  font-weight: 600;
+  margin: 4rpx 0;
+}
+.bazi-zhi {
+  color: #a94442;
+}
