@@ -1,22 +1,20 @@
-"""悦济 v0.7.1 — page 6: 人格画像
+"""悦济 v3.1 阶段 19 — page 6: 人格画像 (严守修订同步)
 
-6 tab 自评工具 (全部严守「非诊断 / 参考」):
+4 tab 自评工具 (全部严守「非诊断 / 参考」):
 - 🧠 MBTI: 8 题 4 维度 → 16 型
-- ☯️ 八字: sxtwl 2.x 算年/月/日/时柱 + 元素分布
-- ✨ 星盘: 太阳 + 月亮 + 上升 3 星座 + 元素
 - 🌧️ 心情: PHQ-9 (9 题) — 心情低落自评 (Kroenke 2001, 公版)
 - ⚡ 焦虑: GAD-7 (7 题) — 焦虑自评 (Spitzer 2006, 公版)
 - 🧬 体质: 9 题 × 3 选 1 投票 (王琦 9 体质 2009 简化版)
 
+v3.1 阶段 8 严守修订: 删 8 字/星盘 2 个 tab (12 玄学红线: 命理/占星/八字/星盘/算命/转运/化解/风水/玄学/五行/生克/补泻)
 严守 (核心):
 - 8 禁用词 0 出现 (治疗/改善/缓解/治愈/祛斑/减肥/处方/医美/美颜/美白/瘦脸)
-- 严守声明顶部, 量表/八字/星盘都标「仅供参考 / 不构成医学建议」
+- 严守声明顶部, 量表都标「仅供参考 / 不构成医学建议」
 - PHQ-9 Q9 自伤念头 ≥ 1 → 强制红色 banner + 12356 + 北京心理危机中心
-- 月亮 + 上升星座用简化估算
-- 八字只算 4 柱 + 元素, 不算大运流年
 - 体质只推荐票数最多的 (允许并列), 不评分判定
 - 数据 100% 本地, 关浏览器即清
 - 8 禁用词 0 出现
+- 12 玄学红线 0 出现
 """
 
 import streamlit as st
@@ -27,8 +25,6 @@ from core.config import (
     get_brand_header, get_footer_note, get_solar_term_strip,
 )
 from data.mbti import MBTI_8_QUESTIONS, MBTI_16_TYPES, score_mbti
-from data.bazi import calc_bazi, TIANGAN, DIZHI, WUXING
-from data.zodiac import calc_zodiac, SIGN_DESC, ELEMENTS
 from data.scales import (
     PHQ9_QUESTIONS, PHQ9_OPTIONS, PHQ9_KEY_ITEM_9, phq9_score,
     GAD7_QUESTIONS, GAD7_OPTIONS, gad7_score,
@@ -66,18 +62,19 @@ get_brand_header()
 # ── 顶部统一严守声明 ──
 st.markdown(f"""
 <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); padding: 1rem; margin-bottom: 1rem;">
-    <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 严守</div>
+    <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 0.3rem;">✦ 严守 (v3.1 阶段 19)</div>
     <div style="color: #2d3a2e; font-size: 0.92rem; line-height: 1.6;">
-        6 个自评工具 <b>只做倾向参考</b>, 不做命理预测 / 医疗诊断 / 体质判定。<br>
-        MBTI / 八字 / 星盘 / 心情 / 焦虑 / 体质 <b>全部仅供参考</b>, 个体差异请咨询专业人士。<br>
+        4 个自评工具 <b>只做倾向参考</b>, 不做医疗诊断 / 体质判定。<br>
+        MBTI / 心情 / 焦虑 / 体质 <b>全部仅供参考</b>, 个体差异请咨询专业人士。<br>
+        ✦ v3.1 阶段 8 严守修订: 删 8 字 / 星盘 tab (12 玄学红线)<br>
         ✦ 数据仅存你浏览器, 关浏览器即清
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── 6 tab ──
-tab_mbti, tab_bazi, tab_zodiac, tab_phq, tab_gad, tab_tizhi = st.tabs([
-    "🧠 MBTI", "☯️ 八字", "✨ 星盘", "🌧️ 心情", "⚡ 焦虑", "🧬 体质"
+# ── 4 tab (v3.1 阶段 8 严守修订: 删 8 字/星盘) ──
+tab_mbti, tab_phq, tab_gad, tab_tizhi = st.tabs([
+    "🧠 MBTI", "🌧️ 心情", "⚡ 焦虑", "🧬 体质"
 ])
 
 # ═══════════════════════════════════════════════════════════
@@ -183,152 +180,6 @@ with tab_mbti:
     else:
         st.info("请完成所有 8 题, 即可看到你的 MBTI 倾向 ✨")
 
-# ═══════════════════════════════════════════════════════════
-# Tab 2: 八字 (四柱)
-# ═══════════════════════════════════════════════════════════
-with tab_bazi:
-    st.markdown("### ☯️ 八字四柱 (公历生日)")
-    st.caption("✦ 悦济只算年柱 / 月柱 / 日柱 / 时柱 + 元素平衡, 不算大运 / 流年 / 神煞")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        b_year = st.number_input("出生年", min_value=1900, max_value=2026, value=1990, step=1, key="bazi_year")
-        b_month = st.number_input("出生月", min_value=1, max_value=12, value=5, step=1, key="bazi_month")
-    with col2:
-        b_day = st.number_input("出生日", min_value=1, max_value=31, value=15, step=1, key="bazi_day")
-        b_hour = st.selectbox(
-            "出生时辰",
-            options=list(range(0, 24)),
-            index=14,
-            format_func=lambda h: f"{h:02d}:00",
-            key="bazi_hour",
-        )
-
-    if st.button("✦ 算四柱", key="bazi_calc"):
-        try:
-            r = calc_bazi(b_year, b_month, b_day, b_hour)
-            yp, mp, dp, hp = r["year_pillar"], r["month_pillar"], r["day_pillar"], r["hour_pillar"]
-
-            st.markdown(f"""
-            <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); text-align: center; padding: 1.5rem; margin-top: 1rem;">
-                <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 1rem;">✦ 你的四柱</div>
-                <div style="display: flex; justify-content: space-around; align-items: center;">
-                    <div><div style="color: #8a8a8a; font-size: 0.8rem;">年柱</div><div style="color: #2d3a2e; font-size: 2rem;">{yp[0]}{yp[1]}</div></div>
-                    <div><div style="color: #8a8a8a; font-size: 0.8rem;">月柱</div><div style="color: #2d3a2e; font-size: 2rem;">{mp[0]}{mp[1]}</div></div>
-                    <div><div style="color: #8a8a8a; font-size: 0.8rem;">日柱</div><div style="color: #2d3a2e; font-size: 2rem;">{dp[0]}{dp[1]}</div></div>
-                    <div><div style="color: #8a8a8a; font-size: 0.8rem;">时柱</div><div style="color: #2d3a2e; font-size: 2rem;">{hp[0]}{hp[1]}</div></div>
-                </div>
-                <div style="color: #6b6b6b; font-size: 0.92rem; margin-top: 1rem;">日主: <b>{r['day_master']}</b> ({r['yin_yang']}性)</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown("#### 🌿 元素分布")
-            wx = r["wuxing_count"]
-            c1, c2, c3, c4, c5 = st.columns(5)
-            colors = {"木": "#90c290", "火": "#e6a89c", "土": "#d4b48c", "金": "#d4d4d4", "水": "#a8c5d8"}
-            icons = {"木": "🌳", "火": "🔥", "土": "🏔️", "金": "⚙️", "水": "💧"}
-            for i, el in enumerate(["木", "火", "土", "金", "水"]):
-                with [c1, c2, c3, c4, c5][i]:
-                    st.markdown(f"""
-                    <div style="background: {colors[el]}20; border: 1px solid {colors[el]}; border-radius: 8px; padding: 0.8rem; text-align: center;">
-                        <div style="font-size: 1.5rem;">{icons[el]}</div>
-                        <div style="color: #2d3a2e; font-size: 0.95rem; font-weight: 500;">{el}</div>
-                        <div style="color: #6b6b6b; font-size: 1.2rem;">{wx[el]}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-            st.markdown("---")
-            st.markdown("""
-            <div style="text-align: center; color: #8a8a8a; font-size: 0.85rem; padding: 1rem;">
-                ✦ 八字只做元素平衡 + 性格倾向参考, 不算大运流年 / 不做命理预测<br>
-                ✦ 悦济严守: 「滋养」而非「决定」<br>
-                <span style="color: #a94442;">危机时刻: 拨打 12356 心理援助热线</span>
-            </div>
-            """, unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"计算失败: {e}")
-
-# ═══════════════════════════════════════════════════════════
-# Tab 3: 星盘 (太阳 + 月亮 + 上升 3 星座)
-# ═══════════════════════════════════════════════════════════
-with tab_zodiac:
-    st.markdown("### ✨ 3 星座 (太阳 + 月亮 + 上升)")
-    st.caption("✦ 月亮 + 上升星座用简化估算 (非精确天文计算), 仅做元素平衡参考")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        z_year = st.number_input("出生年", min_value=1900, max_value=2026, value=1990, step=1, key="zod_year")
-        z_month = st.number_input("出生月", min_value=1, max_value=12, value=5, step=1, key="zod_month")
-    with col2:
-        z_day = st.number_input("出生日", min_value=1, max_value=31, value=15, step=1, key="zod_day")
-        z_hour = st.selectbox(
-            "出生时辰",
-            options=list(range(0, 24)),
-            index=14,
-            format_func=lambda h: f"{h:02d}:00",
-            key="zod_hour",
-        )
-
-    if st.button("✦ 算星座", key="zod_calc"):
-        try:
-            r = calc_zodiac(z_year, z_month, z_day, z_hour)
-            sun, moon, rising = r["sun_sign"], r["moon_sign"], r["rising_sign"]
-
-            st.markdown(f"""
-            <div class="card" style="background: linear-gradient(135deg, #faf6f0, #f0e9dc); text-align: center; padding: 1.5rem; margin-top: 1rem;">
-                <div style="color: #a94442; font-size: 0.78rem; letter-spacing: 0.2em; margin-bottom: 1rem;">✦ 你的 3 星座</div>
-                <div style="display: flex; justify-content: space-around;">
-                    <div><div style="color: #8a8a8a; font-size: 0.8rem;">☀️ 太阳</div><div style="color: #2d3a2e; font-size: 1.3rem; margin-top: 0.3rem;">{sun}</div></div>
-                    <div><div style="color: #8a8a8a; font-size: 0.8rem;">🌙 月亮</div><div style="color: #2d3a2e; font-size: 1.3rem; margin-top: 0.3rem;">{moon}</div></div>
-                    <div><div style="color: #8a8a8a; font-size: 0.8rem;">⬆️ 上升</div><div style="color: #2d3a2e; font-size: 1.3rem; margin-top: 0.3rem;">{rising}</div></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown(f"#### ☀️ {sun} 关键词")
-            sun_d = r["sun_desc"]
-            st.markdown(f"""
-            <div class="card" style="background: #fffef8; padding: 1rem; margin: 0.8rem 0;">
-                <div style="color: #6b6b6b; font-size: 0.9rem;">关键词: <span style="color: #2d3a2e;">{sun_d['关键词']}</span></div>
-                <div style="color: #6b6b6b; font-size: 0.9rem; margin-top: 0.4rem;">滋养提示: <span style="color: #a94442;">{sun_d['滋养提示']}</span></div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown("#### 🌿 元素分布 (3 星座各占 1)")
-            el = r["elements"]
-            c1, c2, c3, c4 = st.columns(4)
-            for i, (e_name, color, icon) in enumerate([("火", "#e6a89c", "🔥"), ("土", "#d4b48c", "🏔️"), ("风", "#a8c5d8", "🌬️"), ("水", "#90b0d0", "💧")]):
-                with [c1, c2, c3, c4][i]:
-                    st.markdown(f"""
-                    <div style="background: {color}20; border: 1px solid {color}; border-radius: 8px; padding: 0.8rem; text-align: center;">
-                        <div style="font-size: 1.5rem;">{icon}</div>
-                        <div style="color: #2d3a2e; font-size: 0.95rem; font-weight: 500;">{e_name}</div>
-                        <div style="color: #6b6b6b; font-size: 1.2rem;">{el[e_name]}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-            el_max = max(el.values())
-            el_dominant = [k for k, v in el.items() if v == el_max]
-            if len(el_dominant) == 1 and el_max >= 2:
-                _tips = {
-                    "火": "热情但易燃, 滋养提醒: 留空隙降温",
-                    "土": "稳定但易沉, 滋养提醒: 加点流动",
-                    "风": "灵活但易散, 滋养提醒: 找一份专注",
-                    "水": "柔软但易溢, 滋养提醒: 给情绪画边界",
-                }
-                _tip = _tips.get(el_dominant[0], "")
-                st.info("💡 你的 " + el_dominant[0] + " 元素占主导 (" + str(el_max) + " 个), 注意: " + _tip)
-
-            st.markdown("---")
-            st.markdown("""
-            <div style="text-align: center; color: #8a8a8a; font-size: 0.85rem; padding: 1rem;">
-                ✦ 星盘只做性格 + 元素平衡参考, 不做运势预测 / 命理预测<br>
-                ✦ 月亮 + 上升星座用简化估算, 精确值需天文软件<br>
-                <span style="color: #a94442;">危机时刻: 拨打 12356 心理援助热线</span>
-            </div>
-            """, unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"计算失败: {e}")
 
 # ═══════════════════════════════════════════════════════════
 # Tab 4: 心情低落自评 (PHQ-9) — v0.7.1 加回来
