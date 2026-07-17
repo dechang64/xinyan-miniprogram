@@ -158,16 +158,21 @@ Page({
       if (res.result && res.result.ok && res.result.data && res.result.data.content) {
         this.pushMessage('assistant', res.result.data.content, true);
       } else {
+        // v3.1 阶段 24 改: ok=false 显式错 (user 反馈"周文王不答", 改显式错方便排查)
         const errMsg = (res.result && res.result.error) || 'AI 返回为空';
-        console.warn('[悦济 chat 云函数]', errMsg);
-        this.pushMessage('assistant', '（暂未接住）请稍后再试, 或换个说法。', false);
+        const errCode = (res.result && res.result.error_code) || 'UNKNOWN';
+        console.warn('[悦济 chat 云函数] role=' + this.humanKey + ', code=' + errCode + ', err=' + errMsg);
+        this.pushMessage('assistant', '（暂未接住 [' + errCode + ']: ' + errMsg.slice(0, 80) + '）请稍后再试, 或换个说法。', false);
       }
     } catch (e) {
       this.setData({ isAiThinking: false });
-      console.error('[悦济 chat 云函数 异常]', e);
-      // v2.6.0 修 P0-9: catch 显式提示 (不再静默), 跟 chat 云函数一致
-      wx.showToast({ title: '云函数不可用, 请检查部署', icon: 'none', duration: 3000 });
-      this.pushMessage('assistant', '（AI 暂未接住, 请检查云函数部署 / 环境变量 AI_API_KEY）', false);
+      // v3.1 阶段 24 改 (user 反馈"周文王不答", 改 catch 显式错)
+      // 修前: catch 静默, pushMessage "AI 暂未接住, 请检查部署" — 用户看到是"不睬"而不是真因
+      // 修后: catch 拿 errMsg + 显式 pushMessage + 控制台详细打印, 用户能看出是 KEY 错 / AMAX 错 / 还是网络错
+      const errMsg = (e && e.errMsg) || (e && e.message) || '未知异常';
+      console.error('[悦济 chat 云函数 异常] role=' + this.humanKey + ', err=' + errMsg, e);
+      wx.showToast({ title: '云函数调用失败: ' + errMsg.slice(0, 30), icon: 'none', duration: 3500 });
+      this.pushMessage('assistant', '（暂未接住: ' + errMsg.slice(0, 50) + '）请稍后再试, 或检查云函数部署 / AI_API_KEY 环境变量。', false);
     }
   },
 

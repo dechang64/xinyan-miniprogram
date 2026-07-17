@@ -227,11 +227,30 @@ Page({
     return '你今天 ' + TIZHI_NAMES[tizhiKey] + ', 试试 ' + WUYUE_NAMES[wuyue] + ' 调, 5 分钟, 慢慢听。';
   },
 
+  // v3.1 阶段 24 修 (user 反馈"暂停键不管用")
+  // 修前: 每次 onPlay 都 createInnerAudioContext 新实例, onPause 调 stop() = 销毁, 续播要重建
+  // 修后: 复用 this.audioCtx 实例, onPause 用 pause() + 记 currentTime, onPlay 用 seek + play() 续播
   onPlay() {
     console.log('[悦济 music] onPlay mp3Url =', this.data.mp3Url ? this.data.mp3Url.slice(0, 80) + '...' : '空');
     if (!this.data.mp3Url) {
       wx.showToast({ title: 'mp3 URL 空, 请看 console', icon: 'none', duration: 3000 });
       return;
+    }
+    // 复用: 已有 audioCtx + 同 src → 续播
+    if (this.audioCtx && this.audioCtx.src === this.data.mp3Url) {
+      // 续播: seek 回暂停点 + play
+      if (this._pausedAt) {
+        this.audioCtx.seek(this._pausedAt);
+        this._pausedAt = 0;
+      }
+      this.audioCtx.play();
+      this.setData({ isPlaying: true });
+      return;
+    }
+    // 新 src: 创建新实例
+    if (this.audioCtx) {
+      this.audioCtx.stop();
+      this.audioCtx = null;
     }
     const ctx = wx.createInnerAudioContext();
     ctx.src = this.data.mp3Url;
@@ -277,9 +296,14 @@ Page({
     setTimeout(() => this.onPlay(), 100);
   },
 
+  // v3.1 阶段 24 修 (user 反馈"音乐播放后无法暂停, 暂停键不管用")
+  // 修前: this.audioCtx.stop() — 暂停 = 停止, 重新播要重 play() + 重置 time = UX 差
+  // 修后: this.audioCtx.pause() + 记 currentTime, onPlay 时 seek 回 = 真暂停, 继续无缝
   onPause() {
     if (this.audioCtx) {
-      this.audioCtx.stop();
+      // 记录暂停时的 currentTime, onPlay 时 seek 回去
+      this._pausedAt = this.audioCtx.currentTime || 0;
+      this.audioCtx.pause();
       this.setData({ isPlaying: false });
     }
   },

@@ -9,6 +9,7 @@ Page({
     tizhiKey: 'pinghe',
     latest4: { mood: 5, energy: 5, sleep: 5, skin: 5 },
     motion: null,
+    currentMotionKey: 'jingzuo',   // v3.1 阶段 24: 当前选的小动 (跟 16_今日一曲 currentWuyue 一致)
     aiHint: '',
     aiPowered: false,
     loading: true,
@@ -21,7 +22,11 @@ Page({
     this.compute();
   },
 
-  compute() {
+  // v3.1 阶段 24 修: 接受 forceMotionKey 参数 (onSelectMotion 同步传, 避免 setData 异步问题)
+  // 修前: this.setData({ currentMotionKey: key }) + this.compute() — setData 异步, compute() 跑时 this.data.currentMotionKey 还是旧值
+  // 修后: this.compute(key) — 同步传参, compute() 立刻用 key 推 motion, UI 100% 同步
+  // 跟 16_今日一曲 阶段 14 修法一致
+  compute(forceMotionKey) {
     // 1. 拿 9 体质 (从 storage / 默认 pinghe)
     const tizhiKey = wx.getStorageSync('yueji_tizhi') || 'pinghe';
     const TIZHI_NAMES = {
@@ -40,20 +45,29 @@ Page({
       skin: latestEntry.skin || 5,
     };
 
-    // 3. 静态规则 → 1 类小动
-    const motionKey = recommendMotion(tizhiKey, latest4);
-    const motion = MOTION_TYPES[motionKey];
+    // 3. 静态规则 → 默认 1 类 (forceMotionKey 优先, 跟 16 阶段 14 一致)
+    const recommendKey = recommendMotion(tizhiKey, latest4);
+    const motionKey = forceMotionKey || recommendKey;
+    const motion = MOTION_TYPES[motionKey] || MOTION_TYPES.jingzuo;
 
     this.setData({
       tizhiKey,
       tizhiName: TIZHI_NAMES[tizhiKey] || '平和质',
       latest4,
+      currentMotionKey: motionKey,   // v3.1 阶段 24: 跟 motion.key 同步, tab UI 一致
       motion: { key: motion.key, name: motion.name, desc: motion.desc, icon: motion.icon, color: motion.color, duration: motion.duration, steps: motion.steps },
       loading: false,
     });
 
     // 4. 大模型润色 (走 chat 云函数, prompt: 1 句为什么不评判)
     this.askAi(tizhiKey, latest4, motion);
+  },
+
+  // v3.1 阶段 24: 4 类小动 tab 点击 (跟 16_今日一曲 onSelectWuyue 一致)
+  onSelectMotion(e) {
+    const key = e.currentTarget.dataset.key;
+    if (!MOTION_TYPES[key]) return;
+    this.compute(key);
   },
 
   askAi(tizhiKey, latest4, motion) {

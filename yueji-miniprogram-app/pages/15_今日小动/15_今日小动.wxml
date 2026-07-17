@@ -1,8 +1,20 @@
-<!-- 15_今日小动.wxml — 悦济 v3.0.5 阶段 1.5 -->
+<!-- 15_今日小动.wxml — 悦济 v3.0.5 阶段 1.5 + v3.1 阶段 24 (4 类小动 tab, 跟 16_今日一曲 一致) -->
 <view class="page-motion">
   <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
   <nav-bar title="今日小动" showHome="{{true}}" />
 
+
+  <!-- v3.1 阶段 24: 4 类小动 tab (静坐/拉筋/拍打/呼吸), 按 user 真测反馈"其他点不出来"修 -->
+  <view class="motion-tabs">
+    <view class="motion-tab {{currentMotionKey=='jingzuo'?'motion-tab-on':''}}"
+      data-key="jingzuo" bindtap="onSelectMotion">静坐</view>
+    <view class="motion-tab {{currentMotionKey=='lajin'?'motion-tab-on':''}}"
+      data-key="lajin" bindtap="onSelectMotion">拉筋</view>
+    <view class="motion-tab {{currentMotionKey=='paida'?'motion-tab-on':''}}"
+      data-key="paida" bindtap="onSelectMotion">拍打</view>
+    <view class="motion-tab {{currentMotionKey=='huxi'?'motion-tab-on':''}}"
+      data-key="huxi" bindtap="onSelectMotion">呼吸</view>
+  </view>
 
   <view class="hero" style="background: linear-gradient(180deg, {{motion.color}}33 0%, {{motion.color}}11 100%);">
     <view class="hero-icon">{{motion.icon}}</view>

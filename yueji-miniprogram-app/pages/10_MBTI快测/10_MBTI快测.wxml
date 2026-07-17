@@ -10,6 +10,13 @@
 
   <view class="card">
     <view class="title-sub">您最近的状态</view>
+    <!-- v3.1 阶段 24 改 B: 实时显示 4 字母 (user 反馈"滑 slider 没更新", 现在滑完立即看到) -->
+    <view class="text-body" style="margin-top: 12rpx; color: #c9a961; font-weight: 600; font-size: 36rpx; letter-spacing: 6rpx; text-align: center;">
+      {{liveType}}
+    </view>
+    <view class="text-body" style="font-size: 22rpx; color: #a8a29e; text-align: center; margin-bottom: 16rpx;">
+      ✦ 4 字母随滑动实时更新 · 推经按下面按钮
+    </view>
     <block wx:for="{{questions}}" wx:key="key" wx:for-item="q">
       <view class="text-body" style="margin-top: 24rpx;">{{q.id + 1}}. {{q.text}}</view>
       <slider
@@ -26,7 +33,7 @@
       </view>
     </block>
 
-    <view class="btn-primary" style="margin-top: 32rpx;" bindtap="onSubmit">看 4 字母</view>
+    <view class="btn-primary" style="margin-top: 32rpx;" bindtap="onSubmit">看 推经 + 数字人</view>
   </view>
 
   <view wx:if="{{result}}">

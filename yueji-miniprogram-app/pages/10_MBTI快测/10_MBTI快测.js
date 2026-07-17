@@ -48,18 +48,40 @@ Page({
   data: {
     questions: QUESTIONS,
     answers: { EI: 50, SN: 50, TF: 50, JP: 50 },
+    // v3.1 阶段 24 修: 实时显示 MBTI 4 字母, 不需点按钮 (user 反馈"滑 slider 没更新")
+    // liveType: 滑 slider 实时算 4 字母, 立即显示
+    // result: 点"看推经"按钮才生成 (推 3 经 + 推数字人), 防止滑一半误生成
+    liveType: 'ENFP',  // 50/50/50/50 默认 = ENFP
     result: null,
+    // 内部: onSlide debounce 计时器
+    _slideTimer: null,
   },
 
   onSlide(e) {
     const key = e.currentTarget.dataset.key;
     const val = e.detail.value;
     this.setData({ [`answers.${key}`]: val });
+    // 实时算 4 字母 (不推经, 只显示字母, 跟 v3.1 阶段 24 改 B 一致)
+    this._computeLiveType();
+  },
+
+  // v3.1 阶段 24 改 B: 实时算 MBTI 4 字母 (滑 slider 立即更新, 不需点按钮)
+  _computeLiveType() {
+    const a = this.data.answers;
+    const e_or_i = a.EI >= 50 ? 'E' : 'I';
+    const s_or_n = a.SN >= 50 ? 'S' : 'N';
+    const t_or_f = a.TF >= 50 ? 'T' : 'F';
+    const j_or_p = a.JP >= 50 ? 'J' : 'P';
+    const type = e_or_i + s_or_n + t_or_f + j_or_p;
+    // 不调用 setData 大量更新, 只更新 liveType
+    if (this.data.liveType !== type) {
+      this.setData({ liveType: type });
+    }
   },
 
   onSubmit() {
+    // v3.1 阶段 24 改 B: 点按钮才推经 + 推数字人 (避免滑一半误生成, 跟 liveType 实时显示分离)
     const a = this.data.answers;
-    // 50 为中线
     const e_or_i = a.EI >= 50 ? 'E' : 'I';
     const s_or_n = a.SN >= 50 ? 'S' : 'N';
     const t_or_f = a.TF >= 50 ? 'T' : 'F';
