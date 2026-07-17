@@ -23,7 +23,8 @@
     "pages/16_今日一曲/16_今日一曲",
     "pages/17_今日一测引导/17_今日一测引导",
     "pages/18_睡前一程/18_睡前一程",
-    "pages/19_我的笔记/19_我的笔记"
+    "pages/19_我的笔记/19_我的笔记",
+    "pages/20_我的曲库/20_我的曲库"
   ],
   "window": {
     "navigationBarBackgroundColor": "#faf6f0",

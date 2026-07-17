@@ -1,0 +1,11 @@
+{
+  "name": "personal_library",
+  "version": "3.1.0",
+  "description": "悦济 v3.1 阶段 23 — 个人曲库 B 基础版 35 段/周 (5 调式 × 7 天), 复用 generate_music 严守 + 5 调式 prompt",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "author": "Mavis (悦济 AI 助手)",
+  "license": "MIT"
+}

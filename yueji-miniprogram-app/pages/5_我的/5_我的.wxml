@@ -77,6 +77,16 @@
     </view>
   </view>
 
+  <!-- 个人曲库 — v3.1 阶段 23 (5 调式 × 7 天 = 35 段/周, B 基础版) -->
+  <view class="card">
+    <view class="title-sub">曲库</view>
+    <view class="list-row" bindtap="onTapMusicLibrary">
+      <view class="list-icon">🎵</view>
+      <view class="list-text">我的曲库 (本周 35 段)</view>
+      <view class="list-arrow">→</view>
+    </view>
+  </view>
+
   <!-- 设置 -->
   <view class="card">
     <view class="title-sub">设置</view>

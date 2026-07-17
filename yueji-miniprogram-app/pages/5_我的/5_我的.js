@@ -53,4 +53,6 @@ Page({
   // v3.1 阶段 3 P0 #5
   onTapMyNotes() { wx.navigateTo({ url: '/pages/19_我的笔记/19_我的笔记' }); },
   onTapNightRitual() { wx.navigateTo({ url: '/pages/18_睡前一程/18_睡前一程' }); },
+  // v3.1 阶段 23: 我的曲库 (5 调式 × 7 天 = 35 段/周, B 基础版)
+  onTapMusicLibrary() { wx.navigateTo({ url: '/pages/20_我的曲库/20_我的曲库' }); },
 });

@@ -1,0 +1,60 @@
+<!--pages/20_我的曲库/20_我的曲库.wxml-->
+<!--悦济 v3.1 阶段 23 — 个人曲库 B 基础版 35 段/周 (5 调式 × 7 天) 严守基调: 滋养·涵养·共修·静下来-->
+<view class="page-music-library">
+  <nav-bar title="我的曲库" />
+
+  <view class="header-card">
+    <view class="header-title">本周曲库</view>
+    <view class="header-subtitle">{{weekStart}} · 共 35 段 (5 调式 × 7 天)</view>
+    <view class="header-status">
+      <text class="stat-pill">已生成 {{stats.generated}}</text>
+      <text class="stat-pill">缓存 {{stats.cached}}</text>
+      <text class="stat-pill">待生 {{stats.pending}}</text>
+    </view>
+    <view class="header-actions">
+      <button class="btn-primary" bindtap="onGenerate" disabled="{{generating}}">
+        {{generating ? '生成中…' : '生成本周曲库'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 7 天 × 5 调式 grid -->
+  <view class="grid-container">
+    <block wx:for="{{gridDays}}" wx:for-item="day" wx:key="dayKey">
+      <view class="day-row">
+        <view class="day-label">
+          <text class="day-name">{{day.name}}</text>
+          <text class="day-date">{{day.dateShort}}</text>
+        </view>
+        <view class="day-cells">
+          <block wx:for="{{day.cells}}" wx:for-item="cell" wx:key="wuyue">
+            <view class="cell {{cell.state}}"
+                  bindtap="onPlayCell"
+                  data-day="{{day.dayKey}}"
+                  data-wuyue="{{cell.wuyue}}"
+                  data-fileid="{{cell.fileID}}">
+              <text class="cell-wuyue">{{cell.wuyueName}}</text>
+              <text class="cell-status">
+                {{cell.state === 'ready' ? '▶' : (cell.state === 'cached' ? '◉' : (cell.state === 'generating' ? '…' : '+'))}}
+              </text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 播放控制区 -->
+  <view class="player-bar" wx:if="{{currentItem}}">
+    <view class="player-info">
+      <text class="player-title">{{currentItem.wuyueName}} · {{currentItem.dayName}}</text>
+      <text class="player-hint">{{playerHint}}</text>
+    </view>
+    <button class="btn-stop" bindtap="onStop">停止</button>
+  </view>
+
+  <!-- 严守基调说明 -->
+  <view class="footer-note">
+    <text>悦济严守: 滋养·涵养·共修, 严守基调 0 医疗用语</text>
+  </view>
+</view>
