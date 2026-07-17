@@ -1,0 +1,11 @@
+{
+  "name": "fl_bridge",
+  "version": "1.0.0",
+  "description": "悦济 v3.1 阶段 20 — 联邦学习 C 方案桥接 (调 HF Space FL 桥)",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "author": "Mavis (悦济 AI 助手)",
+  "license": "MIT"
+}
