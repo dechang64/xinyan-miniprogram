@@ -1,6 +1,6 @@
 {
   "name": "compliance_test",
-  "version": "1.0.0",
+  "version": "3.1.0",
   "description": "悦济 v2.1.1 严守测试云函数 (7 段: 8 禁用词 / 危机 / 6 类对话 / 4 经数字人 / AMAX Key 严守 / AMAX 真接口 / 总结)",
   "main": "index.js",
   "dependencies": {
