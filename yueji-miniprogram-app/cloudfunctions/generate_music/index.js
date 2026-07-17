@@ -1,8 +1,12 @@
-// 云函数: generate_music (悦济 v3.1 阶段 22.4 — 5 调式懒加载音乐生成)
+// 云函数: generate_music (悦济 v3.1 阶段 22.4 + 阶段 26 — 5 调式懒加载音乐生成)
 // 拍板 (2026-07-16 22:00 冬生 '按你的方案开干'):
 //   D 方案: 懒加载+缓存 (新云函数 + 改 16_今日一曲, 1-2 commit)
-//   通道: A 先 mock (冬生配 MINIMAX_MUSIC_KEY 后切真通道, P0 风险点 §4.1)
-//   30 段云存储 mp3: B 30 段重生成 (冬生配 key 跑, 等冬生)
+//   拍板 (2026-07-17 01:13 冬生 '好的, 发 zip 吧' + 01:12/01:13 截图):
+//     改走 minimax 官方 (TokenPlan Max 年度会员 1 key 调全系, 30,706 积分即将到期)
+//     env 统一: MINIMAX_TOKEN_KEY (取代 AMAX AI_API_KEY + 之前占位 MINIMAX_MUSIC_KEY)
+//     跟 chat 云函数共用 1 个 Key, 1 commit 改 3 云函数 (chat + generate_music + personal_library)
+//   通道: A 先 mock (冬生配 MINIMAX_TOKEN_KEY 后切真通道), 真通道走 minimax Music 2.6
+//   30 段云存储 mp3: B 30 段重生成 (冬生配 key 跑, 比赛前 7-22 完)
 //   严守: 14 禁用词 + 12 玄学红线 + 15 危机词 + 4 红线 0 出现 (必跑)
 //
 // 入口: { wuyue: 'gong'|'shang'|'jiao'|'zhi'|'yu', force?: bool }
@@ -89,33 +93,91 @@ function detectCrisis(text) {
   return null;
 }
 
-// v3.1 阶段 22.4 mock 模式: 不调 minimax Music 2.6 真通道, 返占位 fileID
-// 等冬生配 MINIMAX_MUSIC_KEY 后, 切真通道 (复用 chat 云函数 callAmax 类似设计)
+// v3.1 阶段 26: minimax Music 2.6 真通道 (TokenPlan Max 1 key 调全系)
+// 真查 (2026-07-17): https://api.minimaxi.com/v1/music_generation 国内版 (冬生 01:12 截图 platform.minimaxi.com 对齐)
+// 鉴权: Authorization: Bearer <MINIMAX_TOKEN_KEY> (冬生 01:13 截图 TokenPlan Max 订阅 Key, 后 5 位 2V2L_A)
+// body: {model: "music-2.6", prompt, lyrics: "", audio_setting: {sample_rate, bitrate, format}}
+// response: {data: {audio: "hex string"}, base_resp: {status_code: 0, status_msg: "success"}}
+// 错误: base_resp.status_code !== 0 (例 1004 invalid api key)
 async function callMinimaxMusic(prompt, wuyueKey) {
-  const apiKey = process.env.MINIMAX_MUSIC_KEY;
+  const apiKey = process.env.MINIMAX_TOKEN_KEY;
   const mockMode = !apiKey || apiKey === "mock" || apiKey.length < 10;
 
   if (mockMode) {
-    // Mock 模式: 返 mock mp3 path (前端 fallback)
-    // 实际部署时, 冬生配真 key 后, 走真通道
-    console.log(`[generate_music] 🎵 mock 模式 (MINIMAX_MUSIC_KEY 未配), wuyue=${wuyueKey}`);
+    // Mock 模式: 返 mock mp3 path (前端 fallback 30 段 v0.7.1.9)
+    console.log(`[generate_music] 🎵 mock 模式 (MINIMAX_TOKEN_KEY 未配或无效), wuyue=${wuyueKey}`);
     return {
       mock: true,
-      audioPath: null,  // mock 模式不返 audio path, 走前端 fallback 30 段
+      audioPath: null,
       prompt,
-      msg: "mock 模式, 等冬生配 MINIMAX_MUSIC_KEY 后切真通道",
+      msg: "mock 模式, 等冬生配 MINIMAX_TOKEN_KEY (TokenPlan Max 1 key 调全系) 后切真通道",
     };
   }
 
-  // 真通道: minimax Music 2.6 (待冬生配 key + 验证)
-  // 注: 7-17 阶段不实现, 留待 MINIMAX_MUSIC_KEY 验证后
-  // 完整 API 调用见设计文档 §2.2
-  return {
-    mock: false,
-    audioPath: null,  // 占位, 真实接入后返 /tmp/<wuyue>_<hash>.mp3
-    prompt,
-    msg: "真通道接入占位, 完整实现待 MINIMAX_MUSIC_KEY 验证后",
-  };
+  // 真通道: minimax Music 2.6 (国内版)
+  // 严守: 鉴权用 Bearer + https, 0 出现明文 key
+  const baseUrl = (process.env.MINIMAX_BASE_URL || "https://api.minimaxi.com/v1").replace(/\/+$/, "");
+  const url = baseUrl + "/music_generation";
+  const body = JSON.stringify({
+    model: "music-2.6",
+    prompt: prompt,
+    lyrics: "",  // 纯音乐, 不传 lyrics
+    audio_setting: {
+      sample_rate: 44100,
+      bitrate: 256000,
+      format: "mp3",
+    },
+  });
+  console.log(`[generate_music] 🎵 minimax Music 2.6 真通道, wuyue=${wuyueKey}, baseUrl=${baseUrl}`);
+
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request({
+      hostname: u.hostname, port: 443, path: u.pathname + u.search, method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Length": Buffer.byteLength(body),
+      },
+      timeout: 60000,  // minimax Music 首包延迟 < 20s (Music 2.6 真文档), 给 60s 缓冲
+    }, (res) => {
+      let chunks = [];
+      res.on("data", (c) => chunks.push(c));
+      res.on("end", () => {
+        const text = Buffer.concat(chunks).toString("utf8");
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return reject(new Error(`minimax Music HTTP ${res.statusCode}: ${text.slice(0, 300)}`));
+        }
+        try {
+          const json = JSON.parse(text);
+          // 业务错: base_resp.status_code !== 0 (例 1004 invalid api key)
+          if (json.base_resp && json.base_resp.status_code !== 0) {
+            return reject(new Error(`minimax Music 业务错: ${json.base_resp.status_msg} (code: ${json.base_resp.status_code})`));
+          }
+          if (!json.data || !json.data.audio) {
+            return reject(new Error("minimax Music 返 audio 为空"));
+          }
+          // hex → mp3 Buffer
+          const mp3Buffer = Buffer.from(json.data.audio, "hex");
+          const audioPath = `/tmp/yueji_music_${wuyueKey}_${Date.now()}.mp3`;
+          require("fs").writeFileSync(audioPath, mp3Buffer);
+          console.log(`[generate_music] minimax Music 生成成功, size=${mp3Buffer.length} bytes, path=${audioPath}`);
+          resolve({
+            mock: false,
+            audioPath: audioPath,
+            prompt,
+            msg: `minimax Music 2.6 生成成功 (${wuyueKey}, ${mp3Buffer.length} bytes)`,
+          });
+        } catch (e) {
+          reject(new Error(`minimax Music 解析 JSON 失败: ${e.message}, body=${text.slice(0, 200)}`));
+        }
+      });
+    });
+    req.on("error", reject);
+    req.on("timeout", () => req.destroy(new Error("minimax Music 请求超时 60s")));
+    req.write(body);
+    req.end();
+  });
 }
 
 // L2 云存储 hash 去重: 列 yueji-music-v3.1-dynamic/ 目录, 找 fileID 命中

@@ -115,11 +115,11 @@ const WUYUE_PROMPTS = {
   yu: "60 BPM, A natural minor pentatonic, xiao (Chinese vertical bamboo flute) leading, with guqin zither in low register and bamboo flute in soft high register, very soft 5ms attack, long reverb 1.5-2s, morning mist over still lake, meditation for kidney meridian, no percussion, no vocals, 60s loop",
 };
 
-// v3.1 阶段 23: 单次调 generate_music (mock 模式, 复用 22.4 L2/L3 + fallback 30 段)
+// v3.1 阶段 26: 单次调 generate_music (真通道, 复用 22.4 L2/L3 + fallback 30 段)
 // 真实实现: await cloud.callFunction({ name: 'generate_music', data: { wuyue } })
-// 这里简化: 走 mock 模式, 返占位 fileID, 让前端走 fallback
+// 冬生 01:13 拍板: 1 个 MINIMAX_TOKEN_KEY 调全系 (chat + music), generate_music env 也用 MINIMAX_TOKEN_KEY
 async function callGenerateMusic(wuyue, date) {
-  const apiKey = process.env.MINIMAX_MUSIC_KEY;
+  const apiKey = process.env.MINIMAX_TOKEN_KEY;
   const mockMode = !apiKey || apiKey === "mock" || apiKey.length < 10;
 
   // 严守: prompt 校验
@@ -135,7 +135,7 @@ async function callGenerateMusic(wuyue, date) {
       hash: `mock-${wuyue}-${date}-${Date.now()}`,
       isCache: false,
       mock: true,
-      msg: "mock 模式, 等冬生配 MINIMAX_MUSIC_KEY 后切真通道",
+      msg: "mock 模式, 等冬生配 MINIMAX_TOKEN_KEY (TokenPlan Max 1 key 调全系) 后切真通道",
     };
   }
 
