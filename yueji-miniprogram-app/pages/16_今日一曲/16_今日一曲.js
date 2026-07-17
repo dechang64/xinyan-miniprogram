@@ -126,12 +126,79 @@ Page({
   // v3.1 阶段 14 改: 传 forceWuyue 给 compute() (修 setData 异步问题)
   // 修前: this.setData({ currentWuyue: key }) + this.compute() — setData 异步, compute() 跑时 this.data.currentWuyue 还是旧值
   // 修后: this.compute(key) — 同步传参, compute() 立刻用 key 推 track, UI 100% 同步
+  // v3.1 阶段 22.5 D 方案: 懒加载+缓存 (commit ba66299 新云函数 generate_music)
+  //   L1 setStorage 缓存命中 → getTempFileURL 播放
+  //   L1 未命中 → 调 wx.cloud.callFunction('generate_music') 走 L2/L3 minimax Music 2.6
+  //   失败 / mock 模式 → fallback 30 段云存储 v0.7.1.9 (compute(key))
   onSelectWuyue(e) {
     const key = e.currentTarget.dataset.key;
-    if (!WUYUE_30_FILEID[key]) return;
-    // 停止当前播放
     if (this.audioCtx) { this.audioCtx.stop(); this.audioCtx = null; }
-    this.compute(key);
+
+    // 1. L1 setStorage 缓存命中 → getTempFileURL 播放
+    const cached = wx.getStorageSync('yueji_music_cache_' + key);
+    if (cached && cached.fileID) {
+      console.log('[悦济 music D 方案] L1 缓存命中:', key, cached.fileID.slice(0, 50) + '...');
+      this.playFromFileID(cached.fileID, key, true);
+      return;
+    }
+
+    // 2. L1 未命中 → 调 generate_music 云函数 (D 方案懒加载)
+    this.setData({
+      loading: true,
+      aiHint: '正在生成 ' + WUYUE_NAMES[key] + ' 调 mp3...',
+      aiPowered: false,
+    });
+    console.log('[悦济 music D 方案] 调 generate_music:', key);
+    wx.cloud.callFunction({
+      name: 'generate_music',
+      data: { wuyue: key },
+    }).then((res) => {
+      console.log('[悦济 music D 方案] generate_music 返:', res && res.result);
+      if (res && res.result && res.result.ok && res.result.fileID) {
+        // 真通道成功 → 写 L1 缓存 + 播放
+        wx.setStorageSync('yueji_music_cache_' + key, {
+          fileID: res.result.fileID,
+          hash: res.result.hash,
+          ts: Date.now(),
+        });
+        this.playFromFileID(res.result.fileID, key, res.result.isCache);
+      } else {
+        // mock / 失败 → fallback 30 段 v0.7.1.9
+        console.warn('[悦济 music D 方案] generate_music 返 mock/失败, fallback 30 段 v0.7.1.9');
+        if (WUYUE_30_FILEID[key]) { this.compute(key); }
+        else { this.setData({ loading: false, aiHint: '该调式暂不可用' }); }
+      }
+    }).catch((e) => {
+      console.error('[悦济 music D 方案] generate_music 异常, fallback 30 段:', e);
+      if (WUYUE_30_FILEID[key]) { this.compute(key); }
+      else { this.setData({ loading: false, aiHint: '调式调用失败' }); }
+    });
+  },
+
+  // v3.1 阶段 22.5: D 方案 fileID 播放 helper (L1 缓存命中 + L2/L3 调 generate_music 后)
+  // 走 wx.cloud.getTempFileURL 拿 2h 临时 URL, 自动播放
+  playFromFileID(fileID, wuyueKey, isCache) {
+    this.setData({ wuyue: wuyueKey, currentWuyue: wuyueKey, loading: true });
+    getTempUrls([fileID]).then((res) => {
+      const url = res.fileList && res.fileList[0] && res.fileList[0].tempFileURL;
+      if (url) {
+        this.setData({
+          mp3Url: url,
+          loading: false,
+          aiHint: isCache ? '缓存命中' : '刚刚生成, 已缓存',
+        });
+        // 自动播放 (UX 友好, 200ms 延迟避免 setData 异步)
+        setTimeout(() => this.onPlay(), 200);
+      } else {
+        console.warn('[悦济 music] getTempFileURL 返空, fallback 30 段');
+        if (WUYUE_30_FILEID[wuyueKey]) { this.compute(wuyueKey); }
+        else { this.setData({ loading: false }); }
+      }
+    }).catch((e) => {
+      console.error('[悦济 music] getTempFileURL 异常:', e);
+      if (WUYUE_30_FILEID[wuyueKey]) { this.compute(wuyueKey); }
+      else { this.setData({ loading: false }); }
+    });
   },
 
   askAi(tizhiKey, latest4, wuyue) {

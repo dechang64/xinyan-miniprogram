@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "5 元素速测",
-  "navigationBarBackgroundColor": "#faf6f0",
-  "navigationBarTextStyle": "black",
-  "usingComponents": {
-    "nav-bar": "/components/nav-bar/index"
-  }
-}

@@ -1,9 +1,0 @@
-.picker-view {
-  padding: 24rpx;
-  margin: 16rpx 0;
-  background: #faf6f0;
-  border: 2rpx solid #e8dfc8;
-  border-radius: 8rpx;
-  font-size: 28rpx;
-  color: #2d3a2e;
-}
