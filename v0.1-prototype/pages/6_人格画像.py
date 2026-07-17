@@ -52,6 +52,8 @@ with st.sidebar:
     st.page_link("pages/4_镜中.py", label="🪞 镜中")
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
     st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
+    st.page_link("pages/11_海报分享.py", label="🎨 海报分享")
+    st.page_link("pages/12_4经数字人.py", label="🪶 4 经数字人")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v0.7.1.3 · 2026-07-07")
