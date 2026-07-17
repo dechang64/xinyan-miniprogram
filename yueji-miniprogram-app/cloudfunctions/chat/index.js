@@ -213,33 +213,30 @@ function searchKB(query, docs, topK = 2) {
 //       6 类对话 (陪伴) → deepseek-chat (便宜 + 中文好)
 //       危机检测 → gpt-4o-mini (安全严守)
 //       兜底 → AI_MODEL 环境变量 (默认 deepseek-chat)
-// v3.1 阶段 26: 改走 minimax 官方 (TokenPlan Max 1 key 调全系, 冬生 01:12/01:13 截图)
-// 真查: https://api.minimaxi.com/v1/chat/completions 国内版 (OpenAI 兼容)
-// 鉴权: Authorization: Bearer <MINIMAX_TOKEN_KEY> (TokenPlan 订阅 Key, 冬生 01:13 截图后 5 位 2V2L_A)
-// model: "MiniMax-M2.7" (TokenPlan 全系模型, 跟 Music 2.6 / Image / Voice / Video 共享 18 亿+ token 额度池)
-// 退役: AMAX AI_API_KEY (v2.7.2.4 ~ v3.1 阶段 25 沿用, 阶段 26 切 minimax, 1 key 调全系, 跟冬生 01:13 拍板)
-// 不写死 ROLE_MODEL_MAP, 所有角色统一走 MiniMax-M2.7
-// (user 拍板 + 01:13 截图真值: TokenPlan Max 1 key 调全系, 不再走 AMAX 智能分发)
+// v2.7.2.4: AMAX 智能分发 model = "amax-router" (官方文档: ai.amaxsmp.com/guide)
+// AMAX 会"以业务为核心智能分发模型, 毫秒级动态切换"
+// 不写死 ROLE_MODEL_MAP, 所有角色统一走 amax-router
+// (user 拍板 + AMAX 文档截图 + 200 真验: amax-router 真通, deepseek-chat / gpt-4o-mini 也能用)
 // 真教训: v2.4.0 ROLE_MODEL_MAP 写死 claude-sonnet-4-6 / claude-haiku-4-5 = 假模型 (0 completion_tokens)
 // 跨项目原则: 外部 AI API 必先单测 1 个真 key, 再上 ROLE_MODEL_MAP
-const AI_MODEL = 'MiniMax-M2.7';  // minimax TokenPlan Max 1 key 调全系
+const AI_MODEL = 'amax-router';  // AMAX 智能分发
 
 function pickModelForRole(_role) {
   return AI_MODEL;
 }
 
-async function callMinimax(messages, role) {
-  // v3.1 阶段 26: 改走 minimax 官方 (冬生 01:12/01:13 截图: TokenPlan Max 年度会员 1 key 调全系)
-  // 严守: 0 出现 8 禁用词, 鉴权用 Bearer + https, 0 出现明文 key
-  // 退役: AI_API_KEY / AMAX_API_KEY (v2.5.5 ~ v3.1 阶段 25 沿用, AMAX 智能分发)
-  const apiKey = process.env.MINIMAX_TOKEN_KEY;
-  if (!apiKey) throw new Error("MINIMAX_TOKEN_KEY 未设置 (在云函数环境变量配 sk-cp-... 订阅 Key, 跟冬生 01:13 截图 TokenPlan Max 1 key 调全系)");
-  if (!apiKey.startsWith("sk-")) throw new Error("API key 不是 sk- 开头, 检查 MINIMAX_TOKEN_KEY 环境变量 (冬生 01:13 截图 TokenPlan 订阅 Key 后 5 位 2V2L_A)");
-  const baseUrl = (process.env.MINIMAX_BASE_URL || "https://api.minimaxi.com/v1").replace(/\/+$/, "");
+async function callAmax(messages, role) {
+  // v2.5.5 跟祺臻 v6.2 一致: 用 AI_API_KEY 直接明文 (不要 Base64, 严守: 0 出现 8 禁用词)
+  // v2.0 → v2.5.4 我加了 Base64 编码 严守, user 报"开始重复"真错就是这导致 chat 云函数 fail
+  // v2.7.2.5 兼容: AMAX 官方文档例子叫 AMAX_API_KEY, user 可能按文档配, 兼容 2 个名字
+  const apiKey = process.env.AI_API_KEY || process.env.AMAX_API_KEY;
+  if (!apiKey) throw new Error("AI_API_KEY (或 AMAX_API_KEY) 未设置 (在云函数环境变量配 sk-xxx, 跟 v2.5.5 严守一致)");
+  if (!apiKey.startsWith("sk-")) throw new Error("API key 不是 sk- 开头, 检查 AI_API_KEY / AMAX_API_KEY 环境变量");
+  const baseUrl = (process.env.AI_BASE_URL || "https://ai.amaxsmp.com/v1").replace(/\/+$/, "");
   const modelName = pickModelForRole(role);
   const url = baseUrl + "/chat/completions";
 
-  console.log(`[minimax] role=${role} → model=${modelName}, baseUrl=${baseUrl}`);
+  console.log(`[AMAX] role=${role} → model=${modelName}`);
 
   return new Promise((resolve, reject) => {
     const u = new URL(url);
@@ -258,32 +255,33 @@ async function callMinimax(messages, role) {
       res.on("end", () => {
         const text = Buffer.concat(chunks).toString("utf-8");
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          return reject(new Error(`minimax HTTP ${res.statusCode}: ${text.slice(0, 300)}`));
+          return reject(new Error(`AMAX HTTP ${res.statusCode}: ${text.slice(0, 300)}`));
         }
         try { resolve(JSON.parse(text)); }
-        catch (e) { reject(new Error(`minimax 解析 JSON 失败: ${e.message}, body=${text.slice(0, 200)}`)); }
+        catch (e) { reject(new Error(`AMAX 解析 JSON 失败: ${e.message}, body=${text.slice(0, 200)}`)); }
       });
     });
     req.on("error", reject);
-    req.on("timeout", () => req.destroy(new Error("minimax 请求超时 30s")));
+    req.on("timeout", () => req.destroy(new Error("AMAX 请求超时 30s")));
     req.write(body);
     req.end();
   });
 }
 
 async function callLLM(messages) {
-  // v3.1 阶段 26: 改走 minimax 官方 (冬生 01:12/01:13 截图: TokenPlan Max 1 key 调全系)
-  // provider = "minimax" 走 minimax sk-xxx (需配 MINIMAX_TOKEN_KEY env, 冬生 01:13 截图 TokenPlan 订阅 Key)
+  // v2.7.2 修 v2.7.1: 只走 AMAX (user 明确"用 amax", 微信云函数封外网,
+  // AMAX base URL https://ai.amaxsmp.com/v1 走 https.request 走外网实测可调通)
+  // provider = "amax" 走 AMAX sk-xxx (需配 AI_API_KEY env)
   // provider = "static" 走本地兜底 (调试用)
-  // 退役: AMAX provider (v2.7.2.4 ~ v3.1 阶段 25 沿用, 阶段 26 切 minimax, 1 key 调全系)
-  const provider = (process.env.AI_PROVIDER || "minimax").toLowerCase();
-  console.log(`[callLLM] provider=${provider}, messages=${messages.length}, has_key=${!!process.env.MINIMAX_TOKEN_KEY}`);
+  // v2.7.1 加的 cloudbase 路线删掉 (require 严守抛错 + WX_ENV_ID 严守栈错 + user 不用)
+  const provider = (process.env.AI_PROVIDER || "amax").toLowerCase();
+  console.log(`[callLLM] provider=${provider}, messages=${messages.length}, has_key=${!!process.env.AI_API_KEY}`);
 
-  if (provider === "minimax" || provider === "minimax-fallback") {
-    if (!process.env.MINIMAX_TOKEN_KEY) {
-      throw new Error("MINIMAX_TOKEN_KEY 未设置 (在云函数环境变量配 sk-cp-... TokenPlan 订阅 Key, 跟冬生 01:13 截图 1 key 调全系)");
+  if (provider === "amax" || provider === "amax-fallback") {
+    if (!process.env.AI_API_KEY && !process.env.AMAX_API_KEY) {
+      throw new Error("AI_API_KEY (或 AMAX_API_KEY) 未设置 (在云函数环境变量配 sk-xxx, 跟 v2.5.5 严守一致)");
     }
-    return await callMinimax(messages, globalThis._currentRole);
+    return await callAmax(messages, globalThis._currentRole);
   }
   // static 模式: 抛错让外层 catch 知道
   throw new Error("STATIC_MODE: 不调 LLM, 走 utils/data_digital_human.js + utils/dialog.js 本地兜底");
@@ -703,7 +701,7 @@ exports.main = async (event, context) => {
     return {
       ok: false,
       error: e.message,
-      error_code: e.message.includes("MINIMAX_TOKEN_KEY") ? "NO_API_KEY"
+      error_code: e.message.includes("AI_API_KEY") ? "NO_API_KEY"
               : e.message.includes("Env Not Exists") ? "NO_ENV"
               : e.message.includes("AI 调用失败") ? "AI_FAIL"
               : "UNKNOWN",
