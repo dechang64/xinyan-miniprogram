@@ -29,9 +29,9 @@
         <view class="q-text">{{idx + 1}}. {{item.q}}</view>
         <view class="q-options">
           <view class="q-opt {{mbtiAnswers[idx] == 'A' ? 'q-opt-active' : ''}}"
-            data-qi="A" data-idx="{{idx}}" bindtap="onMBTISelect">A</view>
+            data-qi="A" data-idx="{{idx}}" bindtap="onMBTISelect">A · {{item.A}}</view>
           <view class="q-opt {{mbtiAnswers[idx] == 'B' ? 'q-opt-active' : ''}}"
-            data-qi="B" data-idx="{{idx}}" bindtap="onMBTISelect">B</view>
+            data-qi="B" data-idx="{{idx}}" bindtap="onMBTISelect">B · {{item.B}}</view>
         </view>
       </view>
       <view class="btn-primary" bindtap="onMBTISubmit">提交</view>
