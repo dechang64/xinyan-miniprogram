@@ -67,7 +67,9 @@ Page({
     const today = list[idx];
     const tizhiName = this.data.tizhiList.find(t => t.key === this.data.selectedTizhi)?.name || '—';
     const foodImg = this.matchFoodImg(today.name, today.desc);
-    this.setData({ list, today, idx, tizhiName, foodImg });
+    // 真实 idx (在 SOUPS_30 30 汤品里) — 跳 22_汤品详情 用
+    const realIdx = SOUPS_30.findIndex((s) => s.name === today.name && s.tizhi === today.tizhi);
+    this.setData({ list, today, idx, realIdx, tizhiName, foodImg });
   },
 
   onSelectTizhi(e) {
@@ -81,13 +83,26 @@ Page({
     const next = (this.data.idx + 1) % this.data.list.length;
     const today = this.data.list[next];
     const foodImg = this.matchFoodImg(today.name, today.desc);
-    this.setData({ idx: next, today, foodImg });
+    const SOUPS_30 = require('../../utils/data_soups.js');
+    const realIdx = SOUPS_30.findIndex((s) => s.name === today.name && s.tizhi === today.tizhi);
+    this.setData({ idx: next, today, realIdx, foodImg });
   },
 
   onTapPrev() {
     const prev = (this.data.idx - 1 + this.data.list.length) % this.data.list.length;
     const today = this.data.list[prev];
     const foodImg = this.matchFoodImg(today.name, today.desc);
-    this.setData({ idx: prev, today, foodImg });
+    const SOUPS_30 = require('../../utils/data_soups.js');
+    const realIdx = SOUPS_30.findIndex((s) => s.name === today.name && s.tizhi === today.tizhi);
+    this.setData({ idx: prev, today, realIdx, foodImg });
+  },
+
+  // 跳 22_汤品详情 (用真实 idx)
+  onTapToday() {
+    if (this.data.realIdx === undefined || this.data.realIdx < 0) {
+      wx.showToast({ title: '汤品未就绪', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/22_汤品详情/22_汤品详情?idx=${this.data.realIdx}` });
   },
 });

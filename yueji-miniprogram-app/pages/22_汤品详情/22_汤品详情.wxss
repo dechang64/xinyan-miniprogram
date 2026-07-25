@@ -1,0 +1,136 @@
+/* 22_汤品详情.wxss — 跟 1.1_经文详情 模式对齐 (复用) */
+.nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 32rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0e9dc;
+}
+.nav-btn {
+  padding: 8rpx 16rpx;
+  font-size: 24rpx;
+  color: #4a7c59;
+  border: 2rpx solid #4a7c59;
+  border-radius: 8rpx;
+}
+.nav-center {
+  font-size: 24rpx;
+  color: #6b6b6b;
+}
+.tab-bar {
+  display: flex;
+  background: #fff;
+  border-bottom: 1rpx solid #f0e9dc;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: #6b6b6b;
+  border-bottom: 4rpx solid transparent;
+}
+.tab.active {
+  color: #4a7c59;
+  border-bottom-color: #4a7c59;
+}
+.content {
+  height: calc(100vh - 400rpx);
+  padding: 32rpx;
+}
+.content-block {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  border: 1rpx solid #f0e9dc;
+  margin-bottom: 16rpx;
+}
+.content-text {
+  font-size: 32rpx;
+  line-height: 1.8;
+  color: #2d3a2e;
+}
+.season-row, .safe-row {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #2d3a2e;
+  margin-bottom: 8rpx;
+}
+.action-bar {
+  display: flex;
+  background: #fff;
+  border-top: 1rpx solid #f0e9dc;
+  padding: 16rpx 0;
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 0;
+}
+.action-icon {
+  font-size: 40rpx;
+}
+.action-label {
+  font-size: 22rpx;
+  color: #6b6b6b;
+  margin-top: 4rpx;
+}
+.modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal-content {
+  width: 80%;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+}
+.modal-title {
+  font-size: 32rpx;
+  color: #2d3a2e;
+  margin-bottom: 16rpx;
+}
+.note-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  font-size: 28rpx;
+  padding: 16rpx;
+  background: #faf6f0;
+  border-radius: 8rpx;
+}
+.modal-actions {
+  display: flex;
+  margin-top: 24rpx;
+  gap: 16rpx;
+}
+.btn-ghost, .btn-primary {
+  flex: 1;
+  padding: 16rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+.btn-ghost {
+  background: #f0e9dc;
+  color: #4a7c59;
+}
+.btn-primary {
+  background: #4a7c59;
+  color: #fff;
+}
+.compliance-bar {
+  padding: 16rpx 32rpx;
+  background: #fff;
+  border-top: 1rpx solid #f0e9dc;
+  font-size: 22rpx;
+  color: #a8a8a8;
+  text-align: center;
+}

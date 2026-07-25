@@ -1,0 +1,102 @@
+<!-- 22_汤品详情.wxml
+  v3.1 阶段 28C: 汤品独立详情页 (跟 1.1_经文详情 模式对齐)
+  功能:
+   - 4 标签切换: 食材 / 做法 / 节气 / 严守
+   - 笔记 (本地存储)
+   - 收藏 (本地存储)
+   - 分享 (onShareAppMessage)
+   - 已做 (写入 yueji_soup_progress)
+  严守: 0 出现 14 禁用词, 9 体质仅作参考, 不用 '养生方/食疗/调理', 用 '日常滋养汤品/节气膳食'
+-->
+<view class="page">
+  <nav-bar title="{{name}}" showHome="{{true}}" />
+
+  <!-- 顶部导航条: 上一汤 / 序号 / 下一汤 -->
+  <view class="nav-row">
+    <view class="nav-btn" bindtap="onTapPrev">← 上一汤</view>
+    <view class="nav-center">{{tizhiName}} · {{season}} · {{idx + 1}}/{{total}}</view>
+    <view class="nav-btn" bindtap="onTapNext">下一汤 →</view>
+  </view>
+
+  <!-- 标签切换 -->
+  <view class="tab-bar">
+    <view class="tab {{tab == 'ingredients' ? 'active' : ''}}" data-tab="ingredients" bindtap="onTabChange">食材</view>
+    <view class="tab {{tab == 'steps' ? 'active' : ''}}" data-tab="steps" bindtap="onTabChange">做法</view>
+    <view class="tab {{tab == 'season' ? 'active' : ''}}" data-tab="season" bindtap="onTabChange">节气</view>
+    <view class="tab {{tab == 'safe' ? 'active' : ''}}" data-tab="safe" bindtap="onTabChange">严守</view>
+  </view>
+
+  <!-- 内容区 -->
+  <scroll-view scroll-y class="content" enable-flex>
+    <!-- 食材 -->
+    <block wx:if="{{tab == 'ingredients'}}">
+      <view class="content-block">
+        <text class="content-text">{{ingredients}}</text>
+      </view>
+    </block>
+
+    <!-- 做法 -->
+    <block wx:if="{{tab == 'steps'}}">
+      <view class="content-block">
+        <text class="content-text">{{steps}}</text>
+      </view>
+    </block>
+
+    <!-- 节气 -->
+    <block wx:if="{{tab == 'season'}}">
+      <view class="content-block">
+        <view class="season-row">🌸 季节: {{season}} · {{seasonHint}}</view>
+        <view class="season-row">🍵 适合: {{tizhiName}} (王琦 9 体质, 仅作参考)</view>
+        <view class="season-row">💡 严守: 节气膳食, 不替代医疗</view>
+      </view>
+    </block>
+
+    <!-- 严守 -->
+    <block wx:if="{{tab == 'safe'}}">
+      <view class="content-block">
+        <view class="safe-row">✦ 9 体质仅作参考, 不作医学诊断</view>
+        <view class="safe-row">✦ 汤品为日常滋养膳食, 不替代药物治疗</view>
+        <view class="safe-row">✦ 不卖保健品 / 不卖化妆品 / 不挂医械</view>
+        <view class="safe-row">✦ 严守 14 词 / 12 玄学红线 / 15 危机词 0 出现</view>
+        <view class="safe-row">✦ 持续困扰, 请拨打 12356 全国心理援助热线</view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <!-- 底部操作条: 笔记 / 收藏 / 分享 / 已做 -->
+  <view class="action-bar">
+    <view class="action-btn" bindtap="onTapNote">
+      <text class="action-icon">✏</text>
+      <text class="action-label">笔记</text>
+    </view>
+    <view class="action-btn" bindtap="onTapFav">
+      <text class="action-icon">{{fav ? '⭐' : '☆'}}</text>
+      <text class="action-label">收藏</text>
+    </view>
+    <view class="action-btn" bindtap="onTapShare">
+      <text class="action-icon">↗</text>
+      <text class="action-label">分享</text>
+    </view>
+    <view class="action-btn" bindtap="onTapDone">
+      <text class="action-icon">{{done ? '✓' : '🍲'}}</text>
+      <text class="action-label">{{done ? '已做' : '已做'}}</text>
+    </view>
+  </view>
+
+  <!-- 笔记弹窗 -->
+  <view class="modal-mask" wx:if="{{showNoteModal}}" catchtap="onCloseNoteModal">
+    <view class="modal-content" catchtap="">
+      <view class="modal-title">写一笔</view>
+      <textarea class="note-textarea" placeholder="做完这碗汤, 你想到什么?" value="{{noteInput}}" bindinput="onNoteInput" maxlength="500" auto-height></textarea>
+      <view class="modal-actions">
+        <view class="btn-ghost" bindtap="onCloseNoteModal">取消</view>
+        <view class="btn-primary" bindtap="onSaveNote">保存</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 严守提示 -->
+  <view class="compliance-bar">
+    ⓘ 严守: 本产品为滋养型工具, 不替代医械 / 咨询 / 玄学. 滋养身心, 从日常 5 分钟开始.
+  </view>
+</view>

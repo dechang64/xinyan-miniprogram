@@ -16,10 +16,10 @@
     </view>
   </scroll-view>
 
-  <view class="card-soup" wx:if="{{today}}">
+  <view class="card-soup" wx:if="{{today}}" bindtap="onTapToday">
     <image class="food-img" src="{{foodImg}}" mode="aspectFit" wx:if="{{foodImg}}" />
     <view class="name">{{today.name}}</view>
-    <view class="badge">{{today.season}}季 · {{tizhiName}}</view>
+    <view class="badge">{{today.season}}季 · {{tizhiName}} · 点入详情 →</view>
     <view class="ingredients">{{today.desc}}</view>
   </view>
 
