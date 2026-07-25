@@ -1,23 +1,43 @@
 <view class="page">
-  <!-- v3.0.5 阶段 3.9: 全局导航栏 -->
-  <nav-bar title="自拍温润" showHome="{{true}}" />
+  <!-- v3.1 阶段 28B: 12_滋养镜 优化提升 -->
+  <!-- 设计: 自拍 + 4 维 (心情/精力/睡眠/肌肤) + 5 滋养曲风 + 海报生成 -->
+  <!-- 严守: 0 AI 测肤 (NMPA 红线), 0 出现 14 禁用词, 用 5 滋养曲风意境词 -->
+  <nav-bar title="滋养镜" showHome="{{true}}" />
 
 
   <view class="header">
-    <view class="title-main">镜中自拍</view>
-    <view class="title-sub">温润滤镜 · 5 滋养曲风</view>
+    <view class="title-main">滋养镜</view>
+    <view class="title-sub">看见自己 · 滋养此刻</view>
   </view>
 
+  <!-- 第 1 步: 自拍 (看见自己) -->
   <view class="card">
-    <view class="title-sub">第 1 步: 选图</view>
+    <view class="title-sub">第 1 步 · 自拍</view>
+    <view class="text-body" style="margin-bottom: 12rpx; color: #6b6b6b;">
+      镜子的核心是看见自己, 不是别人评价你
+    </view>
     <view class="btn-primary" bindtap="onChooseImage">📷 从相册选 / 拍照</view>
-    <view wx:if="{{imagePath}}" class="text-body" style="margin-top: 12rpx; color: #6b6b6b;">
-      ✓ 已选图
+    <view wx:if="{{imagePath}}" class="text-body" style="margin-top: 12rpx; color: #4a7c59;">
+      ✓ 已选图, 第 2 步选滋养曲风
     </view>
   </view>
 
+  <!-- 第 2 步: 4 维镜中 (心情/精力/睡眠/肌肤 主观自评) -->
+  <view class="card">
+    <view class="title-sub">第 2 步 · 4 维镜中 (主观自评)</view>
+    <view class="text-body" style="margin-bottom: 12rpx; color: #6b6b6b;">
+      不是 AI 测肤, 不是 AI 识情绪, 是你自己看见自己
+    </view>
+    <view wx:for="{{DIMS}}" wx:key="key" wx:for-item="d" class="dim-row">
+      <view class="dim-label">{{d.icon}} {{d.name}}</view>
+      <slider min="0" max="10" value="{{d.value}}" data-key="{{d.key}}"
+              bindchanging="onSlide" show-value />
+    </view>
+  </view>
+
+  <!-- 第 3 步: 5 滋养曲风 (意境滤镜) -->
   <view wx:if="{{imagePath}}" class="card">
-    <view class="title-sub">第 2 步: 选滋养曲风</view>
+    <view class="title-sub">第 3 步 · 5 滋养曲风</view>
     <view class="tpl-row">
       <view wx:for="{{STYLES}}" wx:key="key" wx:for-item="s"
             class="tpl-chip {{currentStyle === s.key ? 'tpl-chip-on' : ''}}"
@@ -27,18 +47,20 @@
     </view>
   </view>
 
+  <!-- 第 4 步: 预览 + 海报生成 -->
   <view wx:if="{{imagePath}}" class="card">
-    <view class="title-sub">第 3 步: 预览</view>
+    <view class="title-sub">第 4 步 · 预览</view>
     <canvas type="2d" id="selfieCanvas"
             class="selfie-canvas"
             style="width: 600rpx; height: 800rpx;" />
     <view class="btn-row" style="margin-top: 24rpx;">
       <view class="btn-secondary" bindtap="onReset">重选</view>
-      <view class="btn-primary" bindtap="onSave">保存到相册</view>
+      <view class="btn-secondary" bindtap="onSaveToDiary">记入日记</view>
+      <view class="btn-primary" bindtap="onSavePoster">生成海报</view>
     </view>
   </view>
 
   <view class="compliance-bar">
-    ✦ 温润滤镜 · 滋养独立设计
+    ✦ 滋养镜 · 4 维主观自评, 不做任何 AI 测肤 / 识情绪 / 医疗诊断. 图像只存本地.
   </view>
 </view>
