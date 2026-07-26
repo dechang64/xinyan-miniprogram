@@ -1,5 +1,5 @@
 // pages/20_我的曲库/20_我的曲库.js
-// 悦济 v3.1 阶段 23 — 个人曲库 B 基础版 35 段/周 (5 调式 × 7 天)
+// 悦济 v3.1 阶段 23 -- 个人曲库 B 基础版 35 段/周 (5 调式 × 7 天)
 // 拍板 (2026-07-16 22:00 冬生 '按你的方案开干'):
 //   B 基础版: 5 调式 × 7 天 = 35 段, 复用 generate_music 22.4 严守
 //   入口: 5_我的 "我的曲库" 卡片 → navigateTo 到本页
@@ -47,6 +47,27 @@ Page({
     currentItem: null,
     playerHint: '',
     audioCtx: null,
+    // v3.1 阶段 28F 个人曲库 #5
+    uploads: [],
+    showUploadModal: false,
+    showShareModal: false,
+    uploading: false,
+    wuyueOptions: ['宫', '商', '角', '徵', '羽'],
+    uploadForm: {
+      title: '',
+      desc: '',
+      wuyue: '',
+      wuyueName: '',
+      fileName: '',
+      filePath: '',
+      size: 0,
+      canSubmit: false,
+    },
+    shareForm: {
+      uploadId: '',
+      shareToText: '',
+      canSubmit: false,
+    },
   },
 
   onLoad() {
@@ -66,6 +87,8 @@ Page({
 
   onShow() {
     this.refreshStatus();
+    this.applyItemsToGrid();
+    this.refreshUploads();
   },
 
   // v3.1 阶段 23: 查云存储本周索引
@@ -123,7 +146,7 @@ Page({
     if (this.data.generating) return;
     this.setData({ generating: true });
 
-    wx.showLoading({ title: '正在生成 35 段…', mask: true });
+    wx.showLoading({ title: '正在生成 35 段...', mask: true });
     wx.cloud.callFunction({
       name: 'personal_library',
       data: { action: 'generate' },
@@ -176,7 +199,7 @@ Page({
 
     this.setData({
       currentItem: { dayName, wuyueName },
-      playerHint: '加载中…',
+      playerHint: '加载中...',
     });
 
     getTempUrls([fileid]).then((res) => {
@@ -213,5 +236,264 @@ Page({
       this.audioCtx.stop();
       this.audioCtx = null;
     }
+  },
+
+  // ── v3.1 阶段 28F 个人曲库 #5: upload + 严守 3 层 + 私域限好友 ──
+
+  refreshUploads() {
+    wx.cloud.callFunction({
+      name: 'personal_library',
+      data: { action: 'list_uploads' },
+    }).then((res) => {
+      if (res && res.result && res.result.ok) {
+        const WUYUE_NAMES_LOCAL = { gong: '宫', shang: '商', jiao: '角', zhi: '徵', yu: '羽' };
+        const uploads = (res.result.uploads || []).map((u) => ({
+          ...u,
+          wuyueName: WUYUE_NAMES_LOCAL[u.wuyue] || u.wuyue,
+        }));
+        this.setData({ uploads });
+      }
+    }).catch((e) => {
+      console.error('[21_我的曲库] refreshUploads 异常:', e);
+    });
+  },
+
+  onShowUploadModal() {
+    this.setData({
+      showUploadModal: true,
+      uploadForm: {
+        title: '',
+        desc: '',
+        wuyue: '',
+        wuyueName: '',
+        fileName: '',
+        filePath: '',
+        canSubmit: false,
+      },
+    });
+  },
+
+  onCloseUploadModal() {
+    this.setData({ showUploadModal: false });
+  },
+
+  onInputTitle(e) {
+    const title = e.detail.value || '';
+    this.setData({ 'uploadForm.title': title });
+    this.checkUploadFormValid();
+  },
+
+  onPickWuyue(e) {
+    const WUYUE_KEYS_ARR = ['gong', 'shang', 'jiao', 'zhi', 'yu'];
+    const WUYUE_NAMES_LOCAL = { gong: '宫', shang: '商', jiao: '角', zhi: '徵', yu: '羽' };
+    const idx = parseInt(e.detail.value, 10);
+    const wuyue = WUYUE_KEYS_ARR[idx];
+    this.setData({
+      'uploadForm.wuyue': wuyue,
+      'uploadForm.wuyueName': WUYUE_NAMES_LOCAL[wuyue],
+    });
+    this.checkUploadFormValid();
+  },
+
+  onInputDesc(e) {
+    this.setData({ 'uploadForm.desc': e.detail.value || '' });
+  },
+
+  checkUploadFormValid() {
+    const f = this.data.uploadForm;
+    const canSubmit = !!(f.title && f.wuyue && f.filePath);
+    this.setData({ 'uploadForm.canSubmit': canSubmit });
+  },
+
+  onChooseMp3() {
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['mp3'],
+    }).then((res) => {
+      const f = res.tempFiles && res.tempFiles[0];
+      if (!f) return;
+      // 限制 ≤ 5 MB
+      if (f.size > 5 * 1024 * 1024) {
+        wx.showToast({ title: 'mp3 ≤ 5 MB', icon: 'none' });
+        return;
+      }
+      this.setData({
+        'uploadForm.fileName': f.name,
+        'uploadForm.filePath': f.path,
+        'uploadForm.size': f.size,
+      });
+      this.checkUploadFormValid();
+    }).catch((e) => {
+      console.error('[21_我的曲库] chooseMp3 异常:', e);
+      wx.showToast({ title: '文件选择失败', icon: 'none' });
+    });
+  },
+
+  onSubmitUpload() {
+    const f = this.data.uploadForm;
+    if (!f.canSubmit) {
+      wx.showToast({ title: '请填完整', icon: 'none' });
+      return;
+    }
+    this.setData({ uploading: true });
+    wx.showLoading({ title: '正在上传...', mask: true });
+    // 微信小程序: 读文件转 base64
+    const fs = wx.getFileSystemManager();
+    fs.readFile({
+      filePath: f.filePath,
+      encoding: 'base64',
+      success: (readRes) => {
+        const mp3Base64 = readRes.data;
+        wx.cloud.callFunction({
+          name: 'personal_library',
+          data: {
+            action: 'upload',
+            title: f.title,
+            desc: f.desc,
+            wuyue: f.wuyue,
+            mp3Base64,
+            fileName: f.fileName,
+          },
+        }).then((res) => {
+          wx.hideLoading();
+          this.setData({ uploading: false });
+          if (res && res.result && res.result.ok) {
+            wx.showToast({ title: '上传成功', icon: 'success' });
+            this.setData({ showUploadModal: false });
+            this.refreshUploads();
+          } else if (res && res.result && res.result.crisis) {
+            wx.showModal({
+              title: '悦济严守',
+              content: res.result.msg,
+              showCancel: false,
+            });
+          } else {
+            wx.showToast({ title: res.result.error || '上传失败', icon: 'none' });
+          }
+        }).catch((e) => {
+          wx.hideLoading();
+          this.setData({ uploading: false });
+          console.error('[21_我的曲库] upload 异常:', e);
+          wx.showToast({ title: '上传异常', icon: 'none' });
+        });
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        this.setData({ uploading: false });
+        console.error('[21_我的曲库] readFile 异常:', err);
+        wx.showToast({ title: '文件读取失败', icon: 'none' });
+      },
+    });
+  },
+
+  onPlayUpload(e) {
+    const { fileid, title } = e.currentTarget.dataset;
+    if (!fileid) {
+      wx.showToast({ title: '文件不存在', icon: 'none' });
+      return;
+    }
+    if (this.audioCtx) { this.audioCtx.stop(); this.audioCtx = null; }
+    this.setData({ currentItem: { title, wuyueName: '个人上传' }, playerHint: '加载中...' });
+    getTempUrls([fileid]).then((res) => {
+      const url = res.fileList && res.fileList[0] && res.fileList[0].tempFileURL;
+      if (!url) {
+        this.setData({ playerHint: '加载失败' });
+        return;
+      }
+      const audioCtx = wx.createInnerAudioContext();
+      audioCtx.src = url;
+      audioCtx.onPlay(() => this.setData({ playerHint: '播放中' }));
+      audioCtx.onError((err) => {
+        console.error('[21_我的曲库] upload audio error:', err);
+        this.setData({ playerHint: '播放失败' });
+      });
+      audioCtx.play();
+      this.audioCtx = audioCtx;
+    }).catch((e) => {
+      console.error('[21_我的曲库] upload getTempUrls 异常:', e);
+      this.setData({ playerHint: '加载异常' });
+    });
+  },
+
+  onDeleteUpload(e) {
+    const { uploadid } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '删除确认',
+      content: '删除后无法恢复, 确认?',
+      success: (m) => {
+        if (!m.confirm) return;
+        wx.cloud.callFunction({
+          name: 'personal_library',
+          data: { action: 'delete_upload', uploadId: uploadid },
+        }).then((res) => {
+          if (res && res.result && res.result.ok) {
+            wx.showToast({ title: '已删除', icon: 'success' });
+            this.refreshUploads();
+          } else {
+            wx.showToast({ title: res.result.error || '删除失败', icon: 'none' });
+          }
+        }).catch((e) => {
+          console.error('[21_我的曲库] delete 异常:', e);
+          wx.showToast({ title: '删除异常', icon: 'none' });
+        });
+      },
+    });
+  },
+
+  onSetShareUpload(e) {
+    const { uploadid, sharedto } = e.currentTarget.dataset;
+    const shareToText = (sharedto || []).join(' ');
+    this.setData({
+      showShareModal: true,
+      shareForm: {
+        uploadId: uploadid,
+        shareToText,
+        canSubmit: !!(shareToText && shareToText.trim().length > 0),
+      },
+    });
+  },
+
+  onCloseShareModal() {
+    this.setData({ showShareModal: false });
+  },
+
+  onInputShareNicks(e) {
+    const text = e.detail.value || '';
+    this.setData({
+      'shareForm.shareToText': text,
+      'shareForm.canSubmit': !!(text && text.trim().length > 0),
+    });
+  },
+
+  onSubmitShare() {
+    const sf = this.data.shareForm;
+    if (!sf.canSubmit) {
+      wx.showToast({ title: '请填昵称', icon: 'none' });
+      return;
+    }
+    // 解析: 用空格分隔, 去重
+    const nicks = [...new Set(
+      sf.shareToText.split(/\s+/).map((s) => s.trim()).filter((s) => s.length > 0)
+    )].slice(0, 9);
+    if (nicks.length === 0) {
+      wx.showToast({ title: '请填至少 1 个昵称', icon: 'none' });
+      return;
+    }
+    wx.cloud.callFunction({
+      name: 'personal_library',
+      data: { action: 'set_share', uploadId: sf.uploadId, shareTo: nicks },
+    }).then((res) => {
+      if (res && res.result && res.result.ok) {
+        wx.showToast({ title: res.result.msg, icon: 'success' });
+        this.setData({ showShareModal: false });
+        this.refreshUploads();
+      } else {
+        wx.showToast({ title: res.result.error || '设置失败', icon: 'none' });
+      }
+    }).catch((e) => {
+      console.error('[21_我的曲库] setShare 异常:', e);
+      wx.showToast({ title: '设置异常', icon: 'none' });
+    });
   },
 });

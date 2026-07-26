@@ -1,12 +1,176 @@
-/* pages/20_我的曲库/20_我的曲库.wxss */
-/* 悦济 v3.1 阶段 23 — 个人曲库 B 基础版 35 段/周 */
+/* pages/21_我的曲库/21_我的曲库.wxss */
+/* 悦济 v3.1 阶段 23 -- 个人曲库 B 基础版 35 段/周 */
 /* 严守基调色: 小青 #5b8a83 / 朱砂 #c8593f / 初雪 #faf6f0 / 秋叶 #c89a4b */
+/* v3.1 阶段 28F 个人曲库 #5: upload + 严守 3 层 + 私域限好友 */
 
 .page-music-library {
   min-height: 100vh;
   background: #faf6f0;
   padding-bottom: 200rpx;
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* v3.1 阶段 28F 个人曲库 #5 上传区 */
+.upload-section {
+  margin: 32rpx;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2c3e3a;
+  margin-bottom: 16rpx;
+}
+
+.btn-secondary-small {
+  background: #faf6f0;
+  color: #5b8a83;
+  border: 2rpx solid #5b8a83;
+  border-radius: 12rpx;
+  padding: 8rpx 20rpx;
+  font-size: 24rpx;
+}
+
+.upload-empty {
+  padding: 32rpx;
+  text-align: center;
+  color: #7a8a87;
+  font-size: 26rpx;
+}
+
+.upload-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0e6d8;
+}
+
+.upload-item:last-child { border-bottom: none; }
+
+.upload-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-title {
+  font-size: 28rpx;
+  color: #2c3e3a;
+  margin-bottom: 4rpx;
+}
+
+.upload-meta {
+  font-size: 22rpx;
+  color: #7a8a87;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 8rpx;
+}
+
+.btn-icon {
+  background: #5b8a83;
+  color: #fff;
+  border: none;
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+  font-size: 22rpx;
+}
+
+.btn-icon-danger {
+  background: #c8593f;
+  color: #fff;
+  border: none;
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+  font-size: 22rpx;
+}
+
+/* modal (上传 + 分享) */
+.modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 600rpx;
+  background: #faf6f0;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2c3e3a;
+  margin-bottom: 24rpx;
+  text-align: center;
+}
+
+.modal-row {
+  margin-bottom: 20rpx;
+}
+
+.modal-label {
+  font-size: 24rpx;
+  color: #7a8a87;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.modal-input, .modal-textarea {
+  width: 100%;
+  background: #fff;
+  border: 2rpx solid #e0d5c3;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  font-size: 28rpx;
+  color: #2c3e3a;
+  box-sizing: border-box;
+}
+
+.modal-textarea {
+  min-height: 120rpx;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: #fff;
+  color: #5b8a83;
+  border: 2rpx solid #5b8a83;
+  border-radius: 12rpx;
+  padding: 16rpx;
+  font-size: 28rpx;
+}
+
+.modal-note {
+  margin-top: 16rpx;
+  font-size: 22rpx;
+  color: #c89a4b;
+  text-align: center;
 }
 
 .header-card {

@@ -1,4 +1,4 @@
-// 云函数: personal_library (悦济 v3.1 阶段 23 — 个人曲库 B 基础版 35 段/周)
+// 云函数: personal_library (悦济 v3.1 阶段 23 -- 个人曲库 B 基础版 35 段/周)
 // 拍板 (2026-07-16 22:00 冬生 '按你的方案开干'):
 //   B 基础版: 5 调式 × 7 天 = 35 段/周 (周一到周日, 每个调式每天 1 段)
 //   触发: 用户首登/周一/手动, 批量调 generate_music 35 次 (复用 22.4 严守 + 5 调式 prompt)
@@ -16,6 +16,14 @@
 // 严守 14 禁用词: 治疗/改善/缓解/治愈/祛斑/减肥/处方/医美/美颜/美白/瘦脸/营销/广告/疗愈
 // 严守 12 玄学红线: 命理/占星/八字/星盘/算命/转运/化解/风水/玄学/五行/生克/补泻
 // 严守 15 危机词: 自杀/自残/轻生/跳楼/割腕/上吊/服药过量/绝望/崩溃/了断/结束生命/一了百了/不想活/活不下去/没意义
+//
+// v3.1 阶段 28F 个人曲库 #5 拍板 (2026-07-25 22:15 冬生 '按你的建议继续'):
+//   #5 = upload + 严守 3 层 + 私域限好友
+//   新 action: 'upload' | 'list_uploads' | 'delete_upload' | 'set_share' | 'get_share'
+//   上传路径: yueji-personal-lib/<openid>/uploads/<uuid>.json (metadata) + <uuid>.mp3 (mp3 二进制)
+//   严守 3 层: validateText (14 禁用 + 12 玄学) + detectCrisis (15 危机词 → 12356)
+//   私域: shareTo 1-9 个昵称, 云存储隔离 openid 索引, 仅上传者自己可播放
+//   限制: 单 mp3 ≤ 5 MB (微信 wx.uploadFile 限制), 单用户最多 30 段上传
 
 const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
@@ -173,11 +181,11 @@ exports.main = async (event, context) => {
       return {
         ok: false,
         crisis: true,
-        msg: "我们注意到您可能正在经历困难时期。请拨打 12356 全国心理援助热线, 悦济陪您。",
+        msg: "我们注意到您可能正在经历困难时期. 请拨打 12356 全国心理援助热线, 悦济陪您.",
       };
     }
     if (!validateText(user_input)) {
-      return { ok: false, error: "悦济严守: 检测到不当用语, 请重新输入。" };
+      return { ok: false, error: "悦济严守: 检测到不当用语, 请重新输入." };
     }
   }
 
@@ -190,7 +198,7 @@ exports.main = async (event, context) => {
     const weekStart = inputWeekStart || getWeekStart();
     const weekDays = getWeekDays(weekStart);
 
-    // ── action: status (默认) — 查本周状态 ──
+    // -- action: status (默认) -- 查本周状态
     if (action === "status") {
       const lib = await readLibrary(OPENID, weekStart);
       const total = lib && lib.items ? lib.items.length : 0;
@@ -208,7 +216,7 @@ exports.main = async (event, context) => {
       };
     }
 
-    // ── action: list — 返本周 35 段清单 ──
+    // -- action: list -- 返本周 35 段清单
     if (action === "list") {
       const lib = await readLibrary(OPENID, weekStart);
       return {
@@ -220,7 +228,7 @@ exports.main = async (event, context) => {
       };
     }
 
-    // ── action: generate — 批量生成 35 段 ──
+    // -- action: generate -- 批量生成 35 段
     if (action === "generate") {
       // 严守 3: 限频 (1 调式 1 天生成 1 次, 避免 35 次重复)
       const lib = await readLibrary(OPENID, weekStart);
@@ -284,7 +292,36 @@ exports.main = async (event, context) => {
       };
     }
 
-    return { ok: false, error: `未知 action: ${action}, 必须是 generate/list/status 之一` };
+    // ── action: upload (v3.1 阶段 28F 个人曲库 #5) ──
+    if (action === "upload") {
+      const { title, desc, wuyue, mp3Base64, fileName } = event;
+      return await uploadPersonal(OPENID, { title, desc, wuyue, mp3Base64, fileName });
+    }
+
+    // ── action: list_uploads (v3.1 阶段 28F) ──
+    if (action === "list_uploads") {
+      return await listUploads(OPENID);
+    }
+
+    // ── action: delete_upload (v3.1 阶段 28F) ──
+    if (action === "delete_upload") {
+      const { uploadId } = event;
+      return await deleteUpload(OPENID, uploadId);
+    }
+
+    // ── action: set_share (v3.1 阶段 28F 私域限好友) ──
+    if (action === "set_share") {
+      const { uploadId, shareTo } = event;
+      return await setShare(OPENID, uploadId, shareTo);
+    }
+
+    // ── action: get_share (v3.1 阶段 28F) ──
+    if (action === "get_share") {
+      const { uploadId } = event;
+      return await getShare(OPENID, uploadId);
+    }
+
+    return { ok: false, error: `未知 action: ${action}, 必须是 generate/list/status/upload/list_uploads/delete_upload/set_share/get_share 之一` };
   } catch (e) {
     console.error(`[personal_library 异常] ${e.message}`);
     return {
@@ -294,3 +331,235 @@ exports.main = async (event, context) => {
     };
   }
 };
+
+// ── v3.1 阶段 28F 个人曲库 #5: 上传/列表/删除/分享 ──
+// 严守 3 层 (复用): 14 禁用词 + 12 玄学红线 + 15 危机词 (in title/desc/metadata)
+// 私域限好友: shareTo 1-9 个昵称, 云存储按 openid 隔离, 仅上传者可播放
+// 限制: 单 mp3 ≤ 5 MB, 单用户 ≤ 30 段上传
+
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;  // 5 MB
+const MAX_UPLOADS_PER_USER = 30;
+const MAX_SHARE_NICKS = 9;
+const ALLOWED_WUYUE = WUYUE_KEYS;  // ["gong", "shang", "jiao", "zhi", "yu"]
+const UPLOAD_DIR = "yueji-personal-lib";
+
+function genUuid() {
+  // 简易 UUID (云函数环境无 crypto.randomUUID)
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+// 上传个人 mp3
+async function uploadPersonal(openid, payload) {
+  const { title, desc, wuyue, mp3Base64, fileName } = payload;
+
+  // 严守 1: 14 禁用 + 12 玄学 (in title/desc)
+  if (!title || typeof title !== "string" || title.length > 50) {
+    return { ok: false, error: "标题必填且 ≤ 50 字" };
+  }
+  if (!validateText(title)) {
+    return { ok: false, error: "悦济严守: 标题含不当用语, 请重新输入" };
+  }
+  if (desc && typeof desc === "string" && desc.length > 200) {
+    return { ok: false, error: "备注 ≤ 200 字" };
+  }
+  if (desc && !validateText(desc)) {
+    return { ok: false, error: "悦济严守: 备注含不当用语, 请重新输入" };
+  }
+
+  // 严守 2: 危机词 (in title/desc) → 12356
+  const titleCrisis = detectCrisis(title);
+  const descCrisis = desc ? detectCrisis(desc) : null;
+  if (titleCrisis || descCrisis) {
+    const kw = titleCrisis || descCrisis;
+    try {
+      await cloud.database().collection("yueji_crisis_logs").add({
+        data: { openid, keyword: kw, action: "personal_library_upload_crisis", created_at: new Date() },
+      });
+    } catch (e) { console.error("[crisis log]", e.message); }
+    return {
+      ok: false,
+      crisis: true,
+      msg: "我们注意到您可能正在经历困难时期. 请拨打 12356 全国心理援助热线, 悦济陪您.",
+    };
+  }
+
+  // 严守 3: 调式校验
+  if (!ALLOWED_WUYUE.includes(wuyue)) {
+    return { ok: false, error: `wuyue 必须是 ${ALLOWED_WUYUE.join("/")} 之一` };
+  }
+
+  // 限制 1: mp3 大小
+  if (!mp3Base64 || typeof mp3Base64 !== "string") {
+    return { ok: false, error: "mp3Base64 必填" };
+  }
+  // base64 解码后约 3/4 长度
+  const approxBytes = Math.floor(mp3Base64.length * 3 / 4);
+  if (approxBytes > MAX_UPLOAD_SIZE) {
+    return { ok: false, error: `mp3 文件 ≤ 5 MB (当前约 ${(approxBytes / 1024 / 1024).toFixed(2)} MB)` };
+  }
+
+  // 限制 2: 单用户上传数 ≤ 30
+  const userUploads = await cloud.downloadFile({
+    fileID: `cloud://${UPLOAD_DIR}/${openid}/uploads/_index.json`,
+  }).then((r) => JSON.parse(r.fileContent.toString("utf8"))).catch(() => null);
+  const existingUploads = (userUploads && userUploads.uploads) || [];
+  if (existingUploads.length >= MAX_UPLOADS_PER_USER) {
+    return { ok: false, error: `单用户最多上传 ${MAX_UPLOADS_PER_USER} 段, 请先删除` };
+  }
+
+  // 写 mp3 二进制
+  const uploadId = genUuid();
+  const mp3Buffer = Buffer.from(mp3Base64, "base64");
+  const mp3CloudPath = `${UPLOAD_DIR}/${openid}/uploads/${uploadId}.mp3`;
+  let mp3FileID = null;
+  try {
+    const upRes = await cloud.uploadFile({ cloudPath: mp3CloudPath, fileContent: mp3Buffer });
+    mp3FileID = upRes.fileID;
+  } catch (e) {
+    return { ok: false, error: `mp3 上传失败: ${e.message}` };
+  }
+
+  // 写 metadata
+  const metadata = {
+    uploadId,
+    title: title.trim(),
+    desc: (desc || "").trim(),
+    wuyue,
+    fileName: fileName || `${uploadId}.mp3`,
+    fileID: mp3FileID,
+    size: mp3Buffer.length,
+    shareTo: [],  // 私域: 1-9 个昵称
+    created_at: new Date().toISOString(),
+  };
+  const metaCloudPath = `${UPLOAD_DIR}/${openid}/uploads/${uploadId}.json`;
+  try {
+    await cloud.uploadFile({
+      cloudPath: metaCloudPath,
+      fileContent: Buffer.from(JSON.stringify(metadata, null, 2), "utf8"),
+    });
+  } catch (e) {
+    // 回滚 mp3
+    try { await cloud.deleteFile({ fileList: [mp3FileID] }); } catch (_) { /* noop */ }
+    return { ok: false, error: `metadata 写失败: ${e.message}` };
+  }
+
+  // 更新 _index.json
+  existingUploads.push({
+    uploadId, title: metadata.title, wuyue, fileID: mp3FileID, size: mp3Buffer.length,
+    shareTo: [], created_at: metadata.created_at,
+  });
+  try {
+    await cloud.uploadFile({
+      cloudPath: `${UPLOAD_DIR}/${openid}/uploads/_index.json`,
+      fileContent: Buffer.from(JSON.stringify({ uploads: existingUploads }, null, 2), "utf8"),
+    });
+  } catch (e) {
+    console.warn("[upload] _index 写失败 (但 mp3+metadata 已写)", e.message);
+  }
+
+  return { ok: true, uploadId, metadata, msg: "上传成功, 已通过严守 3 层扫描" };
+}
+
+// 列出自己上传的 mp3
+async function listUploads(openid) {
+  try {
+    const res = await cloud.downloadFile({
+      fileID: `cloud://${UPLOAD_DIR}/${openid}/uploads/_index.json`,
+    });
+    const data = JSON.parse(res.fileContent.toString("utf8"));
+    return { ok: true, uploads: data.uploads || [] };
+  } catch (e) {
+    return { ok: true, uploads: [], msg: "暂无上传" };
+  }
+}
+
+// 删除自己上传的 mp3
+async function deleteUpload(openid, uploadId) {
+  if (!uploadId) return { ok: false, error: "uploadId 必填" };
+  const list = await listUploads(openid);
+  const target = list.uploads.find((u) => u.uploadId === uploadId);
+  if (!target) return { ok: false, error: "上传不存在或非自己上传" };
+
+  // 删 mp3 + metadata
+  try {
+    await cloud.deleteFile({ fileList: [target.fileID, `cloud://${UPLOAD_DIR}/${openid}/uploads/${uploadId}.json`] });
+  } catch (e) {
+    return { ok: false, error: `删除失败: ${e.message}` };
+  }
+
+  // 更新 _index
+  const newUploads = list.uploads.filter((u) => u.uploadId !== uploadId);
+  try {
+    await cloud.uploadFile({
+      cloudPath: `${UPLOAD_DIR}/${openid}/uploads/_index.json`,
+      fileContent: Buffer.from(JSON.stringify({ uploads: newUploads }, null, 2), "utf8"),
+    });
+  } catch (e) { /* noop */ }
+
+  return { ok: true, msg: "已删除" };
+}
+
+// 设置分享 (1-9 个昵称, 限私域)
+async function setShare(openid, uploadId, shareTo) {
+  if (!uploadId) return { ok: false, error: "uploadId 必填" };
+  if (!Array.isArray(shareTo) || shareTo.length === 0) {
+    return { ok: false, error: "shareTo 必填非空数组" };
+  }
+  if (shareTo.length > MAX_SHARE_NICKS) {
+    return { ok: false, error: `最多分享给 ${MAX_SHARE_NICKS} 个好友` };
+  }
+  // 严守 4: shareTo 昵称严守扫描 (避免上传者用 nickname 隐藏违规)
+  for (const nick of shareTo) {
+    if (typeof nick !== "string" || nick.length > 20) {
+      return { ok: false, error: "每个昵称 ≤ 20 字" };
+    }
+    if (!validateText(nick)) {
+      return { ok: false, error: `悦济严守: 分享昵称 "${nick}" 含不当用语` };
+    }
+  }
+
+  // 读 metadata, 改 shareTo, 写回
+  const metaFileID = `cloud://${UPLOAD_DIR}/${openid}/uploads/${uploadId}.json`;
+  let metadata;
+  try {
+    const res = await cloud.downloadFile({ fileID: metaFileID });
+    metadata = JSON.parse(res.fileContent.toString("utf8"));
+  } catch (e) {
+    return { ok: false, error: "metadata 不存在" };
+  }
+  metadata.shareTo = shareTo;
+  metadata.shared_at = new Date().toISOString();
+  try {
+    await cloud.uploadFile({
+      cloudPath: `${UPLOAD_DIR}/${openid}/uploads/${uploadId}.json`,
+      fileContent: Buffer.from(JSON.stringify(metadata, null, 2), "utf8"),
+    });
+  } catch (e) {
+    return { ok: false, error: `shareTo 写失败: ${e.message}` };
+  }
+
+  // 更新 _index
+  const list = await listUploads(openid);
+  const newUploads = list.uploads.map((u) => u.uploadId === uploadId ? { ...u, shareTo } : u);
+  try {
+    await cloud.uploadFile({
+      cloudPath: `${UPLOAD_DIR}/${openid}/uploads/_index.json`,
+      fileContent: Buffer.from(JSON.stringify({ uploads: newUploads }, null, 2), "utf8"),
+    });
+  } catch (e) { /* noop */ }
+
+  return { ok: true, shareTo, msg: `已设置分享给 ${shareTo.length} 个好友 (私域限好友, 非公开)` };
+}
+
+// 查我分享给了谁
+async function getShare(openid, uploadId) {
+  if (!uploadId) return { ok: false, error: "uploadId 必填" };
+  const metaFileID = `cloud://${UPLOAD_DIR}/${openid}/uploads/${uploadId}.json`;
+  try {
+    const res = await cloud.downloadFile({ fileID: metaFileID });
+    const metadata = JSON.parse(res.fileContent.toString("utf8"));
+    return { ok: true, shareTo: metadata.shareTo || [], shared_at: metadata.shared_at || null };
+  } catch (e) {
+    return { ok: false, error: "metadata 不存在" };
+  }
+}

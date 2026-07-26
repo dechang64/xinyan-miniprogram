@@ -1,5 +1,6 @@
-<!--pages/20_我的曲库/20_我的曲库.wxml-->
-<!--悦济 v3.1 阶段 23 — 个人曲库 B 基础版 35 段/周 (5 调式 × 7 天) 严守基调: 滋养·涵养·共修·静下来-->
+<!--pages/21_我的曲库/21_我的曲库.wxml-->
+<!--悦济 v3.1 阶段 23 -- 个人曲库 B 基础版 35 段/周 (5 调式 × 7 天) 严守基调: 滋养·涵养·共修·静下来-->
+<!--v3.1 阶段 28F 个人曲库 #5 拍板 (2026-07-25 22:15 冬生): upload + 严守 3 层 + 私域限好友 (1-9 昵称)-->
 <view class="page-music-library">
   <nav-bar title="我的曲库" />
 
@@ -13,8 +14,84 @@
     </view>
     <view class="header-actions">
       <button class="btn-primary" bindtap="onGenerate" disabled="{{generating}}">
-        {{generating ? '生成中…' : '生成本周曲库'}}
+        {{generating ? '生成中...' : '生成本周曲库'}}
       </button>
+    </view>
+  </view>
+
+  <!-- v3.1 阶段 28F: 我的上传 (个人曲库 #5) -->
+  <view class="upload-section">
+    <view class="section-title">
+      <text>我的上传 ({{uploads.length}}/30)</text>
+      <button class="btn-secondary-small" bindtap="onShowUploadModal">+ 上传 mp3</button>
+    </view>
+    <view wx:if="{{uploads.length === 0}}" class="upload-empty">
+      <text>暂无上传, 点击右上角上传您的 mp3</text>
+    </view>
+    <block wx:for="{{uploads}}" wx:for-item="u" wx:key="uploadId">
+      <view class="upload-item">
+        <view class="upload-info" bindtap="onPlayUpload" data-fileid="{{u.fileID}}" data-title="{{u.title}}">
+          <text class="upload-title">{{u.title}}</text>
+          <text class="upload-meta">
+            {{u.wuyueName || u.wuyue}} · {{(u.size/1024).toFixed(0)}} KB · 分享给 {{u.shareTo.length}} 人
+          </text>
+        </view>
+        <view class="upload-actions">
+          <button class="btn-icon" bindtap="onSetShareUpload" data-uploadid="{{u.uploadId}}" data-sharedto="{{u.shareTo}}">分享</button>
+          <button class="btn-icon-danger" bindtap="onDeleteUpload" data-uploadid="{{u.uploadId}}">删除</button>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 上传 modal -->
+  <view class="modal-mask" wx:if="{{showUploadModal}}" bindtap="onCloseUploadModal">
+    <view class="modal-card" catchtap="">
+      <view class="modal-title">上传 mp3 (≤ 5 MB)</view>
+      <view class="modal-row">
+        <text class="modal-label">标题 * (≤ 50 字)</text>
+        <input class="modal-input" placeholder="例: 雨后山间" maxlength="50" bindinput="onInputTitle" value="{{uploadForm.title}}" />
+      </view>
+      <view class="modal-row">
+        <text class="modal-label">调式 *</text>
+        <picker mode="selector" range="{{wuyueOptions}}" bindchange="onPickWuyue">
+          <view class="modal-input">{{uploadForm.wuyueName || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="modal-row">
+        <text class="modal-label">备注 (≤ 200 字, 选填)</text>
+        <textarea class="modal-textarea" placeholder="例: 静心时段的陪伴" maxlength="200" bindinput="onInputDesc" value="{{uploadForm.desc}}" />
+      </view>
+      <view class="modal-row">
+        <button class="btn-primary" bindtap="onChooseMp3">{{uploadForm.fileName || '选择 mp3 文件'}}</button>
+      </view>
+      <view class="modal-actions">
+        <button class="btn-secondary" bindtap="onCloseUploadModal">取消</button>
+        <button class="btn-primary" bindtap="onSubmitUpload" disabled="{{!uploadForm.canSubmit || uploading}}">
+          {{uploading ? '上传中...' : '上传'}}
+        </button>
+      </view>
+      <view class="modal-note">
+        <text>悦济严守: 标题/备注 走 3 层扫描 (14 禁用 + 12 玄学 + 15 危机词 → 12356)</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 设置分享 modal -->
+  <view class="modal-mask" wx:if="{{showShareModal}}" bindtap="onCloseShareModal">
+    <view class="modal-card" catchtap="">
+      <view class="modal-title">分享给好友 (1-9 人, 私域)</view>
+      <view class="modal-row">
+        <text class="modal-label">好友昵称 (用空格分隔, ≤ 9 个)</text>
+        <textarea class="modal-textarea" placeholder="例: 小明 小红 小刚" bindinput="onInputShareNicks" value="{{shareForm.shareToText}}" />
+      </view>
+      <view class="modal-actions">
+        <button class="btn-secondary" bindtap="onCloseShareModal">取消</button>
+        <button class="btn-primary" bindtap="onSubmitShare" disabled="{{!shareForm.canSubmit}}">保存</button>
+      </view>
+      <view class="modal-note">
+        <text>悦济严守: 私域限好友, 不公开, 昵称走严守扫描</text>
+      </view>
     </view>
   </view>
 
@@ -35,7 +112,7 @@
                   data-fileid="{{cell.fileID}}">
               <text class="cell-wuyue">{{cell.wuyueName}}</text>
               <text class="cell-status">
-                {{cell.state === 'ready' ? '▶' : (cell.state === 'cached' ? '◉' : (cell.state === 'generating' ? '…' : '+'))}}
+                {{cell.state === 'ready' ? '▶' : (cell.state === 'cached' ? '◉' : (cell.state === 'generating' ? '...' : '+'))}}
               </text>
             </view>
           </block>
@@ -55,6 +132,6 @@
 
   <!-- 严守基调说明 -->
   <view class="footer-note">
-    <text>悦济严守: 滋养·涵养·共修, 严守基调 0 医疗用语</text>
+    <text>悦济严守: 滋养·涵养·共修, 严守基调 0 医疗用语, 个人上传 走 3 层严守</text>
   </view>
 </view>
