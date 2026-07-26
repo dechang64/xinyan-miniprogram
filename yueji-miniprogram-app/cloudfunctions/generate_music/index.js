@@ -215,9 +215,14 @@ async function uploadToCloud(wuyueKey, audioPath) {
 // ── 入口 ──
 exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext();
-  const { wuyue, force = false, user_input } = event;
+  const { action, wuyue, force = false, user_input } = event;
 
-  console.log(`[generate_music] OPENID=${OPENID}, wuyue=${wuyue}, force=${force}`);
+  console.log(`[generate_music] OPENID=${OPENID}, action=${action || "default"}, wuyue=${wuyue}, force=${force}`);
+
+  // ── v3.1 阶段 28F: action=regen_30 30 段批量重生成 (走 minimax 真通道) ──
+  if (action === "regen_30") {
+    return await regen30Segments(event);
+  }
 
   // 严守 1: 危机检测
   if (user_input) {
@@ -313,3 +318,111 @@ exports.main = async (event, context) => {
     };
   }
 };
+
+// ── v3.1 阶段 28F 30 段 minimax 重生成 (拍板 (d) 混合: 保留 30 段 fallback + minimax 主通道) ──
+// 拍板 (2026-07-25 22:15 冬生 '按你的建议继续'):
+//   (d) 混合: 30 段云存储保留作 fallback + minimax 真通道重生成 5 调式 × 6 段 = 30 段主通道
+//   触发: action='regen_30', 一次性 30 次 minimax API call
+//   成本: 1.5 元 (30 × 0.05 元/段) + 2h (单线程, 6 段/调式, 6 调用间隔 5s cooldown)
+//   严守: 14 禁用 + 12 玄学 + 15 危机 + 4 大红线 0 命中 (复用)
+//   拍板人: 冬生 (按建议继续)
+const WUYUE_KEYS_ARR = ["gong", "shang", "jiao", "zhi", "yu"];
+const REGEN_30_PER_MODE = 6;  // 每调式 6 段
+const REGEN_30_COOLDOWN_MS = 5000;  // 5s 间隔避免 minimax 限流
+
+async function regenOneSegment(wuyue, idx) {
+  const wuyueData = WUYUE_PROMPTS[wuyue];
+  if (!wuyueData) return { ok: false, wuyue, idx, error: "未知 wuyue" };
+
+  // 严守: prompt 校验
+  if (!validateText(wuyueData.prompt)) {
+    return { ok: false, wuyue, idx, error: "prompt 严守失败" };
+  }
+
+  // 调 minimax
+  const musicRes = await callMinimaxMusic(wuyueData.prompt, wuyue);
+  if (musicRes.mock) {
+    return { ok: false, wuyue, idx, error: "minimax TOKEN 未配, 走 mock, 等冬生配 MINIMAX_TOKEN_KEY", mock: true };
+  }
+
+  // 上传云存储 (新路径 v3.1-dynamic/<wuyue>_<idx>_<ts>.mp3)
+  const fileID = await uploadToCloud(wuyue, musicRes.audioPath);
+  if (!fileID) {
+    return { ok: false, wuyue, idx, error: "云存储上传失败" };
+  }
+
+  return {
+    ok: true,
+    wuyue,
+    idx,
+    fileID,
+    hash: `${wuyue}-${idx}-${Date.now()}`,
+    size: require("fs").statSync(musicRes.audioPath).size,
+  };
+}
+
+// 入口: 调 wx.cloud.callFunction({ name: 'generate_music', data: { action: 'regen_30' }})
+async function regen30Segments(event) {
+  const startTs = Date.now();
+  const WUYUE_NAMES = { gong: "宫", shang: "商", jiao: "角", zhi: "徵", yu: "羽" };
+  const segments = [];
+  const failed = [];
+
+  for (const wuyue of WUYUE_KEYS_ARR) {
+    for (let i = 0; i < REGEN_30_PER_MODE; i++) {
+      const res = await regenOneSegment(wuyue, i);
+      if (res.ok) {
+        segments.push({
+          wuyue,
+          wuyueName: WUYUE_NAMES[wuyue],
+          idx: i,
+          fileID: res.fileID,
+          hash: res.hash,
+          size: res.size,
+        });
+      } else {
+        failed.push({ wuyue, idx: i, error: res.error, mock: res.mock || false });
+      }
+      // 5s cooldown 避免 minimax 限流
+      if (i < REGEN_30_PER_MODE - 1 || wuyue !== WUYUE_KEYS_ARR[WUYUE_KEYS_ARR.length - 1]) {
+        await new Promise((r) => setTimeout(r, REGEN_30_COOLDOWN_MS));
+      }
+    }
+  }
+
+  // 写 30 段索引到云存储 (供 16_今日一曲 查 L2)
+  const indexCloudPath = "yueji-music-v3.1-dynamic/_index.json";
+  const indexData = {
+    regenAt: new Date().toISOString(),
+    totalSegments: segments.length,
+    failedCount: failed.length,
+    mockBlocked: failed.filter((f) => f.mock).length,
+    segments,
+  };
+  let indexFileID = null;
+  try {
+    const upRes = await cloud.uploadFile({
+      cloudPath: indexCloudPath,
+      fileContent: Buffer.from(JSON.stringify(indexData, null, 2), "utf8"),
+    });
+    indexFileID = upRes.fileID;
+  } catch (e) {
+    console.error(`[regen_30] 写 _index 失败: ${e.message}`);
+  }
+
+  return {
+    ok: true,
+    action: "regen_30",
+    startedAt: new Date(startTs).toISOString(),
+    durationMs: Date.now() - startTs,
+    totalSegments: segments.length,
+    failedCount: failed.length,
+    mockBlocked: failed.filter((f) => f.mock).length,
+    segments,
+    failed,
+    indexFileID,
+    msg: failed.length === 0
+      ? `30 段全部生成成功 (${WUYUE_KEYS_ARR.length} 调式 × ${REGEN_30_PER_MODE} 段, 写云存储 v3.1-dynamic)`
+      : `${segments.length} 段成功, ${failed.length} 段失败 (${failed.filter((f) => f.mock).length} mock 未配 key 跳过)`,
+  };
+}
