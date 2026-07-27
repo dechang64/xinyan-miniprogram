@@ -33,7 +33,7 @@
         <view class="upload-info" bindtap="onPlayUpload" data-fileid="{{u.fileID}}" data-title="{{u.title}}">
           <text class="upload-title">{{u.title}}</text>
           <text class="upload-meta">
-            {{u.wuyueName || u.wuyue}} · {{(u.size/1024).toFixed(0)}} KB · 分享给 {{u.shareTo.length}} 人
+            {{u.wuyueName || u.wuyue}} · {{u.sizeKB}} KB · 分享给 {{u.shareTo.length}} 人
           </text>
         </view>
         <view class="upload-actions">

@@ -250,6 +250,8 @@ Page({
         const uploads = (res.result.uploads || []).map((u) => ({
           ...u,
           wuyueName: WUYUE_NAMES_LOCAL[u.wuyue] || u.wuyue,
+          // v3.1 阶段 28F.1: WXML 不支持链式方法调用 (u.size/1024).toFixed(0), 提前在 js 算 sizeKB
+          sizeKB: u.size ? (u.size / 1024).toFixed(0) : '0',
         }));
         this.setData({ uploads });
       }
