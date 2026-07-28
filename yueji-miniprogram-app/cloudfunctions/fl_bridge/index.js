@@ -1,23 +1,26 @@
-// 云函数: fl_bridge (悦济 v3.1 阶段 20 — 联邦学习 C 方案桥接)
-// 拍板 (2026-07-16 05:30 冬生 '还有联邦学习的基础还没用上?'):
-//   选 C 方案: 悦济不动 reading-fl 仓库, 写 Python 中间层 (HF Space 部署)
-//   悦济云函数 fl_bridge HTTP 调真 FL 桥 (https://huggingface.co/spaces/dechang64/yueji-fl-bridge)
+// 云函数: fl_bridge (悦济 v3.1 阶段 28F.5 — FL 桥 mock fallback)
+// 拍板 (2026-07-28 02:06 冬生 'A'):
+//   选 mock 模式: 没 FL_BRIDGE_URL env 时本地 mock FedAvg, 不用部署 Python 中间层
+//   比赛已过 4+ 天, 部署真 FL 桥不为比赛, 真 FL 留 v3.2+ 等有 paid plan
 //
 // 设计:
 //   1. 5 个 action: register / upload / aggregate / status / demo (一键演示, 比赛路演用)
-//   2. URL 默认 process.env.FL_BRIDGE_URL (HF Space 真 URL), 缺省本地 127.0.0.1:7860 (开发)
-//   3. wx.cloud.CDN 跟 reading-fl 一样走 https.request, 跨域 OK
-//   4. 严守: 14 禁用词 0 出现 + 危机词 0 出现 + 4 红线 0 出现 + 不存用户原始数据 (隐私优先)
+//   2. 有 FL_BRIDGE_URL → 走真 HTTP 调 yueji-fl-bridge Python 中间层 (Render 等)
+//   3. 没 FL_BRIDGE_URL → 走 mock, 内存维护 client/weights, FedAvg 简化版
+//   4. mock state 在同 instance 跨 invocation 持久, cold start 丢失
+//   5. 严守: 14 禁用词 0 出现 + 危机词 0 出现 + 4 红线 0 出现 + 不存用户原始数据 (隐私优先)
 //
 // 入口: { action, campus_id?, n_samples?, weights_b64?, aggregation? }
-// 返:   { ok, action, data, msg }
+// 返:   { ok, action, data, msg } 或 mock: { ok, action, data, mock: true, msg }
 //
-// 比赛路演 (7-25): 微信小程序里 "我的" 页面调 action='demo' 一键跑 3 客户端 + 1 轮 FedAvg
+// 比赛路演 (7-25 已过 4+ 天, 当前 7-28): mock 走内部 FedAvg, 评审看流程
+// 真通道 (Phase 2): 配 FL_BRIDGE_URL env 后自动切真, 代码不改
 
 const cloud = require("wx-server-sdk");
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const https = require("https");
 const http = require("http");
+const crypto = require("crypto");
 
 // 8 禁用词 (严守, 跟 chat 云函数一致)
 const FORBIDDEN_WORDS = [
@@ -54,14 +57,195 @@ function detectCrisis(text) {
   return null;
 }
 
-// ── HTTP 调 FL 桥 (跟 chat 调 AMAX 同款) ──
-function getFlBridgeUrl() {
-  return (
-    process.env.FL_BRIDGE_URL ||
-    "http://127.0.0.1:7860"  // 本地默认 (开发)
-  );
+// ── mock mode 判定 ──
+// 有 FL_BRIDGE_URL env → 真通道 (Render/HF Space 真部署)
+// 没 FL_BRIDGE_URL env → mock fallback (内存 FedAvg)
+function isMockMode() {
+  return !process.env.FL_BRIDGE_URL;
 }
 
+function getFlBridgeUrl() {
+  return process.env.FL_BRIDGE_URL || "http://127.0.0.1:7860";  // mock 时不会用
+}
+
+// ── mock state (in-memory, instance-level) ──
+// 微信云函数 instance 跨 invocation 持久, cold start 丢失
+// demo 场景下 action='demo' 在同 invocation 内 register+upload+aggregate, state 持久 OK
+const mockClients = new Map();  // campus_id -> { n_samples, registered_at }
+const mockWeights = new Map();  // campus_id -> { upload_id, bytes, uploaded_at, weights_b64 }
+let mockRoundIdx = 0;
+let mockLastRoundAt = null;
+let mockLastMetrics = { loss: null, mae: null };
+
+function newUuid() {
+  return crypto.randomBytes(8).toString("hex");
+}
+
+// ── mock 5 个 action ──
+function mockRegister({ campus_id, n_samples }) {
+  if (!campus_id || typeof campus_id !== "string" || campus_id.length > 64) {
+    return { ok: false, action: "register", error: "campus_id 缺失或过长 (>64 字符)" };
+  }
+  if (!n_samples || n_samples < 1 || n_samples > 10000000) {
+    return { ok: false, action: "register", error: "n_samples 必须在 1-10000000" };
+  }
+  const registered_at = new Date().toISOString();
+  mockClients.set(campus_id, { n_samples, registered_at });
+  return {
+    ok: true,
+    action: "register",
+    mock: true,
+    data: { campus_id, n_samples, registered_at },
+  };
+}
+
+function mockUpload({ campus_id, weights_b64 }) {
+  if (!campus_id || !weights_b64) {
+    return { ok: false, action: "upload", error: "campus_id / weights_b64 缺失" };
+  }
+  if (weights_b64.length > 10 * 1024 * 1024) {
+    return { ok: false, action: "upload", error: "weights_b64 > 10MB, 太大" };
+  }
+  if (!mockClients.has(campus_id)) {
+    return { ok: false, action: "upload", error: `campus_id ${campus_id} 未注册, 请先 register` };
+  }
+  const upload_id = newUuid();
+  const bytes_received = Buffer.byteLength(weights_b64, "utf-8");
+  const uploaded_at = new Date().toISOString();
+  mockWeights.set(campus_id, { upload_id, bytes: bytes_received, uploaded_at, weights_b64 });
+  return {
+    ok: true,
+    action: "upload",
+    mock: true,
+    data: { campus_id, upload_id, bytes_received },
+  };
+}
+
+function mockAggregate({ aggregation = "fedavg", reset_after = false } = {}) {
+  if (aggregation !== "fedavg" && aggregation !== "task_aware") {
+    return { ok: false, action: "aggregate", error: `aggregation 必须是 fedavg 或 task_aware, 当前: ${aggregation}` };
+  }
+  if (mockWeights.size < 1) {
+    return { ok: false, action: "aggregate", error: "没有 client upload weights, 至少需要 1 个" };
+  }
+
+  // FedAvg 简化版: 取所有 client weights, 计算加权平均 (按 n_samples 权重)
+  // base64 → bytes 长度 → 加权平均 (length 简化, 真实 FL 用 np.frombuffer + 矩阵)
+  // mock 不算真值, 仅展示流程
+  const clients = Array.from(mockClients.entries());
+  const totalSamples = clients.reduce((acc, [, v]) => acc + v.n_samples, 0) || 1;
+  let weightedBytes = 0;
+  for (const [cid, info] of clients) {
+    if (mockWeights.has(cid)) {
+      const w = mockWeights.get(cid);
+      weightedBytes += (w.bytes * info.n_samples) / totalSamples;
+    }
+  }
+
+  mockRoundIdx += 1;
+  mockLastRoundAt = new Date().toISOString();
+  // 简化 metrics: round_idx 越多, loss 越低 (示意)
+  mockLastMetrics = {
+    loss: Math.max(0.05, 0.5 * Math.exp(-mockRoundIdx * 0.1)),
+    mae: Math.max(0.02, 0.2 * Math.exp(-mockRoundIdx * 0.1)),
+  };
+
+  const aggregated_at = mockLastRoundAt;
+  const global_weights_b64 = Buffer.from(JSON.stringify({
+    round: mockRoundIdx,
+    aggregation,
+    n_clients: mockWeights.size,
+    avg_bytes: Math.round(weightedBytes),
+    method: "mock_fedavg",
+  })).toString("base64");
+
+  if (reset_after) {
+    mockWeights.clear();
+    mockClients.clear();
+  }
+
+  return {
+    ok: true,
+    action: "aggregate",
+    mock: true,
+    data: {
+      round_idx: mockRoundIdx,
+      n_clients: mockWeights.size,
+      aggregated_at,
+      global_weights_b64,
+      global_metrics: mockLastMetrics,
+    },
+  };
+}
+
+function mockStatus() {
+  return {
+    ok: true,
+    action: "status",
+    mock: true,
+    data: {
+      n_rounds: mockRoundIdx,
+      n_clients: mockClients.size,
+      n_uploads: mockWeights.size,
+      last_round_at: mockLastRoundAt,
+      last_metrics: mockLastMetrics,
+      mode: "mock",
+    },
+  };
+}
+
+function mockDemo() {
+  // 重置 mock state
+  mockClients.clear();
+  mockWeights.clear();
+  mockRoundIdx = 0;
+
+  // 1. 注册 3 个 demo client
+  const demoId = `demo-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const clients = [
+    { campus_id: `${demoId}-user-A`, n_samples: 100 },
+    { campus_id: `${demoId}-user-B`, n_samples: 200 },
+    { campus_id: `${demoId}-user-C`, n_samples: 300 },
+  ];
+  for (const cli of clients) {
+    const r = mockRegister(cli);
+    if (!r.ok) return { ok: false, action: "demo", error: `注册 ${cli.campus_id} 失败: ${r.error}` };
+  }
+
+  // 2. 上传 3 个 weights (简化版: 不同长度的 base64, 模拟不同 model size)
+  for (let i = 0; i < 3; i++) {
+    const fakeB64 = "MOCKWEIGHTS" + (i + 1).toString().repeat(20);
+    const r = mockUpload({ campus_id: clients[i].campus_id, weights_b64: fakeB64 });
+    if (!r.ok) {
+      return {
+        ok: true,
+        action: "demo",
+        stage: "upload_partial",
+        registered: clients.length,
+        mock: true,
+        msg: `${clients.length} 客户端注册成功, 但 upload 失败: ${r.error}`,
+      };
+    }
+  }
+
+  // 3. 触发 1 轮 FedAvg
+  const agg = mockAggregate({ aggregation: "fedavg" });
+  if (!agg.ok) return { ok: false, action: "demo", error: `aggregate 失败: ${agg.error}` };
+
+  return {
+    ok: true,
+    action: "demo",
+    stage: "complete",
+    mock: true,
+    demo_id: demoId,
+    clients,
+    aggregate: agg.data,
+    final_status: mockStatus().data,
+    msg: `mock demo 端到端完成: 3 client + 1 round FedAvg, round ${agg.data.round_idx}`,
+  };
+}
+
+// ── HTTP 调 FL 桥 (真通道, mock 时不用) ──
 function httpRequest(method, path, body, timeoutMs = 30000) {
   const baseUrl = getFlBridgeUrl();
   const u = new URL(baseUrl);
@@ -99,8 +283,12 @@ function httpRequest(method, path, body, timeoutMs = 30000) {
   });
 }
 
-// ── 5 个 action ──
+// ── 5 个 action (入口, mock 真通道自动切换) ──
 async function actionRegister(event) {
+  if (isMockMode()) {
+    const r = mockRegister(event);
+    return { ...r, msg: r.ok ? `${event.campus_id} 注册成功 (mock)` : r.error };
+  }
   const { campus_id, n_samples } = event;
   if (!campus_id || typeof campus_id !== "string" || campus_id.length > 64) {
     return { ok: false, action: "register", error: "campus_id 缺失或过长 (>64 字符)" };
@@ -113,6 +301,10 @@ async function actionRegister(event) {
 }
 
 async function actionUpload(event) {
+  if (isMockMode()) {
+    const r = mockUpload(event);
+    return { ...r, msg: r.ok ? `${event.campus_id} 上传 weights 成功 (mock)` : r.error };
+  }
   const { campus_id, weights_b64 } = event;
   if (!campus_id || !weights_b64) {
     return { ok: false, action: "upload", error: "campus_id / weights_b64 缺失" };
@@ -125,6 +317,13 @@ async function actionUpload(event) {
 }
 
 async function actionAggregate(event) {
+  if (isMockMode()) {
+    const r = mockAggregate(event);
+    return {
+      ...r,
+      msg: r.ok ? `FedAvg 聚合 1 轮 (mock), round ${r.data.round_idx}` : r.error,
+    };
+  }
   const { aggregation = "fedavg", reset_after = false } = event;
   if (aggregation !== "fedavg" && aggregation !== "task_aware") {
     return { ok: false, action: "aggregate", error: `aggregation 必须是 fedavg 或 task_aware, 当前: ${aggregation}` };
@@ -134,39 +333,27 @@ async function actionAggregate(event) {
 }
 
 async function actionStatus(event) {
+  if (isMockMode()) {
+    const r = mockStatus();
+    return {
+      ...r,
+      msg: r.ok ? `mock server alive, ${r.data.n_clients} clients, ${r.data.n_rounds} rounds` : r.error,
+    };
+  }
   const data = await httpRequest("GET", "/fl/status", null);
   return { ok: true, action: "status", data, msg: `server alive, ${data.n_clients} clients, ${data.n_rounds} rounds` };
 }
 
-// ── action='demo' (比赛路演一键演示) ──
-// 内部生成 3 个 client (中文 ID) + 随机 weights + 触发 1 轮 FedAvg
-// 不走 user 上传, 走云函数内置 demo 路径, 避免 14 维特征算错
-function makeDemoWeights(seed, inputDim = 14, embedDim = 32) {
-  // 简单 LCG (Linear Congruential Generator) — 跨平台 deterministic
-  let s = (seed * 9301 + 49297) % 233280;
-  const rand = () => {
-    s = (s * 9301 + 49297) % 233280;
-    return (s / 233280) * 2 - 1;  // [-1, 1]
-  };
-  const arr = [];
-  for (let i = 0; i < inputDim * embedDim; i++) arr.push(rand() * 0.1);
-  return [Buffer.from(new Float32Array(arr).buffer)];
-}
-
-function encodeWeightsB64(weightsBuffers) {
-  // 悦济 demo: 直接 JSON 序列化 base64 字符串 (FL 桥用 np.savez 接收)
-  // 这里用 base64-of-raw-bytes 简化, 实际 FL 桥 decode 用 np.frombuffer
-  return weightsBuffers.map((b) => b.toString("base64"));
-}
-
 async function actionDemo(event) {
-  // 1. 查 status (查现成 n_clients, n_rounds)
+  if (isMockMode()) {
+    return mockDemo();
+  }
+  // 真通道 demo: 同原版流程, register 3 client + upload 3 weights + aggregate 1 round
   const status = await actionStatus(event);
   if (!status.ok) return status;
   const startClients = status.data.n_clients || 0;
   const startRounds = status.data.n_rounds || 0;
 
-  // 2. 注册 3 个 demo client (中文 ID, 隐私优先: 不带 openid)
   const demoId = `demo-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   const clients = [
     { campus_id: `${demoId}-user-A`, n_samples: 100 },
@@ -178,16 +365,29 @@ async function actionDemo(event) {
     if (!r.ok) return { ok: false, action: "demo", error: `注册 ${cli.campus_id} 失败: ${r.error}` };
   }
 
-  // 3. 上传 3 个 weights (seed 不同 → 不同随机)
+  function makeDemoWeights(seed, inputDim = 14, embedDim = 32) {
+    let s = (seed * 9301 + 49297) % 233280;
+    const rand = () => {
+      s = (s * 9301 + 49297) % 233280;
+      return (s / 233280) * 2 - 1;
+    };
+    const arr = [];
+    for (let i = 0; i < inputDim * embedDim; i++) arr.push(rand() * 0.1);
+    return [Buffer.from(new Float32Array(arr).buffer)];
+  }
+
+  function encodeWeightsB64(weightsBuffers) {
+    return weightsBuffers.map((b) => b.toString("base64"));
+  }
+
   for (let i = 0; i < 3; i++) {
     const w = makeDemoWeights(i + 1);
     const wB64 = encodeWeightsB64(w);
     const r = await actionUpload({
       campus_id: clients[i].campus_id,
-      weights_b64: wB64[0],  // FL 桥期望 npz 格式, demo mode 走简化版
+      weights_b64: wB64[0],
     });
     if (!r.ok) {
-      // 简化版 weights 格式 FL 桥可能不认, 报错也返
       return {
         ok: true,
         action: "demo",
@@ -200,11 +400,8 @@ async function actionDemo(event) {
     }
   }
 
-  // 4. 触发 1 轮 FedAvg
   const agg = await actionAggregate({ aggregation: "fedavg" });
   if (!agg.ok) return agg;
-
-  // 5. 查 status (确认聚合成功)
   const finalStatus = await actionStatus(event);
 
   return {
@@ -226,7 +423,8 @@ exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext();
   const { action, user_input, role } = event;
 
-  console.log(`[fl_bridge] OPENID=${OPENID}, action=${action}, FL_BRIDGE_URL=${getFlBridgeUrl()}`);
+  const mockFlag = isMockMode() ? "MOCK" : "REAL";
+  console.log(`[fl_bridge] mode=${mockFlag}, OPENID=${OPENID}, action=${action}, FL_BRIDGE_URL=${getFlBridgeUrl()}`);
 
   // 危机检测 (user_input 字段严守)
   if (user_input) {
