@@ -1,7 +1,7 @@
-"""悦济 v3.1 阶段 25 — page 12: 4 经数字人 (v0.1 同步 v3.1 阶段 5 P0)
+"""悦济 v3.1.x — page 12: 先哲数字人 (v0.1 同步 v3.1.x 阶段 28F 扩展)
 
 严守 6 条意见: 滋养而非治疗, 照镜子, 共修
-4 经数字人 IP 立体化: 老子/周文王/岐伯/元神
+先哲数字人 IP 立体化 (5 位: 老子/孔子/周文王/岐伯/元神)
 - 头像: 4 张国画风 PNG (微信小程序有, Streamlit 用 emoji 替代)
 - 长期记忆: 微信小程序 v3.1 阶段 5 接 chat 云函数 yueji_user_profiles, Streamlit 端展示角色定义
 - 角色差异化: 调性强化 (字数/速度/标志性 phrase)
@@ -11,7 +11,7 @@ import streamlit as st
 from core.styles import inject_css
 from core.config import get_brand_header, get_footer_note, checkin_init
 
-st.set_page_config(page_title="4 经数字人 · 悦济", page_icon="🪶", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="先哲数字人 · 悦济", page_icon="🪶", layout="centered", initial_sidebar_state="collapsed")
 inject_css()
 checkin_init()
 
@@ -26,7 +26,7 @@ with st.sidebar:
     st.page_link("pages/6_人格画像.py", label="🪞 人格画像")
     st.page_link("pages/7_悦济之音.py", label="🎵 悦济之音")
     st.page_link("pages/11_海报分享.py", label="🎨 海报分享")
-    st.page_link("pages/12_4经数字人.py", label="🪶 4 经数字人")
+    st.page_link("pages/12_4经数字人.py", label="🪶 先哲数字人")
     st.page_link("pages/5_我的.py", label="🌿 我的")
     st.markdown("---")
     st.caption("v3.1 · 2026-07-17")
@@ -37,13 +37,13 @@ get_brand_header()
 st.markdown("""
 <div class="hero fade-in">
     <div class="hero-eyebrow">YUEJI · FOUR · WISDOM</div>
-    <div class="hero-title">🪶 4 经数字人</div>
-    <div class="hero-sub">"跟老子/文王/岐伯/元神 一起读经典"</div>
+    <div class="hero-title">🪶 先哲数字人</div>
+    <div class="hero-sub">"跟随先哲, 一起读经典"</div>
     <div class="hero-stamp">✦ 滋养 · 涵养 · 共修 ✦</div>
 </div>
 """, unsafe_allow_html=True)
 
-# 4 经数字人数据 (跟微信小程序 data_digital_human.js 同步, v3.1 阶段 5 P0)
+# 先哲数字人数据 (跟微信小程序 data_digital_human.js 同步, v3.1.x 阶段 28F 扩展)
 HUMANS = [
     {
         "key": "laozi",
@@ -55,6 +55,20 @@ HUMANS = [
         "tag": "玄思·慢",
         "persona": {
             "style": "哲思、平静、谦下、像水",
+            "response_structure": "原文 (1-2 句) + 简释 (30-50 字) + 回应 (≤40 字)",
+            "max_length": "总长 ≤ 100 字",
+        },
+    },
+    {
+        "key": "kongzi",
+        "emoji": "🏮",
+        "name": "孔子",
+        "era": "春秋",
+        "book": "《论语》",
+        "intro": "学而时习之, 不亦说乎?",
+        "tag": "温润·仁",
+        "persona": {
+            "style": "温润, 像春风, 讲仁/学/友/志/处世, 走滋养共修, 不评判",
             "response_structure": "原文 (1-2 句) + 简释 (30-50 字) + 回应 (≤40 字)",
             "max_length": "总长 ≤ 100 字",
         },
@@ -104,7 +118,7 @@ HUMANS = [
 ]
 
 # 4 卡片 (2x2 grid)
-st.markdown("### 🌟 4 个调性, 各自不同")
+st.markdown("### 🌟 每个调性, 各自不同")
 
 col1, col2 = st.columns(2)
 for idx, h in enumerate(HUMANS):
@@ -120,7 +134,7 @@ for idx, h in enumerate(HUMANS):
 """, unsafe_allow_html=True)
 
 # 角色差异化说明
-st.markdown("### 🎭 4 个调性对比")
+st.markdown("### 🎭 调性对比")
 for h in HUMANS:
     st.markdown(f"""
 <div class="card">
@@ -142,6 +156,7 @@ if demo_input:
         "周文王": f"需, 有孚, 光亨, 贞吉。\n等待不是消极, 是涵养。你说「{demo_input}」, 准备充分, 这就是需。",
         "岐伯": f"上古之人, 起居有常。\n懂得养生的人, 起居有常, 不妄劳作。你说「{demo_input}」, 试试早起晒太阳, 这是最简单的。",
         "元神": f"夫人神好清, 而心扰之。\n心乱不是病, 是忘了本性。你已觉察, 这就是回到本心的开始。",
+        "孔子": f"学而时习之, 不亦说乎?\n学了常去用, 心里欢喜。你说「{demo_input}」, 知识放进生活才真, 仁在学里也在用里。",
     }
     st.markdown(f"""
 <div class="card" style="background: #faf6f0;">
@@ -154,8 +169,8 @@ if demo_input:
 # 严守声明
 st.markdown("""
 <div class="compliance-note">
-    <strong>✦ 滋养而非治疗</strong>: 4 经数字人为悦济独立设计, 滋养优先, 只陪伴, 不评判。
-    调性、字数、节奏都按 v3.1 阶段 5 设计规范, 跟微信小程序严格对齐。
+    <strong>✦ 滋养而非治疗</strong>: 先哲数字人为悦济独立设计, 滋养优先, 只陪伴, 不评判。
+    调性、字数、节奏都按 v3.1.x 阶段 28F 扩展规范, 跟微信小程序严格对齐。
 </div>
 """, unsafe_allow_html=True)
 

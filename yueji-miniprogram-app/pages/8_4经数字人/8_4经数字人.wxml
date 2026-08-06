@@ -1,16 +1,16 @@
-<!-- 8_4经数字人.wxml — v3.1 阶段 5 P0 #4
-  4 经数字人 IP 立体化:
-   - 头像: 4 张国画风 PNG (老子/周文王/岐伯/元神, 200x200, 57-62 KB)
+<!-- 8_4经数字人.wxml — v3.1.x 阶段 5 扩展 P0 #4
+  先哲数字人 IP 立体化 (5 位: 老子/孔子/周文王/岐伯/元神):
+   - 头像: 5 张国画风 PNG (老子/孔子/周文王/岐伯/元神, 200x200, 50-63 KB)
    - 长期记忆: chat 云函数持久化 user_profile (用户偏好)
    - 角色差异化: 调性强化 (字数/速度/标志性 phrase)
   严守: 0 出现 14 严守词, 滋养/共修/涵养 调性
 -->
 <view class="page">
-  <nav-bar title="4经数字人" showHome="{{true}}" />
+  <nav-bar title="先哲数字人" showHome="{{true}}" />
 
   <view class="header">
-    <view class="title-main">4 经数字人</view>
-    <view class="title-sub">跟老子/文王/岐伯/元神 一起读经典</view>
+    <view class="title-main">先哲数字人</view>
+    <view class="title-sub">跟随先哲, 一起读经典</view>
   </view>
 
   <view class="human-grid">
@@ -18,7 +18,7 @@
       class="human-card"
       data-key="{{item.key}}" bindtap="onTapHuman"
       style="background: {{item.bgGradient}};">
-      <!-- v3.1 阶段 5: 4 张国画头像 (替代 emoji) -->
+      <!-- v3.1.x 阶段 5 扩展: 5 张国画头像 (替代 emoji) -->
       <view class="human-avatar-frame">
         <image class="human-avatar" src="/assets/digital_humans/{{item.key}}.png" mode="aspectFill" />
         <view class="human-emoji-badge">{{item.emoji}}</view>
@@ -31,12 +31,16 @@
     </view>
   </view>
 
-  <!-- v3.1 阶段 5: 4 经数字人调性说明 -->
+  <!-- v3.1.x 阶段 5 扩展: 先哲数字人调性说明 -->
   <view class="role-explain">
-    <view class="explain-title">4 个调性, 各自不同</view>
+    <view class="explain-title">每个调性, 各自不同</view>
     <view class="explain-row">
       <text class="explain-name">老子</text>
       <text class="explain-text">玄思, 慢, ≤80 字, 多引用</text>
+    </view>
+    <view class="explain-row">
+      <text class="explain-name">孔子</text>
+      <text class="explain-text">温润, 中, ≤100 字, 仁/学/友</text>
     </view>
     <view class="explain-row">
       <text class="explain-name">周文王</text>
@@ -53,6 +57,6 @@
   </view>
 
   <view class="compliance-bar">
-    ✦ 4 经数字人为悦济独立设计, 滋养优先, 只陪伴, 不评判。
+    ✦ 先哲数字人为悦济独立设计, 滋养优先, 只陪伴, 不评判。
   </view>
 </view>
