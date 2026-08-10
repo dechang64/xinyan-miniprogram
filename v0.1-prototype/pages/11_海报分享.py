@@ -9,8 +9,8 @@ import streamlit as st
 from datetime import date
 from core.styles import inject_css
 from core.config import get_brand_header, get_footer_note, checkin_init
-from data.jingwen_30 import get_today_jingwen, get_all, get_by_id
-from data.soups_30 import get_today_soup, get_all_soups
+from data.jingwen_30 import get_today_jingwen, get_all as jw_get_all, get_by_id
+from data.soups_30 import get_today_soup, get_all as sp_get_all
 from core.poster_gen_html import gen_jingwen_poster_html, gen_soup_poster_html
 
 st.set_page_config(page_title="海报分享 · 悦济", page_icon="🎨", layout="centered", initial_sidebar_state="collapsed")
@@ -60,14 +60,14 @@ template = st.selectbox("选择海报模板", TEMPLATES, index=0)
 
 # 内容选择
 if content_type == "📜 经文":
-    all_jw = get_all()
+    all_jw = jw_get_all()
     options = {f"#{j['id']:02d} {j['source']} · {j['title']}": j['id'] for j in all_jw}
     jw_today = get_today_jingwen()
     selected_label = st.selectbox("选择经文", list(options.keys()), index=jw_today['id']-1)
     selected = get_by_id(options[selected_label])
     html_poster = gen_jingwen_poster_html(selected, template, date.today())
 else:
-    all_sp = get_all_soups()
+    all_sp = sp_get_all()
     options = {f"#{s['id']:02d} {s['name']} ({s.get('season_tag', '')})": s['id'] for s in all_sp}
     sp_today = get_today_soup()
     selected_label = st.selectbox("选择汤品", list(options.keys()), index=sp_today['id']-1)
