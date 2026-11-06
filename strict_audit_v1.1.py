@@ -167,7 +167,7 @@ for dirpath, dirnames, filenames in os.walk(ROOT):
         fp = os.path.join(dirpath, f)
         # node --check 语法
         try:
-            r = subprocess.run(['node', '--check', fp], capture_output=True, text=True, timeout=10, shell=True)
+            r = subprocess.run(['node', '--check', fp], capture_output=True, text=True, timeout=10, shell=False)
             if r.returncode == 0:
                 D_OK += 1
             else:
@@ -243,7 +243,7 @@ try {{
     with open(test_script_path, 'w', encoding='utf-8') as fh:
         fh.write(test_script)
     try:
-        r = subprocess.run(['node', test_script_path], capture_output=True, text=True, timeout=10, shell=True)
+        r = subprocess.run(['node', test_script_path], capture_output=True, text=True, timeout=10, shell=False)
         out = (r.stdout + r.stderr).strip()
         if 'OK' in out and 'FAIL' not in out:
             print(f'  OK  {u}')

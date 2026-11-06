@@ -35,7 +35,7 @@
 **chat 云函数环境变量** (云开发控制台 → 云函数 → chat → 函数配置 → 环境变量):
 - `AI_PROVIDER` = `amax` (走 AMAX 66 模型)
 - `AI_MODEL` = `deepseek-chat` (默认)
-- `AI_API_KEY` = `sk-IWzK4nWmbGSVPOoRCOeTFFgQQSqwRSijgnudaKkNz7yqkpKG` (明文, 跟祁臻)
+- `AI_API_KEY` = `请在云开发控制台配置，勿写入代码` (明文 key 已移除，请通过环境变量配置)
 - `AI_BASE_URL` = `https://ai.amaxsmp.com/v1`
 
 **voice 云函数**: 0 环境变量 (微信云开发内置 AI STT/TTS, 0 第三方)
