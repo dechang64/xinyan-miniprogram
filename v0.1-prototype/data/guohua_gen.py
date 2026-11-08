@@ -95,7 +95,7 @@ def call_minimax_generate(prompt: str, aspect_ratio: str = "2:3", timeout: int =
             capture_output=True,
             text=True,
             timeout=timeout,
-            shell=True,  # Windows 必须 shell=True 让 PATH 扩展
+            shell=False,  # Use list form for safety; caller must resolve mavis path
         )
     except subprocess.TimeoutExpired:
         return {"success": False, "error": "matrix_generate_image timeout (>{}s)".format(timeout)}

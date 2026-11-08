@@ -15,6 +15,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY core/ ./core/
 
+# Non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
 # HF Space 端口
 EXPOSE 7860
 

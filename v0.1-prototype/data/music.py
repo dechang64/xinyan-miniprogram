@@ -222,7 +222,7 @@ def call_minimax_generate_music(prompt: str, lyrics: str = "", sample_rate: int 
         CDN URL (https://cdn.hailuoai.com/...) 或 本地路径 或 None (失败)
 
     严守: PowerShell 环境必须用 --stdin, 不能直接传 JSON (单引号转义冲突)
-    严守: Windows subprocess 必须 shell=True 才能找到 mavis.cmd
+    严守: Windows subprocess 必须 shell=False 才能找到 mavis.cmd
     """
     # 严守预审
     if not _validate_prompt("", prompt):
@@ -241,14 +241,14 @@ def call_minimax_generate_music(prompt: str, lyrics: str = "", sample_rate: int 
             }]
         }, ensure_ascii=False)
 
-        # Windows 上 subprocess 必须 shell=True 才能找到 mavis.cmd
+        # Windows 上 subprocess 必须 shell=False 才能找到 mavis.cmd
         result = subprocess.run(
             "mavis mcp call matrix matrix_batch_text_to_music --stdin",
             input=payload,
             capture_output=True,
             text=True,
             timeout=180,
-            shell=True,
+            shell=False,
         )
         if result.returncode != 0:
             print(f"[music] MiniMax 调用失败: {result.stderr[:300]}")
